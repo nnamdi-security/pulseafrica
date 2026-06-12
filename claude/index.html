@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PulseAfrica — an independent, non-partisan civic opinion research platform for the United States of Africa. Participate in polls, view real data, and hold leadership accountable." />
+  <title>PulseAfrica — The People's Voice, In Data</title>
+
+  <!-- Tabler Icons (outline) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Project stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR — live statistics
+       ============================================================ -->
+  <div class="ticker" aria-label="Live platform statistics">
+    <div class="ticker-inner" id="tickerInner">
+
+      <!-- Repeated twice so the loop is seamless -->
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+
+      <!-- Duplicate for seamless loop -->
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="polls.html">Polls</a></li>
+      <li><a href="#">Results</a></li>
+      <li><a href="#">Methodology</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+
+    <button class="nav-cta" type="button">Share Your Voice</button>
+
+    <!-- Mobile hamburger -->
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+  </nav>
+
+  <!-- ============================================================
+       HERO SECTION
+       ============================================================ -->
+  <section class="hero" aria-label="Platform introduction">
+    <div class="hero-grid">
+
+      <!-- Left: Headline and CTAs -->
+      <div>
+        <div class="hero-eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          USA Civic Intelligence Platform
+        </div>
+
+        <h1 class="hero-h1">
+          Your voice<br>
+          shapes the<br>
+          <em>national record.</em>
+        </h1>
+
+        <p class="hero-sub">
+          PulseAfrica is an independent, non-partisan opinion research platform
+          for the United States of Africa. Participate in polls, view real data,
+          and hold leadership accountable.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn-primary" type="button">Participate in a Poll</button>
+          <button class="btn-ghost" type="button">View Current Results</button>
+        </div>
+      </div>
+
+      <!-- Right: Presidential approval card -->
+      <div class="hero-card" aria-label="Presidential approval summary — Q2 2026">
+
+        <div class="hero-card-label">Presidential approval — Q2 2026</div>
+
+        <div class="approval-ring-row">
+          <!-- SVG donut ring -->
+          <div class="ring-wrap" aria-hidden="true">
+            <svg width="72" height="72" viewBox="0 0 72 72">
+              <!-- Background track -->
+              <circle cx="36" cy="36" r="28"
+                fill="none"
+                stroke="rgba(255,255,255,0.07)"
+                stroke-width="6" />
+              <!-- Filled arc: circumference = 2π×28 ≈ 175.93; 52% filled → offset = 175.93 × (1 − 0.52) = 84.45 -->
+              <circle cx="36" cy="36" r="28"
+                fill="none"
+                stroke="#C8973A"
+                stroke-width="6"
+                stroke-dasharray="175.93"
+                stroke-dashoffset="84.45"
+                stroke-linecap="round" />
+            </svg>
+            <div class="ring-label">52%</div>
+          </div>
+
+          <div>
+            <div class="ring-meta-title">President A. Okonkwo</div>
+            <div class="ring-meta-sub">Based on 51,204 responses<br>Covering all 40 states</div>
+          </div>
+        </div>
+
+        <!-- Sector mini bars -->
+        <div class="mini-bars">
+
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Economy</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: 39%; background: #C8973A;"></div>
+            </div>
+            <span class="mini-bar-val">39%</span>
+          </div>
+
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Security</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: 45%; background: #2D6A4F;"></div>
+            </div>
+            <span class="mini-bar-val">45%</span>
+          </div>
+
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Education</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: 47%; background: #2D6A4F;"></div>
+            </div>
+            <span class="mini-bar-val">47%</span>
+          </div>
+
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Healthcare</span>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" style="width: 41%; background: #C8973A;"></div>
+            </div>
+            <span class="mini-bar-val">41%</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STATS STRIP
+       ============================================================ -->
+  <div class="stats-strip" role="region" aria-label="Platform statistics">
+
+    <div class="stat-item">
+      <div class="stat-num">187<span>K</span></div>
+      <div class="stat-label">Total Responses</div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-num">31<span>K</span></div>
+      <div class="stat-label">Registered Voices</div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-num">14</div>
+      <div class="stat-label">Active Polls</div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-num">40</div>
+      <div class="stat-label">States Covered</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       FEATURED POLLS
+       ============================================================ -->
+  <section class="section" aria-label="Featured polls">
+
+    <div class="section-label">Open now</div>
+    <h2 class="section-title">Featured polls</h2>
+    <p class="section-sub">
+      These polls are currently open. Your participation directly contributes
+      to the national data record.
+    </p>
+
+    <div class="polls-grid">
+
+      <!-- Poll 1 -->
+      <article class="poll-card">
+        <div class="poll-card-head">
+          <span class="poll-cat cat-presidency">Presidency</span>
+          <h3 class="poll-title">Presidential performance — mid-term assessment</h3>
+        </div>
+        <div class="poll-card-body">
+          <div class="poll-stat-row">
+            <span class="poll-responses">51,204 responses</span>
+            <span class="poll-status">
+              <span class="dot" aria-hidden="true"></span>
+              Live
+            </span>
+          </div>
+          <div class="poll-bar-track">
+            <div class="poll-bar-fill" style="width: 84%;"></div>
+          </div>
+          <button class="poll-cta" type="button">
+            Take poll
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </article>
+
+      <!-- Poll 2 -->
+      <article class="poll-card">
+        <div class="poll-card-head">
+          <span class="poll-cat cat-economy">Economy</span>
+          <h3 class="poll-title">How is your household managing the cost of living?</h3>
+        </div>
+        <div class="poll-card-body">
+          <div class="poll-stat-row">
+            <span class="poll-responses">38,771 responses</span>
+            <span class="poll-status">
+              <span class="dot" aria-hidden="true"></span>
+              Live
+            </span>
+          </div>
+          <div class="poll-bar-track">
+            <div class="poll-bar-fill" style="width: 63%;"></div>
+          </div>
+          <button class="poll-cta" type="button">
+            Take poll
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </article>
+
+      <!-- Poll 3 -->
+      <article class="poll-card">
+        <div class="poll-card-head">
+          <span class="poll-cat cat-security">Security</span>
+          <h3 class="poll-title">Do you feel safe in your state compared to last year?</h3>
+        </div>
+        <div class="poll-card-body">
+          <div class="poll-stat-row">
+            <span class="poll-responses">22,190 responses</span>
+            <span class="poll-status">
+              <span class="dot" aria-hidden="true"></span>
+              Live
+            </span>
+          </div>
+          <div class="poll-bar-track">
+            <div class="poll-bar-fill" style="width: 36%;"></div>
+          </div>
+          <button class="poll-cta" type="button">
+            Take poll
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+          </button>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS
+       ============================================================ -->
+  <section class="how-section" aria-label="How PulseAfrica works">
+
+    <div class="section-label">The process</div>
+    <h2 class="section-title">How PulseAfrica works</h2>
+    <p class="section-sub">
+      From participation to published results, every step is transparent
+      and documented.
+    </p>
+
+    <div class="how-steps">
+
+      <div class="step">
+        <div class="step-num" aria-label="Step 1">01</div>
+        <h3 class="step-title">Register your voice</h3>
+        <p class="step-desc">
+          Create a free account. Your demographic information helps us produce
+          representative, state-level data.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-num" aria-label="Step 2">02</div>
+        <h3 class="step-title">Choose a poll</h3>
+        <p class="step-desc">
+          Browse active polls across presidency, economy, security, education,
+          healthcare, and governance.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-num" aria-label="Step 3">03</div>
+        <h3 class="step-title">Answer honestly</h3>
+        <p class="step-desc">
+          Respond to structured questions. Responses are anonymous by default
+          and never linked to your identity.
+        </p>
+      </div>
+
+      <div class="step">
+        <div class="step-num" aria-label="Step 4">04</div>
+        <h3 class="step-title">See real results</h3>
+        <p class="step-desc">
+          Results update in real time. View breakdowns by state, age, gender,
+          and sector — fully public.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WHY PARTICIPATE
+       ============================================================ -->
+  <section class="why-section" aria-label="Why participate">
+    <div class="why-grid">
+
+      <!-- Left: copy + trust points -->
+      <div>
+        <div class="section-label">Why participate</div>
+        <h2 class="section-title">
+          Opinion without<br>participation is<br>just noise.
+        </h2>
+        <p class="section-sub">
+          In a nation of 450 tribes across 40 states, no single voice dominates.
+          But together, the data is undeniable.
+        </p>
+
+        <div class="why-points">
+
+          <div class="why-point">
+            <div class="why-icon" aria-hidden="true">
+              <i class="ti ti-chart-bar"></i>
+            </div>
+            <div class="why-text">
+              <h4>Real data, not assumptions</h4>
+              <p>
+                Our methodology follows international polling standards. Results
+                are weighted for demographic representation across all 40 states.
+              </p>
+            </div>
+          </div>
+
+          <div class="why-point">
+            <div class="why-icon" aria-hidden="true">
+              <i class="ti ti-lock"></i>
+            </div>
+            <div class="why-text">
+              <h4>Anonymous and independent</h4>
+              <p>
+                PulseAfrica is not affiliated with any political party or
+                government body. Individual responses are never published or shared.
+              </p>
+            </div>
+          </div>
+
+          <div class="why-point">
+            <div class="why-icon" aria-hidden="true">
+              <i class="ti ti-eye"></i>
+            </div>
+            <div class="why-text">
+              <h4>Fully transparent methodology</h4>
+              <p>
+                Every poll includes a full explanation of its sampling approach,
+                margin of error, and weighting model. Nothing is hidden.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right: live data visual -->
+      <div class="why-visual" aria-label="National approval by sector — June 2026">
+
+        <div class="gauge-label">National approval by sector — June 2026</div>
+
+        <div class="approval-num">52<span>%</span></div>
+        <div class="approval-sub">Overall presidential approval · ±2.4% margin of error</div>
+
+        <div class="sector-bars">
+
+          <div class="sector-row">
+            <span class="sector-name">Economy</span>
+            <div class="sector-track">
+              <div class="sector-fill" style="width: 39%; background: #C8973A;"></div>
+            </div>
+            <span class="sector-pct">39%</span>
+          </div>
+
+          <div class="sector-row">
+            <span class="sector-name">Security</span>
+            <div class="sector-track">
+              <div class="sector-fill" style="width: 45%; background: #2D6A4F;"></div>
+            </div>
+            <span class="sector-pct">45%</span>
+          </div>
+
+          <div class="sector-row">
+            <span class="sector-name">Education</span>
+            <div class="sector-track">
+              <div class="sector-fill" style="width: 47%; background: #2D6A4F;"></div>
+            </div>
+            <span class="sector-pct">47%</span>
+          </div>
+
+          <div class="sector-row">
+            <span class="sector-name">Healthcare</span>
+            <div class="sector-track">
+              <div class="sector-fill" style="width: 41%; background: #C8973A;"></div>
+            </div>
+            <span class="sector-pct">41%</span>
+          </div>
+
+          <div class="sector-row">
+            <span class="sector-name">Infrastructure</span>
+            <div class="sector-track">
+              <div class="sector-fill" style="width: 33%; background: #8B3A1F;"></div>
+            </div>
+            <span class="sector-pct">33%</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA STRIP
+       ============================================================ -->
+  <div class="cta-strip" role="complementary" aria-label="Call to action — join PulseAfrica">
+
+    <div class="cta-text">
+      <h3>Your state needs your voice in the record.</h3>
+      <p>
+        It takes under 4 minutes. No political affiliation required.
+        All 40 states, all 450 tribes — one dataset.
+      </p>
+    </div>
+
+    <div class="cta-actions">
+      <button class="btn-white" type="button">Start a Poll</button>
+      <button class="btn-outline-white" type="button">Learn How It Works</button>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+
+    <div class="footer-top">
+
+      <!-- About column -->
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>
+          An independent, non-partisan civic opinion research platform for the
+          United States of Africa. We measure what citizens believe — not what
+          governments claim.
+        </p>
+      </div>
+
+      <!-- Platform links -->
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="#">Active Polls</a>
+        <a href="#">Results Dashboard</a>
+        <a href="#">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+
+      <!-- About links -->
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="#">Our Mission</a>
+        <a href="#">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+
+      <!-- Legal links -->
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges" aria-label="Trust certifications">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT — mobile nav toggle
+       ============================================================ -->
+  <script>
+    const toggle = document.getElementById('navToggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    toggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        toggle.setAttribute('aria-expanded', 'false');
+      } else {
+        navLinks.style.display = 'flex';
+        navLinks.style.flexDirection = 'column';
+        navLinks.style.position = 'absolute';
+        navLinks.style.top = '64px';
+        navLinks.style.left = '0';
+        navLinks.style.right = '0';
+        navLinks.style.background = '#0A1628';
+        navLinks.style.padding = '20px 24px 24px';
+        navLinks.style.gap = '20px';
+        navLinks.style.borderTop = '1px solid rgba(200,151,58,0.18)';
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    // Close nav when a link is clicked (mobile)
+    navLinks.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (window.innerWidth <= 900) {
+          navLinks.style.display = 'none';
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

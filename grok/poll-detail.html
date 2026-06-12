@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Detail - PulseAfrica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=Space+Mono:wght@400;700&amp;display=swap');
+        
+        :root {
+            --navy: #0A1628;
+            --parchment: #F5F0E8;
+            --gold: #C8973A;
+            --green: #2D6A4F;
+            --cream: #E8E0D0;
+            --slate: #6B7280;
+        }
+        
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .heading-font {
+            font-family: 'Fraunces', serif;
+        }
+        
+        .mono-font {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .likert-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .likert-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 4px rgba(200, 151, 58, 0.3);
+        }
+
+        .progress-fill {
+            transition: width 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+<body class="bg-[#F5F0E8] text-[#0A1628]">
+    <!-- NAVBAR (same as polls) -->
+    <nav class="bg-[#0A1628] text-white py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-[#C8973A] rounded-full flex items-center justify-center text-[#0A1628] font-bold text-xl">P</div>
+                <span class="heading-font text-2xl font-semibold tracking-tight">PulseAfrica</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="#" class="hover:text-[#C8973A]">Home</a>
+                <a href="polls.html" class="text-[#C8973A]">Polls</a>
+                <a href="#" class="hover:text-[#C8973A]">Results</a>
+                <a href="#" class="hover:text-[#C8973A]">Methodology</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="window.location.href='login.html'" 
+                        class="px-5 py-2 text-sm font-medium border border-white/70 hover:border-white rounded-xl transition">
+                    Login
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-6 py-10">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 text-sm text-[#6B7280] mb-6">
+            <a href="polls.html" class="hover:text-[#0A1628]">Polls</a>
+            <span class="text-xs">›</span>
+            <span id="breadcrumbTitle" class="font-medium text-[#0A1628]"></span>
+        </div>
+
+        <!-- Poll Header -->
+        <div class="mb-12">
+            <div id="pollCategory" class="uppercase text-xs tracking-widest font-medium text-[#6B7280] mb-2"></div>
+            <h1 id="pollTitle" class="heading-font text-4xl md:text-5xl leading-none font-semibold tracking-tighter"></h1>
+            <div class="flex items-center gap-4 mt-6 text-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-[#2D6A4F] rounded-full animate-pulse"></div>
+                    <span id="pollStatus" class="font-medium text-[#2D6A4F]"></span>
+                </div>
+                <div class="h-4 w-px bg-[#6B7280]/30"></div>
+                <div id="responseCount" class="text-[#6B7280]"></div>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="mb-10">
+            <div class="flex justify-between text-sm mb-3 font-medium">
+                <span id="progressText">Question <span id="currentQ">1</span> of <span id="totalQ">6</span></span>
+                <span class="text-[#6B7280]">Your voice matters</span>
+            </div>
+            <div class="h-2 bg-[#E8E0D0] rounded-3xl overflow-hidden">
+                <div id="progressBar" class="progress-fill h-2 bg-[#2D6A4F] rounded-3xl w-1/6"></div>
+            </div>
+        </div>
+
+        <!-- Question -->
+        <div class="bg-white border border-[#E8E0D0] rounded-3xl p-10 mb-10">
+            <h2 id="questionText" class="heading-font text-3xl leading-tight mb-10"></h2>
+            
+            <!-- Likert Scale -->
+            <div id="optionsContainer" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- Demographics (shown after main question for MVP simplicity) -->
+        <div id="demoSection" class="hidden bg-white border border-[#E8E0D0] rounded-3xl p-10">
+            <h3 class="heading-font text-2xl mb-6">A few details about you</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Age Range</label>
+                    <select id="ageRange" class="w-full border border-[#E8E0D0] rounded-2xl px-6 py-4">
+                        <option value="">Select age range</option>
+                        <option value="18-24">18-24</option>
+                        <option value="25-34">25-34</option>
+                        <option value="35-44">35-44</option>
+                        <option value="45-54">45-54</option>
+                        <option value="55+">55+</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">State</label>
+                    <select id="userState" class="w-full border border-[#E8E0D0] rounded-2xl px-6 py-4">
+                        <option value="">Select your state</option>
+                        <!-- Add more states as needed -->
+                        <option value="Lagos">Lagos Capital Territory</option>
+                        <option value="Abuja">Federal Capital</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center mt-12">
+            <button onclick="prevQuestion()" 
+                    id="prevBtn"
+                    class="px-8 py-4 border border-[#0A1628] hover:bg-[#0A1628]/5 rounded-2xl font-medium flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                Previous
+            </button>
+            
+            <button onclick="nextQuestion()" 
+                    id="nextBtn"
+                    class="bg-[#C8973A] hover:bg-[#A67E2F] text-[#0A1628] px-10 py-4 rounded-2xl font-semibold flex items-center gap-3">
+                Continue 
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- THANK YOU MODAL -->
+    <div id="thankYouModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+        <div class="bg-white rounded-3xl max-w-md w-full mx-4 p-10 text-center">
+            <div class="w-20 h-20 mx-auto bg-[#2D6A4F] text-white rounded-2xl flex items-center justify-center mb-6">
+                <i class="fa-solid fa-check text-4xl"></i>
+            </div>
+            <h2 class="heading-font text-4xl mb-3">Thank You!</h2>
+            <p class="text-[#6B7280] mb-8">Your response has been recorded. Your voice strengthens our democracy.</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="shareResponse()" 
+                        class="border border-[#0A1628] py-4 rounded-2xl font-medium">
+                    Share your participation
+                </button>
+                <button onclick="goToPolls()" 
+                        class="bg-[#0A1628] text-white py-4 rounded-2xl font-medium">
+                    Browse More Polls
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock poll data
+        let currentPoll = {
+            id: 1,
+            title: "How would you rate President Adebayo's performance in his first 18 months?",
+            category: "Presidency",
+            status: "Open",
+            responses: 12480,
+            questions: [
+                {
+                    id: 1,
+                    text: "Overall, how would you rate the President's leadership?",
+                    options: [
+                        {value: 5, label: "Strongly Approve", color: "#2D6A4F"},
+                        {value: 4, label: "Approve", color: "#4A8C6F"},
+                        {value: 3, label: "Neutral", color: "#6B7280"},
+                        {value: 2, label: "Disapprove", color: "#C8973A"},
+                        {value: 1, label: "Strongly Disapprove", color: "#B45309"}
+                    ]
+                },
+                {
+                    id: 2,
+                    text: "How satisfied are you with the current economic policies?",
+                    options: [
+                        {value: 5, label: "Very Satisfied", color: "#2D6A4F"},
+                        {value: 4, label: "Satisfied", color: "#4A8C6F"},
+                        {value: 3, label: "Neutral", color: "#6B7280"},
+                        {value: 2, label: "Dissatisfied", color: "#C8973A"},
+                        {value: 1, label: "Very Dissatisfied", color: "#B45309"}
+                    ]
+                }
+            ]
+        };
+
+        let currentQuestionIndex = 0;
+        let selectedAnswers = {};
+
+        function loadPoll() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pollId = urlParams.get('id') || 1;
+            
+            // In real app, fetch poll by ID
+            document.getElementById('pollTitle').textContent = currentPoll.title;
+            document.getElementById('pollCategory').textContent = currentPoll.category;
+            document.getElementById('pollStatus').textContent = currentPoll.status + " • " + currentPoll.responses.toLocaleString() + " responses";
+            document.getElementById('breadcrumbTitle').textContent = currentPoll.title.substring(0, 45) + "...";
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentPoll.questions[currentQuestionIndex];
+            document.getElementById('questionText').textContent = q.text;
+            document.getElementById('currentQ').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQ').textContent = currentPoll.questions.length;
+            
+            const progress = ((currentQuestionIndex + 1) / currentPoll.questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            q.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = `likert-btn border-2 border-transparent hover:border-[${option.color}] bg-white p-6 rounded-3xl text-left flex flex-col items-center justify-center h-full`;
+                btn.innerHTML = `
+                    <div class="w-6 h-6 rounded-full mb-4" style="background-color: ${option.color}"></div>
+                    <span class="font-medium text-center leading-tight">${option.label}</span>
+                `;
+                btn.onclick = () => selectOption(option.value);
+                container.appendChild(btn);
+            });
+
+            // Show demographics on last question
+            if (currentQuestionIndex === currentPoll.questions.length - 1) {
+                document.getElementById('demoSection').classList.remove('hidden');
+            } else {
+                document.getElementById('demoSection').classList.add('hidden');
+            }
+
+            document.getElementById('prevBtn').style.display = currentQuestionIndex === 0 ? 'none' : 'flex';
+        }
+
+        function selectOption(value) {
+            selectedAnswers[currentPoll.questions[currentQuestionIndex].id] = value;
+            
+            // Visual feedback
+            const buttons = document.querySelectorAll('.likert-btn');
+            buttons.forEach((btn, i) => {
+                if (i === value - 1) { // rough mapping
+                    btn.classList.add('active', 'border-[#C8973A]');
+                } else {
+                    btn.classList.remove('active', 'border-[#C8973A]');
+                }
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentPoll.questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                // Submit
+                submitPoll();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function submitPoll() {
+            // Simulate API call
+            console.log("Submitted answers:", selectedAnswers);
+            document.getElementById('thankYouModal').classList.remove('hidden');
+        }
+
+        function shareResponse() {
+            alert("Shared on social media! (demo)");
+        }
+
+        function goToPolls() {
+            window.location.href = 'polls.html';
+        }
+
+        // Initialize
+        window.onload = loadPoll;
+    </script>
+</body>
+</html>

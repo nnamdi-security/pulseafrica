@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseAfrica | Polls</title>
+  <link rel="stylesheet" href="polls.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=Inter:wght@400;600&family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Pulse Bar -->
+  <div class="pulse-bar">
+    <div class="pulse-chip">Presidential Approval: 62%</div>
+    <div class="pulse-chip">Active Polls: 12</div>
+    <div class="pulse-chip">Total Responses: 4,532</div>
+    <div class="pulse-chip">Top Issue: Economy</div>
+  </div>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <h1>Current Opinion Polls</h1>
+    <p>Explore active polls and share your voice on national issues.</p>
+  </header>
+
+  <!-- Filters -->
+  <section class="filters">
+    <input type="text" id="searchPolls" placeholder="Search polls...">
+    <select id="filterCategory">
+      <option value="">All Categories</option>
+      <option value="Presidency">Presidency</option>
+      <option value="Governors">Governors</option>
+      <option value="Economy">Economy</option>
+      <option value="Security">Security</option>
+      <option value="Education">Education</option>
+      <option value="Healthcare">Healthcare</option>
+    </select>
+  </section>
+
+  <!-- Polls Grid -->
+  <main class="polls-grid" id="pollsGrid">
+    <!-- Example Poll Card -->
+    <div class="poll-card" data-category="Presidency">
+      <h2>Presidential Approval Rating</h2>
+      <p>Rate the performance of the President.</p>
+      <button class="cta">Participate</button>
+    </div>
+
+    <div class="poll-card" data-category="Economy">
+      <h2>Economic Performance</h2>
+      <p>Share your views on the national economy.</p>
+      <button class="cta">Participate</button>
+    </div>
+
+    <div class="poll-card" data-category="Healthcare">
+      <h2>Healthcare Services</h2>
+      <p>Evaluate the quality of healthcare delivery.</p>
+      <button class="cta">Participate</button>
+    </div>
+  </main>
+
+  <script src="polls.js"></script>
+</body>
+</html>

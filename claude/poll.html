@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Presidential performance — Q2 2026 mid-term assessment. Participate in this public opinion poll on PulseAfrica." />
+  <title>Presidential Performance Poll — PulseAfrica</title>
+
+  <!-- Tabler Icons (outline) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Shared project stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR
+       ============================================================ -->
+  <div class="ticker" aria-label="Live platform statistics">
+    <div class="ticker-inner">
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+      <!-- Duplicate for seamless loop -->
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="polls.html" class="active">Polls</a></li>
+      <li><a href="#">Results</a></li>
+      <li><a href="#">Methodology</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button class="nav-cta" type="button">Share Your Voice</button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       POLL PAGE HEADER
+       ============================================================ -->
+  <div class="poll-page-header" aria-label="Poll title and metadata">
+    <div class="pph-breadcrumb">
+      <a href="index.html">Home</a>
+      <span class="pph-sep" aria-hidden="true">/</span>
+      <a href="polls.html">Polls</a>
+      <span class="pph-sep" aria-hidden="true">/</span>
+      <span class="pph-current">Presidential performance</span>
+    </div>
+    <div class="pph-meta">
+      <h1 class="pph-title">Presidential performance — Q2 2026 mid-term assessment</h1>
+      <div class="pph-badges">
+        <span class="pph-badge pph-badge-live">
+          <span class="pph-live-dot" aria-hidden="true"></span>Live
+        </span>
+        <span class="pph-badge pph-badge-cat">Presidency</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       POLL BODY — SIDEBAR + MAIN
+       ============================================================ -->
+  <div class="poll-body">
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="poll-sidebar" aria-label="Poll information and live results">
+
+      <div class="poll-sb-section">
+        <div class="poll-sb-label">Poll info</div>
+        <div class="poll-info-row">
+          <i class="ti ti-users" aria-hidden="true"></i>
+          51,204 responses so far
+        </div>
+        <div class="poll-info-row">
+          <i class="ti ti-clock" aria-hidden="true"></i>
+          ~4 minutes to complete
+        </div>
+        <div class="poll-info-row">
+          <i class="ti ti-calendar" aria-hidden="true"></i>
+          Closes June 30, 2026
+        </div>
+        <div class="poll-info-row">
+          <i class="ti ti-map-pin" aria-hidden="true"></i>
+          All 40 states covered
+        </div>
+      </div>
+
+      <div class="poll-sb-section">
+        <div class="poll-sb-label">Live approval so far</div>
+        <div class="poll-preview-bars">
+
+          <div class="poll-pb-row">
+            <span class="poll-pb-label">Overall</span>
+            <div class="poll-pb-track">
+              <div class="poll-pb-fill" style="width: 52%; background: #C8973A;"></div>
+            </div>
+            <span class="poll-pb-val">52%</span>
+          </div>
+
+          <div class="poll-pb-row">
+            <span class="poll-pb-label">Economy</span>
+            <div class="poll-pb-track">
+              <div class="poll-pb-fill" style="width: 39%; background: #C8973A;"></div>
+            </div>
+            <span class="poll-pb-val">39%</span>
+          </div>
+
+          <div class="poll-pb-row">
+            <span class="poll-pb-label">Security</span>
+            <div class="poll-pb-track">
+              <div class="poll-pb-fill" style="width: 45%; background: #2D6A4F;"></div>
+            </div>
+            <span class="poll-pb-val">45%</span>
+          </div>
+
+          <div class="poll-pb-row">
+            <span class="poll-pb-label">Education</span>
+            <div class="poll-pb-track">
+              <div class="poll-pb-fill" style="width: 47%; background: #2D6A4F;"></div>
+            </div>
+            <span class="poll-pb-val">47%</span>
+          </div>
+
+          <div class="poll-pb-row">
+            <span class="poll-pb-label">Healthcare</span>
+            <div class="poll-pb-track">
+              <div class="poll-pb-fill" style="width: 41%; background: #C8973A;"></div>
+            </div>
+            <span class="poll-pb-val">41%</span>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="poll-sb-section">
+        <div class="poll-sb-label">About this poll</div>
+        <p class="poll-sb-about">
+          This poll uses stratified random sampling across all 40 states.
+          Results are weighted by age, gender, and state population.
+          Margin of error ±2.4%.
+        </p>
+      </div>
+
+    </aside>
+
+    <!-- ── POLL MAIN AREA ── -->
+    <main class="poll-main" id="pollMain" aria-label="Poll questions">
+
+      <!-- ============================================================
+           SCREEN 1 — Question 1: Overall approval
+           ============================================================ -->
+      <div class="poll-screen active" id="screen-1" aria-label="Question 1 of 6">
+
+        <div class="poll-progress-wrap">
+          <div class="poll-progress-meta">
+            <span class="poll-progress-label">Question 1 of 6</span>
+            <span class="poll-progress-pct">16%</span>
+          </div>
+          <div class="poll-segments" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+            <div class="poll-seg active"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+          </div>
+        </div>
+
+        <div class="poll-q-card">
+          <div class="poll-q-num">Question 01 &middot; Overall approval</div>
+          <h2 class="poll-q-text">How do you rate President Okonkwo's overall performance since taking office?</h2>
+          <p class="poll-q-sub">Consider all areas of governance including policy decisions, leadership style, and national direction.</p>
+
+          <div class="poll-answers" id="answers-1" role="radiogroup" aria-label="Overall approval rating">
+            <div class="poll-answer answer-strongly-approve" data-val="strongly-approve" onclick="selectAnswer(this,'answers-1')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div>
+                <div class="poll-ans-text">Strongly approve</div>
+                <div class="poll-ans-desc">The President is performing excellently across all areas</div>
+              </div>
+            </div>
+            <div class="poll-answer" data-val="approve" onclick="selectAnswer(this,'answers-1')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div>
+                <div class="poll-ans-text">Approve</div>
+                <div class="poll-ans-desc">Generally satisfied with performance, with some reservations</div>
+              </div>
+            </div>
+            <div class="poll-answer" data-val="neutral" onclick="selectAnswer(this,'answers-1')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div>
+                <div class="poll-ans-text">Neutral</div>
+                <div class="poll-ans-desc">No strong opinion either way</div>
+              </div>
+            </div>
+            <div class="poll-answer answer-disapprove" data-val="disapprove" onclick="selectAnswer(this,'answers-1')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div>
+                <div class="poll-ans-text">Disapprove</div>
+                <div class="poll-ans-desc">Dissatisfied with performance in most areas</div>
+              </div>
+            </div>
+            <div class="poll-answer answer-strongly-disapprove" data-val="strongly-disapprove" onclick="selectAnswer(this,'answers-1')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div>
+                <div class="poll-ans-text">Strongly disapprove</div>
+                <div class="poll-ans-desc">Very dissatisfied — performance has been poor overall</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poll-nav-row">
+            <span class="poll-step-hint">Select one answer to continue</span>
+            <button class="btn-poll-next" id="next-1" onclick="goTo(2)" disabled type="button">
+              Next <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           SCREEN 2 — Question 2: Economy
+           ============================================================ -->
+      <div class="poll-screen" id="screen-2" aria-label="Question 2 of 6">
+
+        <div class="poll-progress-wrap">
+          <div class="poll-progress-meta">
+            <span class="poll-progress-label">Question 2 of 6</span>
+            <span class="poll-progress-pct">33%</span>
+          </div>
+          <div class="poll-segments" role="progressbar" aria-valuenow="2" aria-valuemin="1" aria-valuemax="6">
+            <div class="poll-seg done"></div>
+            <div class="poll-seg active"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+          </div>
+        </div>
+
+        <div class="poll-q-card">
+          <div class="poll-q-num">Question 02 &middot; Economy</div>
+          <h2 class="poll-q-text">How do you rate the government's handling of the national economy?</h2>
+          <p class="poll-q-sub">Consider inflation, employment levels, cost of living, and business environment.</p>
+
+          <div class="poll-answers" id="answers-2" role="radiogroup" aria-label="Economy rating">
+            <div class="poll-answer answer-strongly-approve" data-val="strongly-approve" onclick="selectAnswer(this,'answers-2')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Strongly approve</div><div class="poll-ans-desc">Economy is well managed and improving</div></div>
+            </div>
+            <div class="poll-answer" data-val="approve" onclick="selectAnswer(this,'answers-2')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Approve</div><div class="poll-ans-desc">Generally on the right track despite some challenges</div></div>
+            </div>
+            <div class="poll-answer" data-val="neutral" onclick="selectAnswer(this,'answers-2')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Neutral</div><div class="poll-ans-desc">No strong opinion on economic management</div></div>
+            </div>
+            <div class="poll-answer answer-disapprove" data-val="disapprove" onclick="selectAnswer(this,'answers-2')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Disapprove</div><div class="poll-ans-desc">Economic conditions are worsening for most citizens</div></div>
+            </div>
+            <div class="poll-answer answer-strongly-disapprove" data-val="strongly-disapprove" onclick="selectAnswer(this,'answers-2')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Strongly disapprove</div><div class="poll-ans-desc">Economic management has been very poor</div></div>
+            </div>
+          </div>
+
+          <div class="poll-nav-row">
+            <button class="btn-poll-back" onclick="goTo(1)" type="button">
+              <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+            </button>
+            <button class="btn-poll-next" id="next-2" onclick="goTo(3)" disabled type="button">
+              Next <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           SCREEN 3 — Question 3: Security
+           ============================================================ -->
+      <div class="poll-screen" id="screen-3" aria-label="Question 3 of 6">
+
+        <div class="poll-progress-wrap">
+          <div class="poll-progress-meta">
+            <span class="poll-progress-label">Question 3 of 6</span>
+            <span class="poll-progress-pct">50%</span>
+          </div>
+          <div class="poll-segments" role="progressbar" aria-valuenow="3" aria-valuemin="1" aria-valuemax="6">
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg active"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+            <div class="poll-seg"></div>
+          </div>
+        </div>
+
+        <div class="poll-q-card">
+          <div class="poll-q-num">Question 03 &middot; Security</div>
+          <h2 class="poll-q-text">How do you rate the government's handling of national security?</h2>
+          <p class="poll-q-sub">Consider crime rates, military effectiveness, border security, and community safety.</p>
+
+          <div class="poll-answers" id="answers-3" role="radiogroup" aria-label="Security rating">
+            <div class="poll-answer answer-strongly-approve" data-val="strongly-approve" onclick="selectAnswer(this,'answers-3')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Strongly approve</div><div class="poll-ans-desc">Citizens are safe and security is well managed</div></div>
+            </div>
+            <div class="poll-answer" data-val="approve" onclick="selectAnswer(this,'answers-3')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Approve</div><div class="poll-ans-desc">Security situation is broadly acceptable</div></div>
+            </div>
+            <div class="poll-answer" data-val="neutral" onclick="selectAnswer(this,'answers-3')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Neutral</div></div>
+            </div>
+            <div class="poll-answer answer-disapprove" data-val="disapprove" onclick="selectAnswer(this,'answers-3')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Disapprove</div><div class="poll-ans-desc">Security concerns remain high in many areas</div></div>
+            </div>
+            <div class="poll-answer answer-strongly-disapprove" data-val="strongly-disapprove" onclick="selectAnswer(this,'answers-3')" role="radio" aria-checked="false" tabindex="0">
+              <div class="poll-ans-radio" aria-hidden="true"></div>
+              <div><div class="poll-ans-text">Strongly disapprove</div><div class="poll-ans-desc">Security has significantly deteriorated</div></div>
+            </div>
+          </div>
+
+          <div class="poll-nav-row">
+            <button class="btn-poll-back" onclick="goTo(2)" type="button">
+              <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+            </button>
+            <button class="btn-poll-next" id="next-3" onclick="goTo(4)" disabled type="button">
+              Next <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           SCREEN 4 — Questions 4 & 5: Education + Healthcare
+           ============================================================ -->
+      <div class="poll-screen" id="screen-4" aria-label="Questions 4 and 5 of 6">
+
+        <div class="poll-progress-wrap">
+          <div class="poll-progress-meta">
+            <span class="poll-progress-label">Questions 4–5 of 6</span>
+            <span class="poll-progress-pct">67%</span>
+          </div>
+          <div class="poll-segments" role="progressbar" aria-valuenow="4" aria-valuemin="1" aria-valuemax="6">
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg active"></div>
+            <div class="poll-seg active"></div>
+            <div class="poll-seg"></div>
+          </div>
+        </div>
+
+        <div class="poll-q-card">
+          <div class="poll-q-num">Questions 04–05 &middot; Sector ratings</div>
+          <h2 class="poll-q-text">Rate these two sectors</h2>
+          <p class="poll-q-sub">Select your approval level for each sector individually.</p>
+
+          <!-- Education sub-group -->
+          <div class="poll-sector-group">
+            <div class="poll-sector-heading education">
+              <i class="ti ti-school" aria-hidden="true"></i>
+              04 &middot; Education
+            </div>
+            <div class="poll-answers poll-answers-compact" id="answers-4" role="radiogroup" aria-label="Education rating">
+              <div class="poll-answer answer-strongly-approve" data-val="strongly-approve" onclick="selectAnswer(this,'answers-4')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Strongly approve</div>
+              </div>
+              <div class="poll-answer" data-val="approve" onclick="selectAnswer(this,'answers-4')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Approve</div>
+              </div>
+              <div class="poll-answer" data-val="neutral" onclick="selectAnswer(this,'answers-4')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Neutral</div>
+              </div>
+              <div class="poll-answer answer-disapprove" data-val="disapprove" onclick="selectAnswer(this,'answers-4')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Disapprove</div>
+              </div>
+              <div class="poll-answer answer-strongly-disapprove" data-val="strongly-disapprove" onclick="selectAnswer(this,'answers-4')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Strongly disapprove</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Healthcare sub-group -->
+          <div class="poll-sector-group poll-sector-group-divided">
+            <div class="poll-sector-heading healthcare">
+              <i class="ti ti-heart-rate-monitor" aria-hidden="true"></i>
+              05 &middot; Healthcare
+            </div>
+            <div class="poll-answers poll-answers-compact" id="answers-5" role="radiogroup" aria-label="Healthcare rating">
+              <div class="poll-answer answer-strongly-approve" data-val="strongly-approve" onclick="selectAnswer(this,'answers-5')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Strongly approve</div>
+              </div>
+              <div class="poll-answer" data-val="approve" onclick="selectAnswer(this,'answers-5')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Approve</div>
+              </div>
+              <div class="poll-answer" data-val="neutral" onclick="selectAnswer(this,'answers-5')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Neutral</div>
+              </div>
+              <div class="poll-answer answer-disapprove" data-val="disapprove" onclick="selectAnswer(this,'answers-5')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Disapprove</div>
+              </div>
+              <div class="poll-answer answer-strongly-disapprove" data-val="strongly-disapprove" onclick="selectAnswer(this,'answers-5')" role="radio" aria-checked="false" tabindex="0">
+                <div class="poll-ans-radio" aria-hidden="true"></div>
+                <div class="poll-ans-text">Strongly disapprove</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="poll-nav-row" style="margin-top: 8px;">
+            <button class="btn-poll-back" onclick="goTo(3)" type="button">
+              <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+            </button>
+            <button class="btn-poll-next" id="next-4" onclick="goTo(5)" disabled type="button">
+              Next <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           SCREEN 5 — Demographics
+           ============================================================ -->
+      <div class="poll-screen" id="screen-5" aria-label="Demographic information — final step">
+
+        <div class="poll-progress-wrap">
+          <div class="poll-progress-meta">
+            <span class="poll-progress-label">Step 6 of 6 — About you</span>
+            <span class="poll-progress-pct">83%</span>
+          </div>
+          <div class="poll-segments" role="progressbar" aria-valuenow="5" aria-valuemin="1" aria-valuemax="6">
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg done"></div>
+            <div class="poll-seg active"></div>
+          </div>
+        </div>
+
+        <div class="poll-q-card">
+          <div class="poll-q-num">Final step &middot; Demographic information</div>
+          <h2 class="poll-q-text">A few details to help us weight the data accurately</h2>
+          <p class="poll-q-sub">This information is used only for statistical weighting. It is never linked to your individual responses.</p>
+
+          <div class="demo-form">
+
+            <div class="demo-field">
+              <label for="dem-age">Age range</label>
+              <div class="demo-select-wrap">
+                <select id="dem-age">
+                  <option value="">Select…</option>
+                  <option>18–24</option>
+                  <option>25–34</option>
+                  <option>35–44</option>
+                  <option>45–54</option>
+                  <option>55–64</option>
+                  <option>65+</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="demo-field">
+              <label for="dem-gender">Gender</label>
+              <div class="demo-select-wrap">
+                <select id="dem-gender">
+                  <option value="">Select…</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Non-binary</option>
+                  <option>Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="demo-field">
+              <label for="dem-state">State of residence</label>
+              <div class="demo-select-wrap">
+                <select id="dem-state">
+                  <option value="">Select your state…</option>
+                  <option>Abara State</option>
+                  <option>Badunna State</option>
+                  <option>Calabari State</option>
+                  <option>Danfodio State</option>
+                  <option>Eko State</option>
+                  <option>Fulani State</option>
+                  <option>Gbari State</option>
+                  <option>Hausa State</option>
+                  <option>Ijaw State</option>
+                  <option>Jukun State</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="demo-field">
+              <label for="dem-edu">Education level</label>
+              <div class="demo-select-wrap">
+                <select id="dem-edu">
+                  <option value="">Select…</option>
+                  <option>No formal education</option>
+                  <option>Primary school</option>
+                  <option>Secondary school</option>
+                  <option>Vocational / technical</option>
+                  <option>Bachelor's degree</option>
+                  <option>Postgraduate</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="demo-field demo-field-full">
+              <label for="dem-occ">Occupation</label>
+              <div class="demo-select-wrap">
+                <select id="dem-occ">
+                  <option value="">Select…</option>
+                  <option>Agriculture / farming</option>
+                  <option>Trade / commerce</option>
+                  <option>Civil service</option>
+                  <option>Private sector employee</option>
+                  <option>Self-employed / entrepreneur</option>
+                  <option>Student</option>
+                  <option>Unemployed</option>
+                  <option>Retired</option>
+                  <option>Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+
+          </div><!-- /demo-form -->
+
+          <div class="demo-privacy-note" role="note">
+            <i class="ti ti-lock" aria-hidden="true"></i>
+            <p>Your demographic data is used solely for statistical weighting to ensure poll results represent all 40 states and 450 tribes proportionally. Your identity is never disclosed or linked to your answers.</p>
+          </div>
+
+          <div class="poll-nav-row" style="margin-top: 20px;">
+            <button class="btn-poll-back" onclick="goTo(4)" type="button">
+              <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+            </button>
+            <button class="btn-poll-submit" onclick="goTo(6)" type="button">
+              <i class="ti ti-check" aria-hidden="true"></i> Submit my response
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           SCREEN 6 — Thank you
+           ============================================================ -->
+      <div class="poll-screen" id="screen-6" aria-label="Response submitted — thank you">
+        <div class="poll-q-card poll-thankyou">
+
+          <div class="ty-icon" aria-hidden="true">
+            <i class="ti ti-check"></i>
+          </div>
+
+          <h2 class="ty-heading">Response recorded. Thank you.</h2>
+          <p class="ty-sub">
+            Your voice has been added to the national data record. You are one of 51,205 citizens
+            who have participated in this poll across all 40 states.
+          </p>
+
+          <div class="ty-stats">
+            <div class="ty-stat">
+              <div class="ty-stat-num">51<span>K</span></div>
+              <div class="ty-stat-label">Total voices</div>
+            </div>
+            <div class="ty-stat">
+              <div class="ty-stat-num">40</div>
+              <div class="ty-stat-label">States covered</div>
+            </div>
+            <div class="ty-stat">
+              <div class="ty-stat-num">19<span>d</span></div>
+              <div class="ty-stat-label">Poll closes in</div>
+            </div>
+          </div>
+
+          <div class="ty-actions">
+            <a href="#" class="btn-ty-primary">
+              <i class="ti ti-chart-bar" aria-hidden="true"></i>
+              View live results
+            </a>
+            <a href="polls.html" class="btn-ty-ghost">
+              <i class="ti ti-layout-grid" aria-hidden="true"></i>
+              Browse more polls
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div><!-- /poll-body -->
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="polls.html">Active Polls</a>
+        <a href="#">Results Dashboard</a>
+        <a href="#">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="#">Our Mission</a>
+        <a href="#">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    /* ── Mobile nav ── */
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        navToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        Object.assign(navLinks.style, {
+          display: 'flex', flexDirection: 'column', position: 'absolute',
+          top: '64px', left: '0', right: '0', background: '#0A1628',
+          padding: '20px 24px 24px', gap: '20px',
+          borderTop: '1px solid rgba(200,151,58,0.18)'
+        });
+        navToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    /* ── Answer selection ── */
+    function selectAnswer(el, groupId) {
+      /* Deselect all in group */
+      document.querySelectorAll('#' + groupId + ' .poll-answer').forEach(function (a) {
+        a.classList.remove('selected');
+        a.setAttribute('aria-checked', 'false');
+      });
+      /* Select clicked */
+      el.classList.add('selected');
+      el.setAttribute('aria-checked', 'true');
+
+      /* Enable next button for single-answer screens */
+      var screenNum = groupId.replace('answers-', '');
+      if (screenNum !== '4' && screenNum !== '5') {
+        var nextBtn = document.getElementById('next-' + screenNum);
+        if (nextBtn) nextBtn.disabled = false;
+      }
+
+      /* Screen 4 needs BOTH answers-4 AND answers-5 selected */
+      if (screenNum === '4' || screenNum === '5') {
+        var sel4 = document.querySelector('#answers-4 .selected');
+        var sel5 = document.querySelector('#answers-5 .selected');
+        var n4   = document.getElementById('next-4');
+        if (n4) n4.disabled = !(sel4 && sel5);
+      }
+    }
+
+    /* Keyboard support for answer tiles */
+    document.querySelectorAll('.poll-answer').forEach(function (tile) {
+      tile.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          tile.click();
+        }
+      });
+    });
+
+    /* ── Screen navigation ── */
+    function goTo(n) {
+      document.querySelectorAll('.poll-screen').forEach(function (s) {
+        s.classList.remove('active');
+      });
+      var target = document.getElementById('screen-' + n);
+      if (target) {
+        target.classList.add('active');
+        document.getElementById('pollMain').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  </script>
+
+</body>
+</html>
