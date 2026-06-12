@@ -283,3 +283,132 @@ textarea:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
+
+/* ========================================
+   HEADER
+======================================== */
+
+.site-header {
+  background-color: var(--color-surface);
+
+  border-bottom: 1px solid var(--color-border);
+
+  position: sticky;
+  top: 0;
+
+  z-index: var(--z-sticky);
+}
+
+/* ========================================
+   NAVBAR
+======================================== */
+
+.navbar {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  min-height: 72px;
+}
+
+/* ========================================
+   LOGO
+======================================== */
+
+.logo {
+  font-size: var(--fs-xl);
+
+  font-weight: var(--fw-extrabold);
+
+  color: var(--color-primary);
+
+  letter-spacing: -0.5px;
+}
+
+/* ========================================
+   NAV LINKS
+======================================== */
+
+.nav-links {
+  display: none;
+}
+
+.nav-links a {
+  color: var(--color-text-primary);
+
+  font-weight: var(--fw-medium);
+
+  transition: var(--transition-fast);
+}
+
+.nav-links a:hover {
+  color: var(--color-secondary);
+}
+
+/* ========================================
+   AUTH BUTTONS
+======================================== */
+
+.auth-buttons {
+  display: none;
+}
+
+.btn-login {
+  font-weight: var(--fw-medium);
+
+  color: var(--color-text-primary);
+}
+
+.btn-register {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 0.75rem 1.25rem;
+
+  background-color: var(--color-secondary);
+
+  color: white;
+
+  border-radius: var(--radius-md);
+
+  font-weight: var(--fw-semibold);
+
+  transition: var(--transition-fast);
+}
+
+.btn-register:hover {
+  opacity: 0.9;
+}
+
+/* ========================================
+   MOBILE MENU BUTTON
+======================================== */
+
+.menu-toggle {
+  font-size: 1.5rem;
+
+  color: var(--color-primary);
+}
+
+.menu-toggle:hover {
+  color: var(--color-secondary);
+}
+
+.menu-toggle {
+  padding: var(--space-2);
+}
+
+.nav-links a.active {
+  color: var(--color-secondary);
+
+  font-weight: var(--fw-semibold);
+}
+
+.site-header.scrolled {
+  box-shadow: var(--shadow-sm);
+}
