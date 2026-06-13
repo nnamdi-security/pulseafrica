@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live results for the Presidential Performance Q2 2026 poll — PulseAfrica analytics dashboard." />
+  <title>Results — Presidential Performance Poll — PulseAfrica</title>
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Chart.js (loaded here so it is available before the inline scripts at bottom) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR
+       ============================================================ -->
+  <div class="ticker" aria-label="Live platform statistics">
+    <div class="ticker-inner">
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="polls.html">Polls</a></li>
+      <li><a href="results.html" class="active">Results</a></li>
+      <li><a href="#">Methodology</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button class="nav-cta" type="button">Share Your Voice</button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       RESULTS HERO HEADER
+       ============================================================ -->
+  <div class="results-hero" aria-label="Poll results summary">
+
+    <div class="results-breadcrumb">
+      <a href="index.html">Home</a>
+      <span class="results-sep" aria-hidden="true">/</span>
+      <a href="polls.html">Polls</a>
+      <span class="results-sep" aria-hidden="true">/</span>
+      <span class="results-current">Presidential performance &mdash; results</span>
+    </div>
+
+    <div class="results-hero-meta">
+      <h1 class="results-hero-title">
+        Presidential performance &mdash; Q2 2026<br>
+        Results dashboard
+      </h1>
+      <div class="results-hero-badges">
+        <span class="results-badge results-badge-live">
+          <span class="results-live-dot" aria-hidden="true"></span>
+          Live &middot; 51,204 responses
+        </span>
+        <span class="results-badge results-badge-cat">Presidency</span>
+      </div>
+    </div>
+
+    <!-- Headline stat strip -->
+    <div class="results-stat-strip" role="region" aria-label="Top-line approval figures">
+
+      <div class="results-stat">
+        <div class="results-stat-num approve">52%</div>
+        <div class="results-stat-label">Overall approval</div>
+        <div class="results-stat-sub">&plusmn;2.4% margin of error</div>
+      </div>
+
+      <div class="results-stat-divider" aria-hidden="true"></div>
+
+      <div class="results-stat">
+        <div class="results-stat-num disapprove">34%</div>
+        <div class="results-stat-label">Disapproval</div>
+        <div class="results-stat-sub">Combined disapprove</div>
+      </div>
+
+      <div class="results-stat-divider" aria-hidden="true"></div>
+
+      <div class="results-stat">
+        <div class="results-stat-num neutral">14%</div>
+        <div class="results-stat-label">Neutral</div>
+        <div class="results-stat-sub">No strong opinion</div>
+      </div>
+
+      <div class="results-stat-divider" aria-hidden="true"></div>
+
+      <div class="results-stat">
+        <div class="results-stat-num">51,204</div>
+        <div class="results-stat-label">Total responses</div>
+        <div class="results-stat-sub">Across all 40 states</div>
+      </div>
+
+      <div class="results-stat-divider" aria-hidden="true"></div>
+
+      <div class="results-stat">
+        <div class="results-stat-num">19d</div>
+        <div class="results-stat-label">Poll closes in</div>
+        <div class="results-stat-sub">Jun 30, 2026</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TAB BAR
+       ============================================================ -->
+  <div class="results-tabs" role="tablist" aria-label="Results sections">
+    <button class="results-tab active" role="tab" aria-selected="true"  data-tab="overview"     type="button">Overview</button>
+    <button class="results-tab"        role="tab" aria-selected="false" data-tab="demographic"  type="button">By demographic</button>
+    <button class="results-tab"        role="tab" aria-selected="false" data-tab="state"        type="button">By state</button>
+    <button class="results-tab"        role="tab" aria-selected="false" data-tab="trend"        type="button">Trend analysis</button>
+  </div>
+
+  <!-- ============================================================
+       DASHBOARD BODY
+       ============================================================ -->
+  <div class="results-dashboard">
+
+    <!-- ── TAB PANEL: Overview ── -->
+    <div class="results-panel active" id="panel-overview" role="tabpanel">
+
+      <!-- Sentiment split — full width -->
+      <div class="results-card results-card-full">
+        <div class="results-card-label">Overall sentiment distribution</div>
+
+        <div class="sentiment-split">
+          <div class="sentiment-split-labels">
+            <span class="sent-lbl-approve">Approve (incl. strongly) &middot; 52%</span>
+            <span class="sent-lbl-neutral">Neutral &middot; 14%</span>
+            <span class="sent-lbl-disapprove">Disapprove (incl. strongly) &middot; 34%</span>
+          </div>
+          <div class="sentiment-split-bar" role="img" aria-label="52% approve, 14% neutral, 34% disapprove">
+            <div class="sent-fill-approve"    style="width: 52%;"></div>
+            <div class="sent-fill-neutral"    style="width: 14%;"></div>
+            <div class="sent-fill-disapprove" style="width: 34%;"></div>
+          </div>
+          <div class="results-legend">
+            <span class="results-legend-item">
+              <span class="results-legend-swatch" style="background: #2D6A4F;"></span>
+              Strongly approve 21%
+            </span>
+            <span class="results-legend-item">
+              <span class="results-legend-swatch" style="background: #5a9e7a;"></span>
+              Approve 31%
+            </span>
+            <span class="results-legend-item">
+              <span class="results-legend-swatch" style="background: rgba(107,114,128,0.4);"></span>
+              Neutral 14%
+            </span>
+            <span class="results-legend-item">
+              <span class="results-legend-swatch" style="background: #c86b6b;"></span>
+              Disapprove 22%
+            </span>
+            <span class="results-legend-item">
+              <span class="results-legend-swatch" style="background: #A32D2D;"></span>
+              Strongly disapprove 12%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-row-2col">
+
+        <!-- Sector approval bar chart -->
+        <div class="results-card">
+          <div class="results-card-label">Approval by sector</div>
+          <p class="results-card-sub">Net approval rating per governance area</p>
+          <div class="results-hbars" role="list">
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Overall</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 52%; background: #C8973A;"></div></div>
+              <span class="results-hbar-val">52%</span>
+            </div>
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Education</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 47%; background: #2D6A4F;"></div></div>
+              <span class="results-hbar-val">47%</span>
+            </div>
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Security</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 45%; background: #2D6A4F;"></div></div>
+              <span class="results-hbar-val">45%</span>
+            </div>
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Foreign policy</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 49%; background: #C8973A;"></div></div>
+              <span class="results-hbar-val">49%</span>
+            </div>
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Healthcare</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 41%; background: #C8973A;"></div></div>
+              <span class="results-hbar-val">41%</span>
+            </div>
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Economy</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 39%; background: #C8973A;"></div></div>
+              <span class="results-hbar-val">39%</span>
+            </div>
+
+            <div class="results-hbar-row" role="listitem">
+              <span class="results-hbar-label">Infrastructure</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width: 33%; background: #A32D2D;"></div></div>
+              <span class="results-hbar-val">33%</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Donut chart -->
+        <div class="results-card">
+          <div class="results-card-label">Response breakdown</div>
+          <p class="results-card-sub">All 5 response options — 51,204 total</p>
+          <div class="results-donut-legend">
+            <span class="results-legend-item"><span class="results-legend-swatch" style="background:#2D6A4F;"></span>Strongly approve 21%</span>
+            <span class="results-legend-item"><span class="results-legend-swatch" style="background:#5a9e7a;"></span>Approve 31%</span>
+            <span class="results-legend-item"><span class="results-legend-swatch" style="background:#aaaaaa;"></span>Neutral 14%</span>
+            <span class="results-legend-item"><span class="results-legend-swatch" style="background:#c86b6b;"></span>Disapprove 22%</span>
+            <span class="results-legend-item"><span class="results-legend-swatch" style="background:#A32D2D;"></span>Strongly disapprove 12%</span>
+          </div>
+          <div class="results-chart-wrap" style="height: 200px;">
+            <canvas id="donutChart"
+              role="img"
+              aria-label="Donut chart: Strongly approve 21%, Approve 31%, Neutral 14%, Disapprove 22%, Strongly disapprove 12%">
+              Strongly approve 21%, Approve 31%, Neutral 14%, Disapprove 22%, Strongly disapprove 12%.
+            </canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TAB PANEL: By demographic ── -->
+    <div class="results-panel" id="panel-demographic" role="tabpanel">
+
+      <div class="results-card results-card-full">
+        <div class="results-card-label">Approval by age group</div>
+        <p class="results-card-sub">Net approval percentage per age bracket</p>
+        <div class="results-hbars">
+          <div class="results-hbar-row"><span class="results-hbar-label">18–24</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:61%;background:#2D6A4F;"></div></div><span class="results-hbar-val">61%</span></div>
+          <div class="results-hbar-row"><span class="results-hbar-label">25–34</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:58%;background:#2D6A4F;"></div></div><span class="results-hbar-val">58%</span></div>
+          <div class="results-hbar-row"><span class="results-hbar-label">35–44</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:54%;background:#C8973A;"></div></div><span class="results-hbar-val">54%</span></div>
+          <div class="results-hbar-row"><span class="results-hbar-label">45–54</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:47%;background:#C8973A;"></div></div><span class="results-hbar-val">47%</span></div>
+          <div class="results-hbar-row"><span class="results-hbar-label">55–64</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:41%;background:#C8973A;"></div></div><span class="results-hbar-val">41%</span></div>
+          <div class="results-hbar-row"><span class="results-hbar-label">65+</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:36%;background:#A32D2D;"></div></div><span class="results-hbar-val">36%</span></div>
+        </div>
+      </div>
+
+      <div class="results-row-2col">
+
+        <div class="results-card">
+          <div class="results-card-label">Approval by gender</div>
+          <div class="results-hbars">
+            <div class="results-hbar-row"><span class="results-hbar-label">Female</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:55%;background:#2D6A4F;"></div></div><span class="results-hbar-val">55%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Non-binary</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:52%;background:#C8973A;"></div></div><span class="results-hbar-val">52%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Male</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:48%;background:#C8973A;"></div></div><span class="results-hbar-val">48%</span></div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <div class="results-card-label">Approval by education</div>
+          <div class="results-hbars">
+            <div class="results-hbar-row"><span class="results-hbar-label">Postgraduate</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:66%;background:#2D6A4F;"></div></div><span class="results-hbar-val">66%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Bachelor's</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:60%;background:#2D6A4F;"></div></div><span class="results-hbar-val">60%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Vocational</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:52%;background:#C8973A;"></div></div><span class="results-hbar-val">52%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Secondary</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:48%;background:#C8973A;"></div></div><span class="results-hbar-val">48%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Primary</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:41%;background:#C8973A;"></div></div><span class="results-hbar-val">41%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">No formal</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:36%;background:#A32D2D;"></div></div><span class="results-hbar-val">36%</span></div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <div class="results-card-label">Approval by occupation</div>
+          <div class="results-hbars">
+            <div class="results-hbar-row"><span class="results-hbar-label">Civil service</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:59%;background:#2D6A4F;"></div></div><span class="results-hbar-val">59%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Student</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:63%;background:#2D6A4F;"></div></div><span class="results-hbar-val">63%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Private sector</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:54%;background:#C8973A;"></div></div><span class="results-hbar-val">54%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Self-employed</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:48%;background:#C8973A;"></div></div><span class="results-hbar-val">48%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Agriculture</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:37%;background:#A32D2D;"></div></div><span class="results-hbar-val">37%</span></div>
+            <div class="results-hbar-row"><span class="results-hbar-label">Unemployed</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:31%;background:#A32D2D;"></div></div><span class="results-hbar-val">31%</span></div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <div class="results-card-label">Grouped bar — age vs. sector</div>
+          <p class="results-card-sub">Economy vs. Security approval by age</p>
+          <div class="results-chart-wrap" style="height:220px;">
+            <canvas id="groupedBarChart"
+              role="img"
+              aria-label="Grouped bar chart comparing economy and security approval across age groups">
+              Economy approval by age: 18-24=44%, 25-34=42%, 35-44=40%, 45-54=38%, 55-64=36%, 65+=33%.
+              Security approval by age: 18-24=52%, 25-34=50%, 35-44=48%, 45-54=44%, 55-64=41%, 65+=38%.
+            </canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TAB PANEL: By state ── -->
+    <div class="results-panel" id="panel-state" role="tabpanel">
+
+      <div class="results-card results-card-full">
+        <div class="results-card-label">State approval heatmap — top 20 states by response volume</div>
+        <p class="results-card-sub">Colour intensity reflects approval level. Darker green = higher approval. Red = below 40%.</p>
+        <div class="state-heatmap-grid" id="stateHeatmap" role="list" aria-label="State approval heatmap"></div>
+        <div class="state-legend" aria-label="Colour scale">
+          <span class="state-legend-label">Low</span>
+          <span class="state-legend-swatch" style="background:#A32D2D;"></span>
+          <span class="state-legend-swatch" style="background:#c86b6b;"></span>
+          <span class="state-legend-swatch" style="background:#C8973A;"></span>
+          <span class="state-legend-swatch" style="background:#5a9e7a;"></span>
+          <span class="state-legend-swatch" style="background:#2D6A4F;"></span>
+          <span class="state-legend-label">High</span>
+        </div>
+      </div>
+
+      <div class="results-card results-card-full">
+        <div class="results-card-label">Top &amp; bottom 5 states by approval</div>
+        <div class="results-row-2col" style="gap:28px;">
+          <div>
+            <div class="results-sub-heading approve-heading">Top 5 — highest approval</div>
+            <div class="results-hbars">
+              <div class="results-hbar-row"><span class="results-hbar-label">Tiv State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:63%;background:#2D6A4F;"></div></div><span class="results-hbar-val">63%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Eko State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:61%;background:#2D6A4F;"></div></div><span class="results-hbar-val">61%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Kanuri State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:58%;background:#2D6A4F;"></div></div><span class="results-hbar-val">58%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Calabari State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:57%;background:#2D6A4F;"></div></div><span class="results-hbar-val">57%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Lafia State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:55%;background:#2D6A4F;"></div></div><span class="results-hbar-val">55%</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="results-sub-heading disapprove-heading">Bottom 5 — lowest approval</div>
+            <div class="results-hbars">
+              <div class="results-hbar-row"><span class="results-hbar-label">Nupe State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:37%;background:#A32D2D;"></div></div><span class="results-hbar-val">37%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Murye State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:39%;background:#A32D2D;"></div></div><span class="results-hbar-val">39%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Shuwa State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:41%;background:#C8973A;"></div></div><span class="results-hbar-val">41%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Hausa State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:44%;background:#C8973A;"></div></div><span class="results-hbar-val">44%</span></div>
+              <div class="results-hbar-row"><span class="results-hbar-label">Ijaw State</span><div class="results-hbar-track"><div class="results-hbar-fill" style="width:43%;background:#C8973A;"></div></div><span class="results-hbar-val">43%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── TAB PANEL: Trend analysis ── -->
+    <div class="results-panel" id="panel-trend" role="tabpanel">
+
+      <div class="results-card results-card-full">
+        <div class="results-card-label">Monthly approval trend — last 12 months</div>
+        <p class="results-card-sub">Weighted overall approval vs. economy approval &middot; Jul 2025 &ndash; Jun 2026</p>
+        <div class="results-trend-legend">
+          <span class="results-legend-item">
+            <span style="display:inline-block;width:22px;height:2px;background:#C8973A;vertical-align:middle;"></span>
+            Overall approval
+          </span>
+          <span class="results-legend-item">
+            <span style="display:inline-block;width:22px;height:0;border-top:2px dashed #2D6A4F;vertical-align:middle;"></span>
+            Economy approval
+          </span>
+        </div>
+        <div class="results-chart-wrap" style="height: 260px;">
+          <canvas id="trendChart"
+            role="img"
+            aria-label="Line chart: overall approval peaked at 58% in September 2025 and declined to 47% by February 2026 before recovering to 52% in June 2026. Economy approval remained lower, ranging from 38–45%.">
+            Monthly overall approval: Jul 55%, Aug 57%, Sep 58%, Oct 56%, Nov 53%, Dec 51%, Jan 49%, Feb 47%, Mar 48%, Apr 50%, May 51%, Jun 52%.
+            Economy approval: Jul 44%, Aug 43%, Sep 45%, Oct 42%, Nov 40%, Dec 39%, Jan 38%, Feb 37%, Mar 38%, Apr 39%, May 39%, Jun 39%.
+          </canvas>
+        </div>
+      </div>
+
+      <div class="results-row-2col">
+
+        <div class="results-card">
+          <div class="results-card-label">Sector trend — Q1 vs Q2 2026</div>
+          <p class="results-card-sub">Change in approval between quarters</p>
+          <div class="results-hbars">
+            <div class="results-hbar-row">
+              <span class="results-hbar-label">Education</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width:47%;background:#2D6A4F;"></div></div>
+              <span class="results-hbar-val trend-up">+3%</span>
+            </div>
+            <div class="results-hbar-row">
+              <span class="results-hbar-label">Security</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width:45%;background:#2D6A4F;"></div></div>
+              <span class="results-hbar-val trend-up">+2%</span>
+            </div>
+            <div class="results-hbar-row">
+              <span class="results-hbar-label">Foreign policy</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width:49%;background:#C8973A;"></div></div>
+              <span class="results-hbar-val trend-up">+1%</span>
+            </div>
+            <div class="results-hbar-row">
+              <span class="results-hbar-label">Healthcare</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width:41%;background:#C8973A;"></div></div>
+              <span class="results-hbar-val trend-down">&minus;1%</span>
+            </div>
+            <div class="results-hbar-row">
+              <span class="results-hbar-label">Economy</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width:39%;background:#C8973A;"></div></div>
+              <span class="results-hbar-val trend-down">&minus;2%</span>
+            </div>
+            <div class="results-hbar-row">
+              <span class="results-hbar-label">Infrastructure</span>
+              <div class="results-hbar-track"><div class="results-hbar-fill" style="width:33%;background:#A32D2D;"></div></div>
+              <span class="results-hbar-val trend-down">&minus;4%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-card">
+          <div class="results-card-label">Key inflection points</div>
+          <div class="results-timeline">
+            <div class="results-tl-item">
+              <div class="results-tl-dot approve-dot"></div>
+              <div>
+                <div class="results-tl-date">Sep 2025</div>
+                <div class="results-tl-event">Peak approval 58% — following national security summit</div>
+              </div>
+            </div>
+            <div class="results-tl-item">
+              <div class="results-tl-dot neutral-dot"></div>
+              <div>
+                <div class="results-tl-date">Nov 2025</div>
+                <div class="results-tl-event">Decline begins — fuel subsidy removal announced</div>
+              </div>
+            </div>
+            <div class="results-tl-item">
+              <div class="results-tl-dot disapprove-dot"></div>
+              <div>
+                <div class="results-tl-date">Feb 2026</div>
+                <div class="results-tl-event">Lowest approval 47% — cost of living at peak concern</div>
+              </div>
+            </div>
+            <div class="results-tl-item">
+              <div class="results-tl-dot approve-dot"></div>
+              <div>
+                <div class="results-tl-date">Apr 2026</div>
+                <div class="results-tl-event">Recovery — education reform bill passed by legislature</div>
+              </div>
+            </div>
+            <div class="results-tl-item">
+              <div class="results-tl-dot neutral-dot"></div>
+              <div>
+                <div class="results-tl-date">Jun 2026</div>
+                <div class="results-tl-event">Current 52% — poll closes June 30</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Methodology note — visible on all panels -->
+    <div class="results-meth-note" role="note">
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
+      <p>Results are updated daily as new responses are received. Data is weighted for age, gender, state, and education level to ensure proportional representation across all 40 states and 450 tribes. Margin of error &plusmn;2.4% at 95% confidence level. Poll open June 1&ndash;30, 2026.</p>
+    </div>
+
+  </div><!-- /results-dashboard -->
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="polls.html">Active Polls</a>
+        <a href="results.html">Results Dashboard</a>
+        <a href="#">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="#">Our Mission</a>
+        <a href="#">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    /* ── Mobile nav ── */
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        navToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        Object.assign(navLinks.style, {
+          display:'flex', flexDirection:'column', position:'absolute',
+          top:'64px', left:'0', right:'0', background:'#0A1628',
+          padding:'20px 24px 24px', gap:'20px',
+          borderTop:'1px solid rgba(200,151,58,0.18)'
+        });
+        navToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    /* ── Tab switching ── */
+    document.querySelectorAll('.results-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        document.querySelectorAll('.results-tab').forEach(function (t) {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.results-panel').forEach(function (p) {
+          p.classList.remove('active');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    /* ── State heatmap ── */
+    const states = [
+      { name: 'Eko State',       pct: 61 }, { name: 'Calabari State',  pct: 57 },
+      { name: 'Abara State',     pct: 54 }, { name: 'Danfodio State',  pct: 52 },
+      { name: 'Badunna State',   pct: 49 }, { name: 'Fulani State',    pct: 48 },
+      { name: 'Gbari State',     pct: 46 }, { name: 'Hausa State',     pct: 44 },
+      { name: 'Ijaw State',      pct: 43 }, { name: 'Jukun State',     pct: 42 },
+      { name: 'Kanuri State',    pct: 58 }, { name: 'Lafia State',     pct: 55 },
+      { name: 'Murye State',     pct: 39 }, { name: 'Nupe State',      pct: 37 },
+      { name: 'Ogoni State',     pct: 53 }, { name: 'Plateau State',   pct: 50 },
+      { name: 'Qua State',       pct: 47 }, { name: 'Remo State',      pct: 45 },
+      { name: 'Shuwa State',     pct: 41 }, { name: 'Tiv State',       pct: 63 }
+    ];
+
+    function stateColor(p) {
+      if (p >= 60) return '#2D6A4F';
+      if (p >= 52) return '#5a9e7a';
+      if (p >= 44) return '#C8973A';
+      if (p >= 40) return '#c86b6b';
+      return '#A32D2D';
+    }
+
+    const heatmap = document.getElementById('stateHeatmap');
+    states.forEach(function (s) {
+      const el = document.createElement('div');
+      el.className = 'state-heat-cell';
+      el.style.background = stateColor(s.pct);
+      el.setAttribute('role', 'listitem');
+      el.setAttribute('aria-label', s.name + ': ' + s.pct + '% approval');
+      el.innerHTML =
+        '<div class="state-heat-name">' + s.name + '</div>' +
+        '<div class="state-heat-pct">' + s.pct + '%</div>';
+      heatmap.appendChild(el);
+    });
+
+    /* ── Charts (runs after Chart.js deferred script loads) ── */
+    window.addEventListener('load', function () {
+
+      /* Donut chart */
+      new Chart(document.getElementById('donutChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Strongly approve', 'Approve', 'Neutral', 'Disapprove', 'Strongly disapprove'],
+          datasets: [{
+            data: [21, 31, 14, 22, 12],
+            backgroundColor: ['#2D6A4F', '#5a9e7a', '#aaaaaa', '#c86b6b', '#A32D2D'],
+            borderWidth: 0,
+            hoverOffset: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '66%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (c) { return '  ' + c.label + ': ' + c.raw + '%'; }
+              }
+            }
+          }
+        }
+      });
+
+      /* Grouped bar chart (demographic tab) */
+      new Chart(document.getElementById('groupedBarChart'), {
+        type: 'bar',
+        data: {
+          labels: ['18–24', '25–34', '35–44', '45–54', '55–64', '65+'],
+          datasets: [
+            {
+              label: 'Economy approval',
+              data: [44, 42, 40, 38, 36, 33],
+              backgroundColor: '#C8973A',
+              borderRadius: 3
+            },
+            {
+              label: 'Security approval',
+              data: [52, 50, 48, 44, 41, 38],
+              backgroundColor: '#2D6A4F',
+              borderRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function (c) { return '  ' + c.dataset.label + ': ' + c.raw + '%'; }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: "'Space Mono', monospace", size: 10 }, color: '#6B7280' },
+              border: { display: false }
+            },
+            y: {
+              min: 0, max: 70,
+              grid: { color: 'rgba(10,22,40,0.05)' },
+              ticks: {
+                font: { family: "'Space Mono', monospace", size: 10 },
+                color: '#6B7280',
+                callback: function (v) { return v + '%'; }
+              },
+              border: { display: false }
+            }
+          }
+        }
+      });
+
+      /* Trend line chart */
+      new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+          labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [
+            {
+              label: 'Overall approval',
+              data: [55, 57, 58, 56, 53, 51, 49, 47, 48, 50, 51, 52],
+              borderColor: '#C8973A',
+              backgroundColor: 'rgba(200,151,58,0.07)',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointBackgroundColor: '#C8973A',
+              tension: 0.35,
+              fill: true
+            },
+            {
+              label: 'Economy approval',
+              data: [44, 43, 45, 42, 40, 39, 38, 37, 38, 39, 39, 39],
+              borderColor: '#2D6A4F',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [6, 4],
+              pointRadius: 4,
+              pointBackgroundColor: '#2D6A4F',
+              tension: 0.35
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function (c) { return '  ' + c.dataset.label + ': ' + c.raw + '%'; }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(10,22,40,0.05)' },
+              ticks: { font: { family: "'Space Mono', monospace", size: 10 }, color: '#6B7280' },
+              border: { display: false }
+            },
+            y: {
+              min: 30, max: 70,
+              grid: { color: 'rgba(10,22,40,0.05)' },
+              ticks: {
+                font: { family: "'Space Mono', monospace", size: 10 },
+                color: '#6B7280',
+                callback: function (v) { return v + '%'; }
+              },
+              border: { display: false }
+            }
+          }
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
