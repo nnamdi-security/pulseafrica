@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How PulseAfrica collects, weights, and publishes public opinion data — a full explanation of our polling methodology." />
+  <title>Methodology — PulseAfrica</title>
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR
+       ============================================================ -->
+  <div class="ticker" aria-label="Live platform statistics">
+    <div class="ticker-inner">
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="polls.html">Polls</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="methodology.html" class="active">Methodology</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button class="nav-cta" type="button">Share Your Voice</button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <div class="meth-hero" aria-label="Methodology page introduction">
+    <div class="meth-hero-eyebrow">How we work</div>
+    <h1 class="meth-hero-h1">Polling methodology</h1>
+    <p class="meth-hero-sub">
+      A full explanation of how PulseAfrica collects, weights, and publishes
+      public opinion data — so you can trust what you read here.
+    </p>
+    <div class="meth-hero-chips" aria-label="Topics covered">
+      <span class="meth-chip">Sample collection</span>
+      <span class="meth-chip">Data weighting</span>
+      <span class="meth-chip">Margin of error</span>
+      <span class="meth-chip">Limitations</span>
+      <span class="meth-chip">Independence</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       BODY — SIDE NAV + CONTENT
+       ============================================================ -->
+  <div class="meth-body">
+
+    <!-- Sticky section navigator -->
+    <nav class="meth-sidenav" aria-label="Jump to section">
+      <div class="meth-sidenav-label">Sections</div>
+      <a class="meth-sidenav-link active" href="#sec-what">What is polling?</a>
+      <a class="meth-sidenav-link" href="#sec-how">How polling works</a>
+      <a class="meth-sidenav-link" href="#sec-sample">Sample collection</a>
+      <a class="meth-sidenav-link" href="#sec-weighting">Data weighting</a>
+      <a class="meth-sidenav-link" href="#sec-error">Margin of error</a>
+      <a class="meth-sidenav-link" href="#sec-limitations">Limitations</a>
+      <a class="meth-sidenav-link" href="#sec-dont">What we don't do</a>
+      <a class="meth-sidenav-link" href="#sec-faq">FAQ</a>
+    </nav>
+
+    <!-- Main content -->
+    <main class="meth-content" id="methMain">
+
+      <!-- ── Section 01: What is polling? ── -->
+      <section class="meth-section" id="sec-what" aria-labelledby="heading-what">
+        <div class="meth-eyebrow">Section 01</div>
+        <h2 class="meth-section-h2" id="heading-what">What is polling?</h2>
+        <p class="meth-p">
+          Public opinion polling is a systematic method of measuring the views, attitudes,
+          and beliefs of a defined population by surveying a carefully selected sample of
+          that population. Rather than asking every person in a country — which is both
+          impractical and unnecessary — polling uses statistical principles to draw accurate
+          conclusions from a smaller but representative group.
+        </p>
+
+        <div class="meth-concept-card meth-concept-amber">
+          <div class="meth-concept-term">Population</div>
+          <div class="meth-concept-def">
+            The full group whose opinions we aim to measure. For PulseAfrica, this is all
+            adult citizens of the United States of Africa — approximately 180 million people
+            across 40 states and 450 tribes.
+          </div>
+        </div>
+
+        <div class="meth-concept-card meth-concept-green">
+          <div class="meth-concept-term">Sample</div>
+          <div class="meth-concept-def">
+            A smaller subset of the population selected to participate in a poll.
+            A well-designed sample of 1,000–2,000 people can accurately represent the
+            views of millions, provided it reflects the demographic composition of the
+            wider population.
+          </div>
+        </div>
+
+        <div class="meth-concept-card meth-concept-red">
+          <div class="meth-concept-term">Bias</div>
+          <div class="meth-concept-def">
+            Any systematic error that causes a sample to over-represent or under-represent
+            certain groups. PulseAfrica uses multiple techniques to detect and correct for
+            bias before publishing results.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 02: How polling works ── -->
+      <section class="meth-section" id="sec-how" aria-labelledby="heading-how">
+        <div class="meth-eyebrow">Section 02</div>
+        <h2 class="meth-section-h2" id="heading-how">How polling works</h2>
+        <p class="meth-p">
+          Every poll on PulseAfrica follows a structured five-stage process from
+          question design through to publication. No results are published until all
+          stages are complete.
+        </p>
+
+        <div class="meth-steps" role="list">
+
+          <div class="meth-step" role="listitem">
+            <span class="meth-step-num" aria-hidden="true">01</span>
+            <div>
+              <h3 class="meth-step-title">Question design</h3>
+              <p class="meth-step-desc">
+                Questions are written to be neutral, unambiguous, and free from leading
+                language. Each question is reviewed internally for balance and clarity
+                before the poll is opened.
+              </p>
+            </div>
+          </div>
+
+          <div class="meth-step" role="listitem">
+            <span class="meth-step-num" aria-hidden="true">02</span>
+            <div>
+              <h3 class="meth-step-title">Sample recruitment</h3>
+              <p class="meth-step-desc">
+                Participants are recruited through the platform's registered user base,
+                stratified to match the demographic profile of the United States of Africa
+                by age, gender, state, and education.
+              </p>
+            </div>
+          </div>
+
+          <div class="meth-step" role="listitem">
+            <span class="meth-step-num" aria-hidden="true">03</span>
+            <div>
+              <h3 class="meth-step-title">Data collection</h3>
+              <p class="meth-step-desc">
+                Responses are collected through the secure online poll interface. Each
+                registered user may submit one response per poll. Duplicate detection
+                is applied at account and IP level.
+              </p>
+            </div>
+          </div>
+
+          <div class="meth-step" role="listitem">
+            <span class="meth-step-num" aria-hidden="true">04</span>
+            <div>
+              <h3 class="meth-step-title">Weighting</h3>
+              <p class="meth-step-desc">
+                Raw responses are statistically weighted to correct for any demographic
+                imbalances in the sample relative to the known population. Weights are
+                capped to prevent outsized individual influence.
+              </p>
+            </div>
+          </div>
+
+          <div class="meth-step" role="listitem">
+            <span class="meth-step-num" aria-hidden="true">05</span>
+            <div>
+              <h3 class="meth-step-title">Publication</h3>
+              <p class="meth-step-desc">
+                Weighted results, margin of error, sample size, and field dates are
+                published simultaneously. No data is withheld or selectively released.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Section 03: Sample collection ── -->
+      <section class="meth-section" id="sec-sample" aria-labelledby="heading-sample">
+        <div class="meth-eyebrow">Section 03</div>
+        <h2 class="meth-section-h2" id="heading-sample">Sample collection</h2>
+        <p class="meth-p">
+          PulseAfrica uses a voluntary opt-in panel of registered users. While this
+          differs from traditional probability sampling, we apply rigorous demographic
+          stratification and weighting to ensure results are broadly representative
+          of the national population.
+        </p>
+
+        <div class="meth-stat-chips" role="list" aria-label="Key sample statistics">
+          <div class="meth-stat-chip" role="listitem">
+            <div class="meth-stat-num">1,000<span>+</span></div>
+            <div class="meth-stat-label">Min. sample per poll</div>
+          </div>
+          <div class="meth-stat-chip" role="listitem">
+            <div class="meth-stat-num">40</div>
+            <div class="meth-stat-label">States sampled</div>
+          </div>
+          <div class="meth-stat-chip" role="listitem">
+            <div class="meth-stat-num">95<span>%</span></div>
+            <div class="meth-stat-label">Confidence level</div>
+          </div>
+          <div class="meth-stat-chip" role="listitem">
+            <div class="meth-stat-num">&plusmn;2.4<span>%</span></div>
+            <div class="meth-stat-label">Typical margin of error</div>
+          </div>
+        </div>
+
+        <p class="meth-p">
+          Responses are only accepted from verified registered accounts. Each account
+          may respond to a given poll only once. IP-level and account-level duplicate
+          detection is applied to all submissions before data is included in results.
+        </p>
+        <p class="meth-p">
+          We aim for minimum representation from every state. Polls that fail to reach
+          a representative threshold in any state are clearly labelled as having limited
+          geographic coverage.
+        </p>
+      </section>
+
+      <!-- ── Section 04: Data weighting ── -->
+      <section class="meth-section" id="sec-weighting" aria-labelledby="heading-weighting">
+        <div class="meth-eyebrow">Section 04</div>
+        <h2 class="meth-section-h2" id="heading-weighting">Data weighting</h2>
+        <p class="meth-p">
+          Because our voluntary panel does not perfectly mirror the national population,
+          we apply post-stratification weighting to bring the sample into alignment with
+          known demographic benchmarks from national census data.
+        </p>
+
+        <!-- Weighting factor visual -->
+        <div class="meth-weight-visual" aria-label="Weighting factors by importance">
+          <div class="meth-weight-title">Weighting factors applied to every poll</div>
+          <div class="meth-weight-rows" role="list">
+
+            <div class="meth-weight-row" role="listitem">
+              <span class="meth-weight-factor">State of residence</span>
+              <div class="meth-weight-track">
+                <div class="meth-weight-fill" style="width: 90%; background: #C8973A;"></div>
+              </div>
+              <span class="meth-weight-badge high">High</span>
+            </div>
+
+            <div class="meth-weight-row" role="listitem">
+              <span class="meth-weight-factor">Age group</span>
+              <div class="meth-weight-track">
+                <div class="meth-weight-fill" style="width: 85%; background: #C8973A;"></div>
+              </div>
+              <span class="meth-weight-badge high">High</span>
+            </div>
+
+            <div class="meth-weight-row" role="listitem">
+              <span class="meth-weight-factor">Gender</span>
+              <div class="meth-weight-track">
+                <div class="meth-weight-fill" style="width: 75%; background: #2D6A4F;"></div>
+              </div>
+              <span class="meth-weight-badge medium">Medium</span>
+            </div>
+
+            <div class="meth-weight-row" role="listitem">
+              <span class="meth-weight-factor">Education level</span>
+              <div class="meth-weight-track">
+                <div class="meth-weight-fill" style="width: 65%; background: #2D6A4F;"></div>
+              </div>
+              <span class="meth-weight-badge medium">Medium</span>
+            </div>
+
+            <div class="meth-weight-row" role="listitem">
+              <span class="meth-weight-factor">Occupation</span>
+              <div class="meth-weight-track">
+                <div class="meth-weight-fill" style="width: 45%; background: #6B7280;"></div>
+              </div>
+              <span class="meth-weight-badge low">Low</span>
+            </div>
+
+          </div>
+        </div>
+
+        <p class="meth-p">
+          Weights are capped to prevent any single respondent from having
+          disproportionate influence on the final result. Any response assigned a
+          weight greater than 5&times; the mean is trimmed before publication.
+        </p>
+      </section>
+
+      <!-- ── Section 05: Margin of error ── -->
+      <section class="meth-section" id="sec-error" aria-labelledby="heading-error">
+        <div class="meth-eyebrow">Section 05</div>
+        <h2 class="meth-section-h2" id="heading-error">Margin of error</h2>
+        <p class="meth-p">
+          Every poll result published on PulseAfrica includes a margin of error —
+          the range within which the true population value is likely to fall, given
+          the sample size and confidence level used.
+        </p>
+
+        <div class="meth-concept-card meth-concept-amber">
+          <div class="meth-concept-term">How to read it</div>
+          <div class="meth-concept-def">
+            A result of 52% approval with a margin of error of &plusmn;2.4% at 95%
+            confidence means: if the same poll were conducted 100 times, 95 of those
+            results would fall between 49.6% and 54.4%. It does not mean the result is
+            uncertain — it means we know precisely how certain it is.
+          </div>
+        </div>
+
+        <p class="meth-p">
+          Margins of error are calculated using the standard formula for proportions
+          at a 95% confidence interval. Larger samples produce smaller margins of error.
+          Our target minimum sample of 1,000 responses produces a margin of error of
+          approximately &plusmn;3.1%.
+        </p>
+        <p class="meth-p">
+          Sub-group results — such as approval ratings broken down by state or age group —
+          will have larger margins of error than overall figures, because the sub-group
+          sample is smaller. These are clearly indicated wherever sub-group data is published.
+        </p>
+      </section>
+
+      <!-- ── Section 06: Limitations ── -->
+      <section class="meth-section" id="sec-limitations" aria-labelledby="heading-limitations">
+        <div class="meth-eyebrow">Section 06</div>
+        <h2 class="meth-section-h2" id="heading-limitations">Poll limitations</h2>
+        <p class="meth-p">
+          We believe transparency about what our polls cannot do is as important as
+          explaining what they can. The following limitations apply to all PulseAfrica polls.
+        </p>
+
+        <div class="meth-concept-card meth-concept-red">
+          <div class="meth-concept-term">Online access bias</div>
+          <div class="meth-concept-def">
+            Our polls are conducted online. Citizens without reliable internet access
+            are less likely to participate, which may under-represent rural and lower-income
+            populations. We apply geographic and socioeconomic weighting to partially
+            correct for this.
+          </div>
+        </div>
+
+        <div class="meth-concept-card meth-concept-red">
+          <div class="meth-concept-term">Voluntary response bias</div>
+          <div class="meth-concept-def">
+            People with strong opinions are more likely to seek out and complete opinion
+            polls. This is a known limitation of opt-in panels and is partially addressed
+            through demographic weighting and active outreach to under-represented groups.
+          </div>
+        </div>
+
+        <div class="meth-concept-card meth-concept-red">
+          <div class="meth-concept-term">Social desirability bias</div>
+          <div class="meth-concept-def">
+            Respondents may answer in ways they believe are socially acceptable rather
+            than reflecting their true opinions. Anonymous response design and careful
+            question wording help mitigate this, but it cannot be fully eliminated.
+          </div>
+        </div>
+
+        <div class="meth-concept-card meth-concept-red">
+          <div class="meth-concept-term">Snapshot in time</div>
+          <div class="meth-concept-def">
+            Poll results reflect public opinion at a specific point in time. Opinions can
+            shift rapidly in response to events. PulseAfrica runs regular tracking polls
+            to capture trends over time, but a single poll result should not be treated
+            as a permanent measure.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 07: What we don't do ── -->
+      <section class="meth-section" id="sec-dont" aria-labelledby="heading-dont">
+        <div class="meth-eyebrow">Section 07</div>
+        <h2 class="meth-section-h2" id="heading-dont">What we don't do</h2>
+        <p class="meth-p">
+          Independence and integrity are the foundation of credible polling.
+          These commitments are non-negotiable and permanent.
+        </p>
+
+        <div class="meth-dont-grid" role="list">
+
+          <div class="meth-dont-item meth-dont-no" role="listitem">
+            <i class="ti ti-x meth-dont-icon" aria-hidden="true"></i>
+            <div>
+              <div class="meth-dont-heading">We don't accept poll commissions</div>
+              <p class="meth-dont-text">No government body, political party, or private organisation can commission, fund, or direct a poll on this platform.</p>
+            </div>
+          </div>
+
+          <div class="meth-dont-item meth-dont-yes" role="listitem">
+            <i class="ti ti-check meth-dont-icon" aria-hidden="true"></i>
+            <div>
+              <div class="meth-dont-heading">We publish all results</div>
+              <p class="meth-dont-text">Results are published regardless of outcome. Unfavourable findings for any leader or party are never suppressed or delayed.</p>
+            </div>
+          </div>
+
+          <div class="meth-dont-item meth-dont-no" role="listitem">
+            <i class="ti ti-x meth-dont-icon" aria-hidden="true"></i>
+            <div>
+              <div class="meth-dont-heading">We don't share individual data</div>
+              <p class="meth-dont-text">Individual responses are never shared with third parties, governments, advertisers, or any other organisation under any circumstances.</p>
+            </div>
+          </div>
+
+          <div class="meth-dont-item meth-dont-yes" role="listitem">
+            <i class="ti ti-check meth-dont-icon" aria-hidden="true"></i>
+            <div>
+              <div class="meth-dont-heading">We publish our methodology</div>
+              <p class="meth-dont-text">Every poll includes the full methodology, sample size, field dates, and margin of error. Nothing is hidden from the public record.</p>
+            </div>
+          </div>
+
+          <div class="meth-dont-item meth-dont-no" role="listitem">
+            <i class="ti ti-x meth-dont-icon" aria-hidden="true"></i>
+            <div>
+              <div class="meth-dont-heading">We don't interpret results politically</div>
+              <p class="meth-dont-text">PulseAfrica publishes data, not commentary. We do not tell citizens what results mean politically or which leader they should prefer.</p>
+            </div>
+          </div>
+
+          <div class="meth-dont-item meth-dont-yes" role="listitem">
+            <i class="ti ti-check meth-dont-icon" aria-hidden="true"></i>
+            <div>
+              <div class="meth-dont-heading">We correct our errors</div>
+              <p class="meth-dont-text">If a methodological error is discovered after publication, we correct and republish with a clearly dated correction notice explaining what changed.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Section 08: FAQ ── -->
+      <section class="meth-section" id="sec-faq" aria-labelledby="heading-faq">
+        <div class="meth-eyebrow">Section 08</div>
+        <h2 class="meth-section-h2" id="heading-faq">Frequently asked questions</h2>
+
+        <div class="meth-faq" role="list">
+
+          <div class="meth-faq-item" role="listitem">
+            <h3 class="meth-faq-q">Can anyone participate in a poll?</h3>
+            <p class="meth-faq-a">Any registered adult citizen of the United States of Africa may participate. Registration requires a verified email address and state of residence. Each person may submit one response per poll.</p>
+          </div>
+
+          <div class="meth-faq-item" role="listitem">
+            <h3 class="meth-faq-q">Are results updated in real time?</h3>
+            <p class="meth-faq-a">Results are updated daily as new responses are received and weighted. Live response counts update continuously, but weighted percentage figures are recalculated and published once per day to ensure statistical stability.</p>
+          </div>
+
+          <div class="meth-faq-item" role="listitem">
+            <h3 class="meth-faq-q">Who funds PulseAfrica?</h3>
+            <p class="meth-faq-a">PulseAfrica is an independent civic platform. It does not accept advertising, government funding, or political donations. Operational costs are covered through a transparent public interest grant model.</p>
+          </div>
+
+          <div class="meth-faq-item" role="listitem">
+            <h3 class="meth-faq-q">Why are my answers anonymous but I still need to register?</h3>
+            <p class="meth-faq-a">Registration is required solely to prevent duplicate responses and verify age and citizenship status. Your account identity is never linked to your individual poll answers in any stored, published, or shared form.</p>
+          </div>
+
+          <div class="meth-faq-item" role="listitem">
+            <h3 class="meth-faq-q">How is PulseAfrica different from a government survey?</h3>
+            <p class="meth-faq-a">PulseAfrica is entirely independent. No government body has access to our data, can influence our questions, or can prevent publication of results. This independence is what makes the data credible and the platform useful.</p>
+          </div>
+
+          <div class="meth-faq-item" role="listitem">
+            <h3 class="meth-faq-q">How do I know results haven't been manipulated?</h3>
+            <p class="meth-faq-a">Every poll includes a full audit trail: sample size, field dates, demographic breakdown, weighting factors, and margin of error. Our source methodology is published openly. We also maintain a public correction log for any changes made post-publication.</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Bottom CTA -->
+      <div class="meth-bottom-cta" role="complementary" aria-label="Call to action">
+        <div>
+          <h3 class="meth-cta-h3">Satisfied with the methodology?</h3>
+          <p class="meth-cta-sub">Your participation makes the data more representative for every citizen across all 40 states.</p>
+        </div>
+        <a href="polls.html" class="meth-cta-btn">Participate in a poll</a>
+      </div>
+
+    </main>
+  </div><!-- /meth-body -->
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="polls.html">Active Polls</a>
+        <a href="results.html">Results Dashboard</a>
+        <a href="methodology.html">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="#">Our Mission</a>
+        <a href="#">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    /* ── Mobile nav ── */
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        navToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        Object.assign(navLinks.style, {
+          display:'flex', flexDirection:'column', position:'absolute',
+          top:'64px', left:'0', right:'0', background:'#0A1628',
+          padding:'20px 24px 24px', gap:'20px',
+          borderTop:'1px solid rgba(200,151,58,0.18)'
+        });
+        navToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    /* ── Scroll spy — highlight active section in side nav ── */
+    const sections = document.querySelectorAll('.meth-section');
+    const navItems = document.querySelectorAll('.meth-sidenav-link');
+
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          navItems.forEach(function (link) { link.classList.remove('active'); });
+          const active = document.querySelector(
+            '.meth-sidenav-link[href="#' + entry.target.id + '"]'
+          );
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(function (s) { observer.observe(s); });
+  </script>
+
+</body>
+</html>

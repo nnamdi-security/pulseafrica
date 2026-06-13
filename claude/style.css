@@ -3197,3 +3197,543 @@ footer {
     width: 90px;
   }
 }
+
+
+
+
+/* ============================================================
+   METHODOLOGY PAGE — methodology.html
+   ============================================================ */
+
+/* ── Hero ── */
+.meth-hero {
+  background: #0A1628;
+  padding: 44px 40px 52px;
+  border-bottom: 2px solid #C8973A;
+}
+
+.meth-hero-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #C8973A;
+  margin-bottom: 10px;
+}
+
+.meth-hero-h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: #F5F0E8;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.meth-hero-sub {
+  font-size: 14px;
+  color: rgba(245, 240, 232, 0.55);
+  max-width: 540px;
+  line-height: 1.75;
+}
+
+.meth-hero-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.meth-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(200, 151, 58, 0.25);
+  color: #C8973A;
+  background: rgba(200, 151, 58, 0.08);
+}
+
+/* ── Body layout ── */
+.meth-body {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  background: #f9f7f4;
+  min-height: 70vh;
+}
+
+/* ── Sticky side nav ── */
+.meth-sidenav {
+  background: #fff;
+  border-right: 1px solid rgba(10, 22, 40, 0.1);
+  padding: 28px 0;
+  position: sticky;
+  top: 64px;
+  align-self: start;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.meth-sidenav-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #6B7280;
+  padding: 0 22px;
+  margin-bottom: 12px;
+}
+
+.meth-sidenav-link {
+  display: block;
+  padding: 9px 22px;
+  font-size: 12px;
+  color: #6B7280;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.meth-sidenav-link:hover {
+  color: #0A1628;
+  background: rgba(10, 22, 40, 0.03);
+}
+
+.meth-sidenav-link.active {
+  color: #0A1628;
+  border-left-color: #C8973A;
+  font-weight: 500;
+  background: rgba(200, 151, 58, 0.04);
+}
+
+/* ── Content area ── */
+.meth-content {
+  padding: 44px 48px 64px;
+  max-width: 760px;
+}
+
+/* ── Sections ── */
+.meth-section {
+  margin-bottom: 56px;
+  scroll-margin-top: 28px;
+}
+
+.meth-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #C8973A;
+  margin-bottom: 8px;
+}
+
+.meth-section-h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #0A1628;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.meth-p {
+  font-size: 14px;
+  color: #4a4a4a;
+  line-height: 1.8;
+  margin-bottom: 14px;
+}
+
+/* ── Concept cards ── */
+.meth-concept-card {
+  background: #fff;
+  border: 0.5px solid rgba(10, 22, 40, 0.1);
+  border-left-width: 3px;
+  border-radius: 0 6px 6px 0;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+
+.meth-concept-amber { border-left-color: #C8973A; }
+.meth-concept-green { border-left-color: #2D6A4F; }
+.meth-concept-red   { border-left-color: #A32D2D; }
+
+.meth-concept-term {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.meth-concept-amber .meth-concept-term { color: #C8973A; }
+.meth-concept-green .meth-concept-term { color: #2D6A4F; }
+.meth-concept-red   .meth-concept-term { color: #A32D2D; }
+
+.meth-concept-def {
+  font-size: 13px;
+  color: #4a4a4a;
+  line-height: 1.7;
+}
+
+/* ── Process steps ── */
+.meth-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 8px;
+}
+
+.meth-step {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.06);
+}
+
+.meth-step:last-child {
+  border-bottom: none;
+}
+
+.meth-step-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #C8973A;
+  width: 26px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.meth-step-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 5px;
+}
+
+.meth-step-desc {
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.65;
+}
+
+/* ── Stat chips ── */
+.meth-stat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.meth-stat-chip {
+  background: #0A1628;
+  border-radius: 6px;
+  padding: 14px 18px;
+  text-align: center;
+  min-width: 110px;
+}
+
+.meth-stat-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: #F5F0E8;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.meth-stat-num span {
+  color: #C8973A;
+  font-size: 14px;
+}
+
+.meth-stat-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: rgba(245, 240, 232, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Weighting visual ── */
+.meth-weight-visual {
+  background: #0A1628;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 20px 0;
+}
+
+.meth-weight-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #C8973A;
+  margin-bottom: 18px;
+}
+
+.meth-weight-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meth-weight-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meth-weight-factor {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(245, 240, 232, 0.6);
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.meth-weight-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.meth-weight-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.meth-weight-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.meth-weight-badge.high   { background: rgba(200,151,58,0.18); color: #C8973A; }
+.meth-weight-badge.medium { background: rgba(45,106,79,0.18);  color: #6fcf97; }
+.meth-weight-badge.low    { background: rgba(107,114,128,0.18);color: #9ca3af; }
+
+/* ── What we don't do grid ── */
+.meth-dont-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.meth-dont-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.meth-dont-no {
+  background: rgba(163, 45, 45, 0.04);
+  border: 0.5px solid rgba(163, 45, 45, 0.15);
+}
+
+.meth-dont-yes {
+  background: rgba(45, 106, 79, 0.04);
+  border: 0.5px solid rgba(45, 106, 79, 0.15);
+}
+
+.meth-dont-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.meth-dont-no  .meth-dont-icon { color: #A32D2D; }
+.meth-dont-yes .meth-dont-icon { color: #2D6A4F; }
+
+.meth-dont-heading {
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 4px;
+}
+
+.meth-dont-text {
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.65;
+}
+
+/* ── FAQ ── */
+.meth-faq {
+  display: flex;
+  flex-direction: column;
+}
+
+.meth-faq-item {
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.07);
+}
+
+.meth-faq-item:last-child {
+  border-bottom: none;
+}
+
+.meth-faq-q {
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 7px;
+  line-height: 1.3;
+}
+
+.meth-faq-a {
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.75;
+}
+
+/* ── Bottom CTA ── */
+.meth-bottom-cta {
+  background: #0A1628;
+  border-radius: 8px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.meth-cta-h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #F5F0E8;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.meth-cta-sub {
+  font-size: 13px;
+  color: rgba(245, 240, 232, 0.5);
+}
+
+.meth-cta-btn {
+  background: #C8973A;
+  color: #0A1628;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s;
+}
+
+.meth-cta-btn:hover {
+  background: #d9a845;
+}
+
+/* ============================================================
+   METHODOLOGY PAGE — RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .meth-body {
+    grid-template-columns: 1fr;
+  }
+
+  .meth-sidenav {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(10, 22, 40, 0.1);
+    padding: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .meth-sidenav-label {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  .meth-sidenav-link {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 14px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .meth-sidenav-link.active {
+    border-left: none;
+    border-bottom-color: #C8973A;
+  }
+
+  .meth-hero {
+    padding: 32px 24px 40px;
+  }
+
+  .meth-hero-h1 {
+    font-size: 26px;
+  }
+
+  .meth-content {
+    padding: 32px 24px 48px;
+  }
+
+  .meth-dont-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .meth-stat-chips {
+    flex-direction: column;
+  }
+
+  .meth-stat-chip {
+    min-width: auto;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .meth-stat-num {
+    font-size: 18px;
+  }
+
+  .meth-bottom-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px 20px;
+  }
+
+  .meth-cta-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
