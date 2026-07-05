@@ -619,15 +619,10 @@ Examples:
 
 
 Buttons
-
 Cards
-
 Forms
-
 Charts
-
 Tables
-
 Navigation
 
 
@@ -635,111 +630,57 @@ Navigation
 
 
 RESPONSIVE DESIGN
-
-
-
 Provide layouts for:
-
-
-
 Mobile
-
 Tablet
-
 Desktop
-
-
 
 Use a mobile-first approach.
 
 
 
 FRONTEND ARCHITECTURE
-
-
-
 Recommend:
-
-
-
 HTML5
-
 CSS3
-
 JavaScript
-
-
 
 Then provide a React version recommendation.
 
 
 
 Explain:
-
-
-
 Folder structure
-
 Component structure
-
 Routing structure
 
 BACKEND ARCHITECTURE
-
-
-
 Recommend:
-
-
-
 Node.js
-
 Express.js
 
 
 
 Design:
-
-
-
 Folder structure
-
 Controllers
-
 Services
-
 Middleware
 
 Authentication flow
 
 DATABASE
-
-
-
 Recommend either:
-
-
-
 MongoDB
-
 or
-
 PostgreSQL
-
 
 
 Explain why.
 
-
-
 AUTHENTICATION
 
-
-
 Design:
-
-
-
 Registration flow
 
 Login flow
@@ -760,10 +701,7 @@ Provide REST API endpoints.
 
 Examples:
 
-
-
 Auth
-
 POST /api/auth/register
 
 POST /api/auth/login
@@ -771,7 +709,6 @@ POST /api/auth/login
 
 
 Polls
-
 GET /api/polls
 
 GET /api/polls/:id
@@ -781,13 +718,11 @@ POST /api/polls
 
 
 Responses
-
 POST /api/responses
 
 
 
 Analytics
-
 GET /api/results
 
 
@@ -845,19 +780,16 @@ DEPLOYMENT
 Recommend:
 
 Frontend
-
 Vercel
 
 
 
 Backend
-
 Render
 
 
 
 Database
-
 MongoDB Atlas
 
 
@@ -873,37 +805,31 @@ Break development into phases:
 
 
 Phase 1
-
 Frontend UI
 
 
 
 Phase 2
-
 Backend APIs
 
 
 
 Phase 3
-
 Database integration
 
 
 
 Phase 4
-
 Authentication
 
 
 
 Phase 5
-
 Analytics
 
 
 
 Phase 6
-
 Deployment
 
 
@@ -915,8 +841,6 @@ Provide estimated timelines.
 DELIVERABLE FORMAT
 
 I want the response structured like a real product specification document containing:
-
-
 
 Executive Summary
 
@@ -955,54 +879,45 @@ Let start with phase 1-the frontend UI and there, let's only focus on the home p
 
 
 **PROMPT 2**
-
 You've done an excellent job, Thank you. Now compile the landing page into a downloadable HTML and CSS files using VS code as IDE
 
 
 
 **PROMPT 3**
-
 Let's now move to phase 1 page 2
 
 
 
 **PROMPT 3**
-
 Excellent. Let's now move to Page 3 — the Single Poll page. Remember that you do not need to regenerate the previous page codes. Only the new codes should be generated and tell me where/how to append it to the previous ones.
 
 
 
 **PROMPT 4**
-
 Now complete the last task you started which is the single poll page. Remember to not repeat what has been done already
 
 
 
 **PROMPT 5**
-
 I am now ready to move to page 4 - the Result page
 
 
 
 **PROMPT 6**
-
 Now complete the last task you started which is the result page. Remember to not repeat what has been done already
 
 
 
 **PROMPT 7**
-
 Everything looks fine. We can now proceed to the methodology page
 
 
 
 **PROMPT 8**
-
 Let's now move on to the next page which is about page
 
 
 
 **PROMPT 9**
-
-This project is a work in progress, one that am very proud of and intend and intend to continue later. For now, generate a README.md file to add to the repo
+This project is a work in progress, one that am very proud of and intend to continue later. For now, generate a README.md file to add to the repo
 
