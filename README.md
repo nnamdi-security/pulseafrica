@@ -24,9 +24,9 @@ This repository currently contains the **Phase 1 frontend** (HTML, CSS, vanilla 
 | 4 | Results dashboard | `results.html` | Tabbed analytics dashboard — overview, by demographic, by state, trend analysis (Chart.js) |
 | 5 | Methodology | `methodology.html` | Long-form trust document explaining sampling, weighting, margin of error, and limitations |
 | 6 | About | `about.html` | Mission, vision, values, founding story timeline, team, and platform goals |
+| 7 | Login / Register | `login.html` | Sign in, create account, and reset password views with inline validation, error and success states (`login.html#register` opens registration) |
 
 ### Not yet built
-- Login / Register page
 - User dashboard (profile, participation history, account settings)
 - Admin dashboard (poll management, user management)
 - Backend API, database, authentication
@@ -43,6 +43,7 @@ pulseafrica/
 ├── results.html        Results dashboard with Chart.js visualizations
 ├── methodology.html     Methodology / trust document
 ├── about.html          About page
+├── login.html          Login / Register / reset password
 └── style.css           Single shared stylesheet for all pages
 ```
 
@@ -91,7 +92,7 @@ No build step, no dependencies to install. It's static HTML/CSS/JS.
 3. Right-click `index.html` → **"Open with Live Server"**
 4. It opens at `http://localhost:5500`
 
-Navigate between pages using the top nav — all internal links (`index.html`, `polls.html`, `poll.html`, `results.html`, `methodology.html`, `about.html`) are already wired up.
+Navigate between pages using the top nav — all internal links (`index.html`, `polls.html`, `poll.html`, `results.html`, `methodology.html`, `about.html`, `login.html`) are already wired up.
 
 ---
 
@@ -114,7 +115,7 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 - [x] Results dashboard
 - [x] Methodology
 - [x] About
-- [ ] Login / Register
+- [x] Login / Register
 - [ ] User dashboard
 - [ ] Admin dashboard
 
