@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in or create your PulseAfrica account to participate in independent civic opinion polls for the United States of Africa." />
+  <title>Sign In — PulseAfrica</title>
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR
+       ============================================================ -->
+  <div class="ticker" aria-label="Live platform statistics">
+    <div class="ticker-inner">
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="polls.html">Polls</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="methodology.html">Methodology</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="login.html" class="active">Sign in</a></li>
+    </ul>
+    <button class="nav-cta" type="button">Share Your Voice</button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       AUTH LAYOUT — trust panel + form card
+       ============================================================ -->
+  <main class="auth-page">
+    <div class="auth-layout">
+
+      <!-- Left: trust panel -->
+      <aside class="auth-aside" aria-label="Why create an account">
+        <div class="auth-aside-eyebrow">Your voice, on the record</div>
+        <h1 class="auth-aside-h1">
+          One citizen.<br>One account.
+          <em>One honest response.</em>
+        </h1>
+        <p class="auth-aside-sub">
+          An account lets us guarantee one response per citizen per poll — the
+          foundation of every number we publish. Your answers are never linked
+          to your identity.
+        </p>
+
+        <ul class="auth-points" role="list">
+          <li class="auth-point">
+            <div class="auth-point-icon" aria-hidden="true"><i class="ti ti-user-check"></i></div>
+            <div>
+              <h2 class="auth-point-title">Verified participation</h2>
+              <p class="auth-point-text">Email verification and duplicate detection keep every poll to one response per person.</p>
+            </div>
+          </li>
+          <li class="auth-point">
+            <div class="auth-point-icon" aria-hidden="true"><i class="ti ti-lock"></i></div>
+            <div>
+              <h2 class="auth-point-title">Anonymous by design</h2>
+              <p class="auth-point-text">Responses are stored separately from account details. We publish only aggregate results.</p>
+            </div>
+          </li>
+          <li class="auth-point">
+            <div class="auth-point-icon" aria-hidden="true"><i class="ti ti-map-pin"></i></div>
+            <div>
+              <h2 class="auth-point-title">Representative data</h2>
+              <p class="auth-point-text">Your state and age range let us weight results fairly across all 40 states.</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="auth-aside-stats">
+          <div class="auth-aside-stat">
+            <span class="auth-aside-stat-val">31,890</span>
+            <span class="auth-aside-stat-label">Registered voices</span>
+          </div>
+          <div class="auth-aside-stat">
+            <span class="auth-aside-stat-val">40</span>
+            <span class="auth-aside-stat-label">States covered</span>
+          </div>
+          <div class="auth-aside-stat">
+            <span class="auth-aside-stat-val">14</span>
+            <span class="auth-aside-stat-label">Live polls</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right: form card -->
+      <section class="auth-card" aria-label="Account access">
+
+        <!-- Tabs -->
+        <div class="auth-tabs" role="tablist" aria-label="Sign in or create account">
+          <button class="auth-tab active" type="button" role="tab" id="tab-login" aria-controls="view-login" aria-selected="true" data-view="login">Sign in</button>
+          <button class="auth-tab" type="button" role="tab" id="tab-register" aria-controls="view-register" aria-selected="false" data-view="register" tabindex="-1">Create account</button>
+        </div>
+
+        <!-- ========== VIEW: LOGIN ========== -->
+        <div class="auth-view active" id="view-login" role="tabpanel" aria-labelledby="tab-login">
+          <div class="auth-head">
+            <h2 class="auth-h2">Welcome back</h2>
+            <p class="auth-sub">Sign in to continue participating in live polls.</p>
+          </div>
+
+          <div class="auth-alert" id="login-alert" role="alert" hidden>
+            <i class="ti ti-alert-circle" aria-hidden="true"></i>
+            <p class="auth-alert-text"></p>
+          </div>
+
+          <form class="auth-form" id="login-form" novalidate>
+            <div class="auth-field">
+              <label for="login-email">Email address</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-mail" aria-hidden="true"></i>
+                <input type="email" id="login-email" name="email" autocomplete="email" placeholder="you@example.com" aria-describedby="login-email-error" required />
+              </div>
+              <p class="auth-error" id="login-email-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <div class="auth-label-row">
+                <label for="login-password">Password</label>
+                <a href="#reset" class="auth-link-sm" data-view-link="reset">Forgot password?</a>
+              </div>
+              <div class="auth-input-wrap">
+                <i class="ti ti-key" aria-hidden="true"></i>
+                <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="Your password" aria-describedby="login-password-error" required />
+                <button class="auth-reveal" type="button" aria-label="Show password" aria-controls="login-password">
+                  <i class="ti ti-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+              <p class="auth-error" id="login-password-error"></p>
+            </div>
+
+            <label class="auth-check">
+              <input type="checkbox" id="login-remember" name="remember" />
+              <span class="auth-check-box" aria-hidden="true"><i class="ti ti-check"></i></span>
+              <span class="auth-check-text">Keep me signed in on this device</span>
+            </label>
+
+            <button class="auth-submit" type="submit">
+              <span class="auth-submit-label">Sign in</span>
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+
+          <p class="auth-switch">
+            New to PulseAfrica? <a href="#register" data-view-link="register">Create an account</a>
+          </p>
+        </div>
+
+        <!-- ========== VIEW: REGISTER ========== -->
+        <div class="auth-view" id="view-register" role="tabpanel" aria-labelledby="tab-register" hidden>
+          <div class="auth-head">
+            <h2 class="auth-h2">Create your account</h2>
+            <p class="auth-sub">Takes under a minute. Adults 18+ resident in the United States of Africa.</p>
+          </div>
+
+          <div class="auth-alert" id="register-alert" role="alert" hidden>
+            <i class="ti ti-alert-circle" aria-hidden="true"></i>
+            <p class="auth-alert-text"></p>
+          </div>
+
+          <form class="auth-form" id="register-form" novalidate>
+            <div class="auth-field">
+              <label for="reg-name">Full name</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-user" aria-hidden="true"></i>
+                <input type="text" id="reg-name" name="fullName" autocomplete="name" placeholder="e.g. Adaeze Okafor" aria-describedby="reg-name-error" required />
+              </div>
+              <p class="auth-error" id="reg-name-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="reg-email">Email address</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-mail" aria-hidden="true"></i>
+                <input type="email" id="reg-email" name="email" autocomplete="email" placeholder="you@example.com" aria-describedby="reg-email-hint reg-email-error" required />
+              </div>
+              <p class="auth-hint" id="reg-email-hint">We'll send a verification link. Your email is never published.</p>
+              <p class="auth-error" id="reg-email-error"></p>
+            </div>
+
+            <div class="auth-row">
+              <div class="auth-field">
+                <label for="reg-state">State of residence</label>
+                <div class="auth-select-wrap">
+                  <select id="reg-state" name="state" aria-describedby="reg-state-error" required>
+                    <option value="">Select your state…</option>
+                    <option>ABA STATE</option>
+                    <option>ADOKA STATE</option>
+                    <option>AFEMI IGODOMIGODO STATE</option>
+                    <option>AHOADA STATE</option>
+                    <option>AKPAKIP ORO STATE</option>
+                    <option>ALANSO STATE</option>
+                    <option>ALAUDO STATE</option>
+                    <option>ANIOMA STATE</option>
+                    <option>BRANEM STATE</option>
+                    <option>CALABAR STATE</option>
+                    <option>EBONYI STATE</option>
+                    <option>EBUBE STATE</option>
+                    <option>EDDA STATE</option>
+                    <option>ENUGU STATE</option>
+                    <option>EPIE STATE</option>
+                    <option>ESAN IGODOMIGODO STATE</option>
+                    <option>EZEANI STATE</option>
+                    <option>IDEN IGODOMIGODO STATE</option>
+                    <option>IDUNG IBON STATE</option>
+                    <option>IGALA STATE</option>
+                    <option>IGBANI STATE</option>
+                    <option>IKA STATE</option>
+                    <option>IKEMBA STATE</option>
+                    <option>IKOM STATE</option>
+                    <option>IKWUMESIA STATE</option>
+                    <option>ITTAI STATE</option>
+                    <option>IWERE STATE</option>
+                    <option>IWHUNROHA STATE</option>
+                    <option>ODUMEGWU STATE</option>
+                    <option>OGBIA/IZON STATE</option>
+                    <option>OGOJA STATE</option>
+                    <option>OHABUEYI STATE</option>
+                    <option>OHAUKWU STATE</option>
+                    <option>OKIGWE STATE</option>
+                    <option>OMAMBALA STATE</option>
+                    <option>ORLU STATE</option>
+                    <option>OWERRI STATE</option>
+                    <option>QUA STATE</option>
+                    <option>SOUTH ATLANTIC STATE</option>
+                    <option>URHOBO/ISOKO STATE</option>
+                  </select>
+                </div>
+                <p class="auth-error" id="reg-state-error"></p>
+              </div>
+
+              <div class="auth-field">
+                <label for="reg-age">Age range</label>
+                <div class="auth-select-wrap">
+                  <select id="reg-age" name="ageRange" aria-describedby="reg-age-error" required>
+                    <option value="">Select…</option>
+                    <option>18–24</option>
+                    <option>25–34</option>
+                    <option>35–44</option>
+                    <option>45–54</option>
+                    <option>55–64</option>
+                    <option>65+</option>
+                  </select>
+                </div>
+                <p class="auth-error" id="reg-age-error"></p>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label for="reg-password">Password</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-key" aria-hidden="true"></i>
+                <input type="password" id="reg-password" name="password" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="reg-password-rules reg-password-error" required />
+                <button class="auth-reveal" type="button" aria-label="Show password" aria-controls="reg-password">
+                  <i class="ti ti-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="auth-strength" aria-hidden="true">
+                <div class="auth-strength-bar"><span id="reg-strength-fill"></span></div>
+                <span class="auth-strength-label" id="reg-strength-label">Strength</span>
+              </div>
+              <ul class="auth-rules" id="reg-password-rules" role="list" aria-label="Password requirements">
+                <li data-rule="length"><i class="ti ti-circle" aria-hidden="true"></i> 8+ characters</li>
+                <li data-rule="letter"><i class="ti ti-circle" aria-hidden="true"></i> A letter</li>
+                <li data-rule="number"><i class="ti ti-circle" aria-hidden="true"></i> A number</li>
+              </ul>
+              <p class="auth-error" id="reg-password-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="reg-confirm">Confirm password</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-key" aria-hidden="true"></i>
+                <input type="password" id="reg-confirm" name="confirmPassword" autocomplete="new-password" placeholder="Re-enter your password" aria-describedby="reg-confirm-error" required />
+              </div>
+              <p class="auth-error" id="reg-confirm-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-check">
+                <input type="checkbox" id="reg-terms" name="terms" aria-describedby="reg-terms-error" required />
+                <span class="auth-check-box" aria-hidden="true"><i class="ti ti-check"></i></span>
+                <span class="auth-check-text">I am 18 or older and agree to the <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>.</span>
+              </label>
+              <p class="auth-error" id="reg-terms-error"></p>
+            </div>
+
+            <button class="auth-submit" type="submit">
+              <span class="auth-submit-label">Create account</span>
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+
+          <div class="auth-privacy-note" role="note">
+            <i class="ti ti-shield-lock" aria-hidden="true"></i>
+            <p>State and age range are used only for statistical weighting. They are never published individually or linked to your poll answers. <a href="methodology.html">How we weight results</a></p>
+          </div>
+
+          <p class="auth-switch">
+            Already registered? <a href="#login" data-view-link="login">Sign in</a>
+          </p>
+        </div>
+
+        <!-- ========== VIEW: RESET PASSWORD ========== -->
+        <div class="auth-view" id="view-reset" hidden>
+          <a href="#login" class="auth-back" data-view-link="login">
+            <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to sign in
+          </a>
+          <div class="auth-head">
+            <h2 class="auth-h2">Reset your password</h2>
+            <p class="auth-sub">Enter the email you registered with and we'll send you a reset link.</p>
+          </div>
+
+          <form class="auth-form" id="reset-form" novalidate>
+            <div class="auth-field">
+              <label for="reset-email">Email address</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-mail" aria-hidden="true"></i>
+                <input type="email" id="reset-email" name="email" autocomplete="email" placeholder="you@example.com" aria-describedby="reset-email-error" required />
+              </div>
+              <p class="auth-error" id="reset-email-error"></p>
+            </div>
+
+            <button class="auth-submit" type="submit">
+              <span class="auth-submit-label">Send reset link</span>
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- ========== VIEW: SUCCESS (shared) ========== -->
+        <div class="auth-view auth-success" id="view-success" hidden>
+          <div class="auth-success-icon" aria-hidden="true"><i class="ti ti-check"></i></div>
+          <h2 class="auth-h2" id="success-title" tabindex="-1">Success</h2>
+          <p class="auth-sub" id="success-text"></p>
+          <div class="auth-success-meta" id="success-meta" hidden></div>
+          <div class="auth-success-btns">
+            <a href="polls.html" class="auth-submit auth-submit-link" id="success-primary">
+              <span>Browse live polls</span>
+              <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </a>
+            <a href="#login" class="auth-btn-ghost" id="success-secondary" data-view-link="login">Back to sign in</a>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="polls.html">Active Polls</a>
+        <a href="results.html">Results Dashboard</a>
+        <a href="methodology.html">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="about.html">Our Mission</a>
+        <a href="about.html#team-heading">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    /* ---------- Mobile nav ---------- */
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        navToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        Object.assign(navLinks.style, {
+          display:'flex', flexDirection:'column', position:'absolute',
+          top:'64px', left:'0', right:'0', background:'#0A1628',
+          padding:'20px 24px 24px', gap:'20px',
+          borderTop:'1px solid rgba(200,151,58,0.18)'
+        });
+        navToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    /* ---------- View switching (login / register / reset / success) ---------- */
+    const tabs  = document.querySelectorAll('.auth-tab');
+    const views = document.querySelectorAll('.auth-view');
+    const tabsBar = document.querySelector('.auth-tabs');
+
+    function showView(name) {
+      views.forEach(function (v) {
+        const on = v.id === 'view-' + name;
+        v.hidden = !on;
+        v.classList.toggle('active', on);
+      });
+      tabs.forEach(function (t) {
+        const on = t.dataset.view === name;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+      });
+      // Tabs only make sense for the two main forms
+      tabsBar.hidden = (name === 'reset' || name === 'success');
+      document.title = {
+        login: 'Sign In', register: 'Create Account',
+        reset: 'Reset Password', success: 'Success'
+      }[name] + ' — PulseAfrica';
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        history.replaceState(null, '', '#' + tab.dataset.view);
+        showView(tab.dataset.view);
+      });
+      // Arrow-key navigation between tabs
+      tab.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const other = tab.dataset.view === 'login' ? 'register' : 'login';
+        const target = document.getElementById('tab-' + other);
+        target.click();
+        target.focus();
+      });
+    });
+
+    document.querySelectorAll('[data-view-link]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const name = link.dataset.viewLink;
+        history.replaceState(null, '', '#' + name);
+        showView(name);
+        const firstInput = document.querySelector('#view-' + name + ' input');
+        if (firstInput) firstInput.focus();
+      });
+    });
+
+    // Deep links: login.html#register opens the registration form.
+    // The success view is only reachable by submitting a form, never by URL.
+    function showViewFromHash() {
+      const name = location.hash.replace('#', '');
+      showView(['register', 'reset'].indexOf(name) !== -1 ? name : 'login');
+    }
+    showViewFromHash();
+    window.addEventListener('hashchange', showViewFromHash);
+
+    /* ---------- Show / hide password ---------- */
+    document.querySelectorAll('.auth-reveal').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = document.getElementById(btn.getAttribute('aria-controls'));
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.querySelector('i').className = show ? 'ti ti-eye-off' : 'ti ti-eye';
+      });
+    });
+
+    /* ---------- Validation helpers ---------- */
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function setFieldError(input, message) {
+      const field = input.closest('.auth-field');
+      const errorEl = document.getElementById(input.id + '-error');
+      field.classList.toggle('has-error', !!message);
+      field.classList.toggle('is-valid', !message && input.value !== '' && input.type !== 'checkbox');
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (errorEl) {
+        errorEl.innerHTML = message ? '<i class="ti ti-alert-circle" aria-hidden="true"></i> ' + message : '';
+      }
+      return !message;
+    }
+
+    function passwordChecks(pw) {
+      return {
+        length: pw.length >= 8,
+        letter: /[A-Za-z]/.test(pw),
+        number: /\d/.test(pw)
+      };
+    }
+
+    // One rule per field id → returns an error message or ''
+    const rules = {
+      'login-email': function (v) {
+        if (!v.trim()) return 'Enter your email address.';
+        if (!EMAIL_RE.test(v.trim())) return 'Enter a valid email address, e.g. name@example.com.';
+        return '';
+      },
+      'login-password': function (v) {
+        return v ? '' : 'Enter your password.';
+      },
+      'reg-name': function (v) {
+        const t = v.trim();
+        if (!t) return 'Enter your full name.';
+        if (t.split(/\s+/).length < 2) return 'Enter your first and last name.';
+        if (!/^[\p{L}\s'.-]+$/u.test(t)) return 'Name can only contain letters, spaces, hyphens, and apostrophes.';
+        return '';
+      },
+      'reg-email': function (v) {
+        if (!v.trim()) return 'Enter your email address.';
+        if (!EMAIL_RE.test(v.trim())) return 'Enter a valid email address, e.g. name@example.com.';
+        return '';
+      },
+      'reg-state': function (v) {
+        return v ? '' : 'Select your state of residence.';
+      },
+      'reg-age': function (v) {
+        return v ? '' : 'Select your age range.';
+      },
+      'reg-password': function (v) {
+        if (!v) return 'Create a password.';
+        const c = passwordChecks(v);
+        if (!c.length || !c.letter || !c.number) return 'Password must be at least 8 characters and include a letter and a number.';
+        return '';
+      },
+      'reg-confirm': function (v) {
+        if (!v) return 'Confirm your password.';
+        if (v !== document.getElementById('reg-password').value) return 'Passwords do not match.';
+        return '';
+      },
+      'reg-terms': function (v, input) {
+        return input.checked ? '' : 'You must confirm you are 18+ and accept the terms to register.';
+      },
+      'reset-email': function (v) {
+        if (!v.trim()) return 'Enter your email address.';
+        if (!EMAIL_RE.test(v.trim())) return 'Enter a valid email address, e.g. name@example.com.';
+        return '';
+      }
+    };
+
+    function validateInput(input) {
+      const rule = rules[input.id];
+      return rule ? setFieldError(input, rule(input.value, input)) : true;
+    }
+
+    function validateForm(form) {
+      let firstInvalid = null;
+      let count = 0;
+      form.querySelectorAll('input, select').forEach(function (input) {
+        if (!validateInput(input)) {
+          count++;
+          if (!firstInvalid) firstInvalid = input;
+        }
+      });
+      return { ok: count === 0, count: count, firstInvalid: firstInvalid };
+    }
+
+    function showAlert(id, message) {
+      const alert = document.getElementById(id);
+      if (!alert) return;
+      if (message) {
+        alert.querySelector('.auth-alert-text').textContent = message;
+        alert.hidden = false;
+      } else {
+        alert.hidden = true;
+      }
+    }
+
+    function errorSummary(count) {
+      return count === 1
+        ? 'Please fix the highlighted field below.'
+        : 'Please fix the ' + count + ' highlighted fields below.';
+    }
+
+    // Keep an open error banner in step with the fields as they get fixed
+    function refreshAlert(form) {
+      const alert = form.parentElement.querySelector('.auth-alert');
+      if (!alert || alert.hidden) return;
+      const count = form.querySelectorAll('.auth-field.has-error').length;
+      showAlert(alert.id, count ? errorSummary(count) : '');
+    }
+
+    // Validate on blur; once a field has shown an error, re-validate as the user types
+    document.querySelectorAll('.auth-form input, .auth-form select').forEach(function (input) {
+      const evt = (input.tagName === 'SELECT' || input.type === 'checkbox') ? 'change' : 'blur';
+      input.addEventListener(evt, function () {
+        validateInput(input);
+        refreshAlert(input.form);
+      });
+      input.addEventListener('input', function () {
+        if (input.closest('.auth-field').classList.contains('has-error')) {
+          validateInput(input);
+          refreshAlert(input.form);
+        }
+      });
+    });
+
+    // Keep "confirm password" in sync if the password changes after it was filled
+    document.getElementById('reg-password').addEventListener('input', function () {
+      const confirm = document.getElementById('reg-confirm');
+      if (confirm.value) {
+        validateInput(confirm);
+        refreshAlert(this.form);
+      }
+    });
+
+    /* ---------- Password strength meter ---------- */
+    const strengthFill  = document.getElementById('reg-strength-fill');
+    const strengthLabel = document.getElementById('reg-strength-label');
+    const strengthLevels = [
+      { label: 'Strength', cls: '' },
+      { label: 'Weak',     cls: 'weak' },
+      { label: 'Fair',     cls: 'fair' },
+      { label: 'Good',     cls: 'good' },
+      { label: 'Strong',   cls: 'strong' }
+    ];
+
+    document.getElementById('reg-password').addEventListener('input', function () {
+      const pw = this.value;
+      const c = passwordChecks(pw);
+
+      document.querySelectorAll('#reg-password-rules li').forEach(function (li) {
+        const met = c[li.dataset.rule];
+        li.classList.toggle('met', met);
+        li.querySelector('i').className = met ? 'ti ti-circle-check' : 'ti ti-circle';
+      });
+
+      let score = 0;
+      if (pw) {
+        score = 1;
+        if (c.length && c.letter && c.number) score = 2;
+        if (score === 2 && (pw.length >= 12 || /[^A-Za-z0-9]/.test(pw))) score = 3;
+        if (score === 3 && pw.length >= 12 && /[^A-Za-z0-9]/.test(pw) && /[a-z]/.test(pw) && /[A-Z]/.test(pw)) score = 4;
+      }
+      const level = strengthLevels[score];
+      strengthFill.style.width = (score * 25) + '%';
+      strengthFill.className = level.cls;
+      strengthLabel.textContent = level.label;
+      strengthLabel.className = 'auth-strength-label ' + level.cls;
+    });
+
+    /* ---------- Submission ----------
+       Phase 1 has no backend: a short delay stands in for the API call.
+       In Phase 3, replace simulateRequest() with fetch() calls to
+       POST /api/auth/login, POST /api/auth/register and
+       POST /api/auth/forgot-password, and pass server errors to showAlert(). */
+    function simulateRequest() {
+      return new Promise(function (resolve) { setTimeout(resolve, 900); });
+    }
+
+    function setLoading(form, loading) {
+      const btn = form.querySelector('.auth-submit');
+      btn.disabled = loading;
+      btn.classList.toggle('loading', loading);
+      btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+    }
+
+    function showSuccess(opts) {
+      document.getElementById('success-title').textContent = opts.title;
+      document.getElementById('success-text').textContent = opts.text;
+
+      const meta = document.getElementById('success-meta');
+      meta.hidden = !opts.meta;
+      meta.textContent = opts.meta || '';
+
+      const primary = document.getElementById('success-primary');
+      primary.hidden = !opts.primary;
+      if (opts.primary) {
+        primary.href = opts.primary.href;
+        primary.querySelector('span').textContent = opts.primary.label;
+      }
+      document.getElementById('success-secondary').hidden = !opts.showBack;
+
+      history.replaceState(null, '', '#success');
+      showView('success');
+      document.getElementById('success-title').focus();
+    }
+
+    function handleSubmit(form, alertId, onSuccess) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const result = validateForm(form);
+        if (!result.ok) {
+          showAlert(alertId, errorSummary(result.count));
+          result.firstInvalid.focus();
+          return;
+        }
+        showAlert(alertId, '');
+        setLoading(form, true);
+        simulateRequest().then(function () {
+          setLoading(form, false);
+          onSuccess(form);
+        });
+      });
+    }
+
+    handleSubmit(document.getElementById('login-form'), 'login-alert', function () {
+      showSuccess({
+        title: 'You’re signed in',
+        text: 'Welcome back. There are 14 live polls waiting for your response.',
+        primary: { href: 'polls.html', label: 'Browse live polls' },
+        showBack: false
+      });
+    });
+
+    handleSubmit(document.getElementById('register-form'), 'register-alert', function (form) {
+      const email = form.querySelector('#reg-email').value.trim();
+      const firstName = form.querySelector('#reg-name').value.trim().split(/\s+/)[0];
+      showSuccess({
+        title: 'Account created',
+        text: 'Thank you, ' + firstName + '. Check your inbox and click the verification link to activate your account — verified accounts can respond to every live poll.',
+        meta: 'Verification email sent to ' + email,
+        primary: { href: 'polls.html', label: 'Browse live polls' },
+        showBack: true
+      });
+      form.reset();
+      form.querySelectorAll('.auth-field').forEach(function (f) { f.classList.remove('is-valid', 'has-error'); });
+      document.getElementById('reg-password').dispatchEvent(new Event('input'));
+    });
+
+    handleSubmit(document.getElementById('reset-form'), null, function (form) {
+      const email = form.querySelector('#reset-email').value.trim();
+      showSuccess({
+        title: 'Check your inbox',
+        text: 'If an account exists for that address, a password reset link is on its way. The link expires in 30 minutes.',
+        meta: 'Reset link requested for ' + email,
+        showBack: true
+      });
+      form.reset();
+      form.querySelectorAll('.auth-field').forEach(function (f) { f.classList.remove('is-valid', 'has-error'); });
+    });
+  </script>
+
+</body>
+</html>
