@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PulseAfrica admin dashboard: platform totals, participation, poll management and user management." />
+  <title>Admin — PulseAfrica</title>
+  <meta name="robots" content="noindex" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR
+       ============================================================ -->
+  <div class="ticker" aria-label="About PulseAfrica">
+    <!-- Neutral placeholder; ticker.js swaps in live figures from the API -->
+    <div class="ticker-inner" data-ticker>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">PulseAfrica</span><span class="tick-val">Independent civic opinion research</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Coverage</span><span class="tick-val">40 states &middot; 450 tribes</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Responses</span><span class="tick-val">Anonymous by design</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Methodology</span><span class="tick-val">Open and published</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Affiliation</span><span class="tick-val">No party, no government</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="polls.html">Polls</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="methodology.html">Methodology</a></li>
+      <li><a href="about.html">About</a></li>
+      <li data-nav-auth><a href="login.html">Sign in</a></li>
+    </ul>
+    <button class="nav-cta" type="button">Share Your Voice</button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       PAGE HEADER
+       ============================================================ -->
+  <div class="page-head dash-head" aria-label="Admin dashboard">
+    <div class="page-head-label">Admin</div>
+    <h1>Admin dashboard</h1>
+    <p class="page-head-sub">
+      Platform totals, participation, poll management and user management.
+    </p>
+
+    <div class="page-head-stats" id="adminStats">
+      <div>
+        <div class="ph-stat-num" id="statUsers">–</div>
+        <div class="ph-stat-label">Total users</div>
+      </div>
+      <div class="ph-stat-divider"></div>
+      <div>
+        <div class="ph-stat-num" id="statPolls">–</div>
+        <div class="ph-stat-label">Total polls</div>
+      </div>
+      <div class="ph-stat-divider"></div>
+      <div>
+        <div class="ph-stat-num" id="statActive">–</div>
+        <div class="ph-stat-label">Active polls</div>
+      </div>
+      <div class="ph-stat-divider"></div>
+      <div>
+        <div class="ph-stat-num" id="statWeek">–</div>
+        <div class="ph-stat-label">Responses, last 7 days</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TABS
+       ============================================================ -->
+  <div class="results-tabs" role="tablist" aria-label="Admin sections" id="adminTabs" hidden>
+    <button class="results-tab active" role="tab" aria-selected="true"  aria-controls="panel-overview" id="tab-overview" data-tab="overview" type="button">Overview</button>
+    <button class="results-tab"        role="tab" aria-selected="false" aria-controls="panel-polls"    id="tab-polls"    data-tab="polls"    type="button" tabindex="-1">Polls</button>
+    <button class="results-tab"        role="tab" aria-selected="false" aria-controls="panel-users"    id="tab-users"    data-tab="users"    type="button" tabindex="-1">Users</button>
+  </div>
+
+  <main class="results-dashboard dash-page" aria-label="Admin dashboard">
+
+    <!-- Loading / signed out / not an admin / error -->
+    <div class="results-card results-card-full results-notice" id="adminNotice" role="status" tabindex="-1">
+      <i class="ti ti-loader-2" aria-hidden="true"></i>
+      <div>
+        <div class="results-notice-title">Loading the admin dashboard…</div>
+        <p class="results-notice-text"></p>
+      </div>
+    </div>
+
+    <!-- ── TAB PANEL: Overview ── -->
+    <div class="results-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" hidden>
+      <div class="results-row-2col">
+
+        <section class="results-card" aria-labelledby="totalsHeading">
+          <div class="results-card-label" id="totalsHeading">Platform totals</div>
+          <dl class="dash-profile admin-totals" id="totals"></dl>
+        </section>
+
+        <section class="results-card" aria-labelledby="dailyHeading">
+          <div class="results-card-label" id="dailyHeading">Responses per day · last 14 days</div>
+          <p class="results-card-sub" id="dailySub"></p>
+          <div class="admin-columns" id="dailyChart" role="img"></div>
+          <details class="admin-details">
+            <summary>Show as table</summary>
+            <table class="admin-table admin-table-compact">
+              <thead><tr><th scope="col">Day (UTC)</th><th scope="col" class="num">Responses</th></tr></thead>
+              <tbody id="dailyTable"></tbody>
+            </table>
+          </details>
+        </section>
+
+      </div>
+
+      <section class="results-card results-card-full" aria-labelledby="partHeading">
+        <div class="results-card-label" id="partHeading">Participation by poll</div>
+        <p class="results-card-sub">Every poll, drafts included, most responses first</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Poll</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="num">Responses</th>
+                <th scope="col" class="num">Last 7 days</th>
+                <th scope="col">Share of all responses</th>
+              </tr>
+            </thead>
+            <tbody id="partTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── TAB PANEL: Polls ── -->
+    <div class="results-panel" id="panel-polls" role="tabpanel" aria-labelledby="tab-polls" hidden>
+
+      <!-- List view -->
+      <section class="results-card results-card-full" id="pollListView" aria-labelledby="pollListHeading">
+        <div class="dash-card-head">
+          <div>
+            <div class="results-card-label" id="pollListHeading">Polls</div>
+            <p class="results-card-sub" id="pollListSub"></p>
+          </div>
+          <div class="admin-toolbar">
+            <div class="dash-filter" role="group" aria-label="Filter by status">
+              <button type="button" class="dash-filter-btn active" data-poll-filter="all" aria-pressed="true">All</button>
+              <button type="button" class="dash-filter-btn" data-poll-filter="draft" aria-pressed="false">Drafts</button>
+              <button type="button" class="dash-filter-btn" data-poll-filter="active" aria-pressed="false">Live</button>
+              <button type="button" class="dash-filter-btn" data-poll-filter="closed" aria-pressed="false">Closed</button>
+            </div>
+            <button type="button" class="admin-btn admin-btn-primary" id="newPoll">
+              <i class="ti ti-plus" aria-hidden="true"></i> New poll
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-alert" id="polls-alert" role="alert" hidden>
+          <i class="ti ti-alert-circle" aria-hidden="true"></i>
+          <p class="auth-alert-text"></p>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Poll</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="num">Responses</th>
+                <th scope="col">Closes</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="pollTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Editor view (create / edit) -->
+      <section class="results-card results-card-full" id="pollEditorView" aria-labelledby="editorHeading" hidden>
+        <button type="button" class="auth-back admin-back" id="editorBack">
+          <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to polls
+        </button>
+        <h2 class="admin-editor-title" id="editorHeading" tabindex="-1">New poll</h2>
+
+        <div class="auth-alert" id="editor-alert" role="alert" hidden>
+          <i class="ti ti-alert-circle" aria-hidden="true"></i>
+          <p class="auth-alert-text"></p>
+        </div>
+
+        <form class="auth-form dash-form admin-editor" id="poll-form" novalidate>
+          <div class="auth-field">
+            <label for="ed-title">Title</label>
+            <div class="auth-input-wrap">
+              <i class="ti ti-heading" aria-hidden="true"></i>
+              <input type="text" id="ed-title" maxlength="200" aria-describedby="ed-title-hint ed-title-error" required />
+            </div>
+            <p class="auth-hint" id="ed-title-hint">Shown on cards and results. "Topic — detail" reads well, e.g. "Cost of living — household impact survey".</p>
+            <p class="auth-error" id="ed-title-error"></p>
+          </div>
+
+          <div class="auth-field">
+            <label for="ed-description">Description</label>
+            <textarea id="ed-description" class="admin-textarea" rows="3" aria-describedby="ed-description-error"></textarea>
+            <p class="auth-error" id="ed-description-error"></p>
+          </div>
+
+          <div class="admin-row-3">
+            <div class="auth-field">
+              <label for="ed-category">Category</label>
+              <div class="auth-select-wrap">
+                <select id="ed-category" aria-describedby="ed-category-error" required>
+                  <option value="">Select…</option>
+                  <option value="presidency">Presidency</option>
+                  <option value="governors">Governors</option>
+                  <option value="economy">Economy</option>
+                  <option value="security">Security</option>
+                  <option value="education">Education</option>
+                  <option value="healthcare">Healthcare</option>
+                  <option value="governance">Governance</option>
+                </select>
+              </div>
+              <p class="auth-error" id="ed-category-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="ed-closes">Closes on <span class="demo-optional">(optional)</span></label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-calendar" aria-hidden="true"></i>
+                <input type="date" id="ed-closes" aria-describedby="ed-closes-hint ed-closes-error" />
+              </div>
+              <p class="auth-hint" id="ed-closes-hint">Closes at the end of this day (UTC).</p>
+              <p class="auth-error" id="ed-closes-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="ed-status">Status</label>
+              <div class="auth-select-wrap">
+                <select id="ed-status" aria-describedby="ed-status-hint ed-status-error">
+                  <option value="draft">Draft (hidden)</option>
+                  <option value="active">Live (open)</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <p class="auth-hint" id="ed-status-hint">Drafts are only visible to admins.</p>
+              <p class="auth-error" id="ed-status-error"></p>
+            </div>
+          </div>
+
+          <fieldset class="admin-questions" id="questionsFieldset">
+            <legend>Questions</legend>
+            <p class="admin-locked" id="questionsLocked" hidden>
+              <i class="ti ti-lock" aria-hidden="true"></i>
+              <span></span>
+            </p>
+            <p class="auth-error admin-questions-error" id="questions-error"></p>
+            <ol class="admin-question-list" id="questionList"></ol>
+            <button type="button" class="admin-btn" id="addQuestion">
+              <i class="ti ti-plus" aria-hidden="true"></i> Add question
+            </button>
+          </fieldset>
+
+          <div class="admin-editor-actions">
+            <button class="auth-submit" type="submit">
+              <span class="auth-submit-label">Save poll</span>
+            </button>
+            <button type="button" class="admin-btn" id="editorCancel">Cancel</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- ── TAB PANEL: Users ── -->
+    <div class="results-panel" id="panel-users" role="tabpanel" aria-labelledby="tab-users" hidden>
+      <section class="results-card results-card-full" aria-labelledby="usersHeading">
+        <div class="dash-card-head">
+          <div>
+            <div class="results-card-label" id="usersHeading">Users</div>
+            <p class="results-card-sub" id="usersSub" aria-live="polite"></p>
+          </div>
+          <div class="admin-toolbar">
+            <label class="sr-only" for="userSearch">Search users</label>
+            <input type="search" id="userSearch" class="admin-input" placeholder="Search name or email…" />
+            <label class="sr-only" for="userRole">Role</label>
+            <select id="userRole" class="admin-input">
+              <option value="">All roles</option>
+              <option value="admin">Admins</option>
+              <option value="citizen">Citizens</option>
+            </select>
+            <label class="sr-only" for="userStatus">Status</label>
+            <select id="userStatus" class="admin-input">
+              <option value="">Any status</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="auth-alert" id="users-alert" role="alert" hidden>
+          <i class="ti ti-alert-circle" aria-hidden="true"></i>
+          <p class="auth-alert-text"></p>
+        </div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">State</th>
+                <th scope="col">Joined</th>
+                <th scope="col" class="num">Polls answered</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="userTable"></tbody>
+          </table>
+        </div>
+
+        <nav class="admin-pager" aria-label="User list pages">
+          <button type="button" class="admin-btn" id="usersPrev"><i class="ti ti-chevron-left" aria-hidden="true"></i> Previous</button>
+          <span id="usersPage"></span>
+          <button type="button" class="admin-btn" id="usersNext">Next <i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        </nav>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Shared confirmation dialog (delete poll, suspend user, change role) -->
+  <dialog class="admin-dialog" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <form method="dialog">
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <p id="confirmText"></p>
+      <div class="admin-dialog-actions">
+        <button type="submit" value="cancel" class="admin-btn" id="confirmCancel" autofocus>Cancel</button>
+        <button type="submit" value="ok" class="admin-btn admin-btn-danger" id="confirmOk">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="polls.html">Active Polls</a>
+        <a href="results.html">Results Dashboard</a>
+        <a href="methodology.html">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="about.html">Our Mission</a>
+        <a href="about.html#team-heading">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="ticker.js"></script>
+  <script>
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        navToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        Object.assign(navLinks.style, {
+          display:'flex', flexDirection:'column', position:'absolute',
+          top:'64px', left:'0', right:'0', background:'#0A1628',
+          padding:'20px 24px 24px', gap:'20px',
+          borderTop:'1px solid rgba(200,151,58,0.18)'
+        });
+        navToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    /* ── Admin dashboard ──
+       Needs an admin account. Loads GET /api/admin/overview and GET /api/polls
+       (which includes drafts for admins); the Users tab loads GET /api/admin/users
+       when first opened. */
+    const CATEGORY_NAMES = {
+      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
+      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
+    };
+    const TABS = ['overview', 'polls', 'users'];
+    const USERS_PER_PAGE = 25;
+
+    let me = null;
+    let overview = null;
+    let polls = [];
+    let pollFilter = 'all';
+    let editing = null;            /* null = new poll, otherwise the poll being edited */
+    const userQuery = { search: '', role: '', status: '', offset: 0 };
+    let usersLoaded = false;
+    let usersRequest = 0;          /* ignores replies to superseded searches */
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text == null ? '' : String(text);
+      return div.innerHTML;
+    }
+
+    /* plural(3, 'poll') → "3 polls"; pass the plural form when it isn't just + "s" */
+    function plural(n, word, many) {
+      return n.toLocaleString() + ' ' + (n === 1 ? word : (many || word + 's'));
+    }
+
+    function longDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    }
+
+    function dayLabel(day) {
+      return new Date(day + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+    }
+
+    function statusBadge(status) {
+      const label = { draft: 'Draft', active: 'Live', closed: 'Closed' }[status];
+      return '<span class="admin-status is-' + status + '"><span class="live-dot" aria-hidden="true"></span>' + label + '</span>';
+    }
+
+    function categoryTag(key) {
+      const k = CATEGORY_NAMES[key] ? key : 'governance';
+      return '<span class="poll-cat-label cat-' + k + '">' + CATEGORY_NAMES[k] + '</span>';
+    }
+
+    /* ── Notices ── */
+    function showNotice(opts) {
+      const notice = document.getElementById('adminNotice');
+      notice.hidden = !opts;
+      document.getElementById('adminTabs').hidden = !!opts;
+      document.querySelectorAll('.dash-page .results-panel').forEach(function (p) {
+        p.hidden = !!opts || !p.classList.contains('active');
+      });
+      if (!opts) return;
+      notice.className = 'results-card results-card-full results-notice' + (opts.tone ? ' is-' + opts.tone : '');
+      notice.querySelector('i').className = 'ti ti-' + opts.icon;
+      notice.querySelector('.results-notice-title').textContent = opts.title;
+      notice.querySelector('.results-notice-text').innerHTML = opts.html || '';
+    }
+
+    function showSignedOut(expired) {
+      me = null;
+      showNotice({
+        icon: 'lock', title: expired ? 'Your session has ended' : 'Sign in as an admin',
+        html: 'The admin dashboard needs an admin account. <a href="login.html?next=admin.html">Sign in</a>.'
+      });
+    }
+
+    function showNotAdmin() {
+      showNotice({
+        tone: 'warn', icon: 'shield-x', title: 'Admin access only',
+        html: 'Your account doesn’t have admin access. An existing admin can grant it from the Users tab. ' +
+          '<a href="dashboard.html">Go to your dashboard</a>.'
+      });
+    }
+
+    /* 401 → signed out, 403 → no longer an admin; anything else goes to the alert */
+    function handleError(err, alertId) {
+      if (!(err instanceof PulseAPI.ApiError)) throw err;
+      if (err.status === 401) {
+        PulseAPI.clearToken();
+        PulseNav.refresh();
+        showSignedOut(true);
+        return true;
+      }
+      if (err.status === 403 && !alertId) {
+        showNotAdmin();
+        return true;
+      }
+      if (alertId) showAlert(alertId, err.message);
+      return false;
+    }
+
+    function showAlert(id, message, tone) {
+      const alert = document.getElementById(id);
+      alert.classList.toggle('is-success', tone === 'success');
+      alert.querySelector('i').className = 'ti ti-' + (tone === 'success' ? 'circle-check' : 'alert-circle');
+      alert.querySelector('.auth-alert-text').textContent = message || '';
+      alert.setAttribute('role', tone === 'success' ? 'status' : 'alert');
+      alert.hidden = !message;
+    }
+
+    /* ── Confirmation dialog → Promise<boolean> ── */
+    function confirmAction(opts) {
+      const dialog = document.getElementById('confirmDialog');
+      document.getElementById('confirmTitle').textContent = opts.title;
+      document.getElementById('confirmText').textContent = opts.text;
+      const ok = document.getElementById('confirmOk');
+      ok.textContent = opts.confirm;
+      ok.classList.toggle('admin-btn-danger', opts.danger !== false);
+      ok.classList.toggle('admin-btn-primary', opts.danger === false);
+      if (typeof dialog.showModal !== 'function') {
+        return Promise.resolve(window.confirm(opts.title + '\n\n' + opts.text));
+      }
+      return new Promise(function (resolve) {
+        dialog.returnValue = 'cancel';
+        dialog.addEventListener('close', function done() {
+          dialog.removeEventListener('close', done);
+          resolve(dialog.returnValue === 'ok');
+        });
+        dialog.showModal();
+      });
+    }
+
+    /* ── Tabs ── */
+    function showTab(name, focusTab) {
+      if (TABS.indexOf(name) === -1) name = 'overview';
+      document.querySelectorAll('#adminTabs .results-tab').forEach(function (t) {
+        const on = t.dataset.tab === name;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (on && focusTab) t.focus();
+      });
+      document.querySelectorAll('.dash-page .results-panel').forEach(function (p) {
+        const on = p.id === 'panel-' + name;
+        p.classList.toggle('active', on);
+        p.hidden = !on || !me;
+      });
+      if (name === 'users' && me && !usersLoaded) loadUsers();
+    }
+
+    document.querySelectorAll('#adminTabs .results-tab').forEach(function (tab, i, all) {
+      tab.addEventListener('click', function () {
+        window.history.replaceState(null, '', '#' + tab.dataset.tab);
+        showTab(tab.dataset.tab);
+      });
+      tab.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const next = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length];
+        window.history.replaceState(null, '', '#' + next.dataset.tab);
+        showTab(next.dataset.tab, true);
+      });
+    });
+
+    window.addEventListener('hashchange', function () { showTab(location.hash.slice(1)); });
+    document.addEventListener('pulse:signedout', function () { showSignedOut(false); });
+
+    /* ── Overview ── */
+    function renderOverview() {
+      const o = overview;
+      document.getElementById('statUsers').textContent = o.totalUsers.toLocaleString();
+      document.getElementById('statPolls').textContent = o.totalPolls;
+      document.getElementById('statActive').textContent = o.activePolls;
+      document.getElementById('statWeek').textContent = o.responsesLast7Days.toLocaleString();
+
+      const groups = [
+        ['Users', [['Active', o.activeUsers], ['Suspended', o.suspendedUsers], ['Admins', o.admins]]],
+        ['Polls', [['Drafts', o.draftPolls], ['Live', o.activePolls], ['Closed', o.closedPolls]]],
+        ['Responses', [['All time', o.totalResponses], ['Last 7 days', o.responsesLast7Days]]]
+      ];
+      document.getElementById('totals').innerHTML = groups.map(function (g) {
+        return '<div class="admin-totals-group"><dt>' + g[0] + '</dt>' + g[1].map(function (row) {
+          return '<dd><span>' + row[0] + '</span><strong>' + row[1].toLocaleString() + '</strong></dd>';
+        }).join('') + '</div>';
+      }).join('');
+
+      /* Column chart: one series, so the card title names it and there's no legend.
+         Each column is focusable and shows its value on hover / focus. */
+      const days = o.dailyResponses;
+      const max = Math.max.apply(null, days.map(function (d) { return d.count; }).concat([1]));
+      const total = days.reduce(function (s, d) { return s + d.count; }, 0);
+      const peak = days.reduce(function (a, b) { return b.count > a.count ? b : a; }, days[0]);
+      document.getElementById('dailySub').textContent = total
+        ? plural(total, 'response') + ' in 14 days · busiest ' + dayLabel(peak.date) + ' (' + peak.count + ')'
+        : 'No responses in the last 14 days';
+      const chart = document.getElementById('dailyChart');
+      chart.setAttribute('aria-label', 'Responses per day, ' + dayLabel(days[0].date) + ' to ' +
+        dayLabel(days[days.length - 1].date) + ': ' + plural(total, 'response') + ' in total. The table below lists each day.');
+      chart.innerHTML = '<div class="admin-columns-plot">' + days.map(function (d, i) {
+        const tip = dayLabel(d.date) + ': ' + plural(d.count, 'response');
+        const label = i === 0 || i === days.length - 1 || i % 2 === 0
+          ? new Date(d.date + 'T00:00:00Z').getUTCDate() : '';
+        return '<div class="admin-col" tabindex="0" data-tip="' + escapeHtml(tip) + '" aria-label="' + escapeHtml(tip) + '">' +
+          '<div class="admin-col-bar' + (d.count ? '' : ' is-zero') + '" style="height: ' + (100 * d.count / max) + '%;"></div>' +
+          '<span class="admin-col-label" aria-hidden="true">' + label + '</span>' +
+        '</div>';
+      }).join('') + '</div>' +
+      '<div class="admin-columns-axis" aria-hidden="true"><span>' + dayLabel(days[0].date) + '</span><span>' +
+        dayLabel(days[days.length - 1].date) + '</span></div>';
+      document.getElementById('dailyTable').innerHTML = days.slice().reverse().map(function (d) {
+        return '<tr><td>' + dayLabel(d.date) + '</td><td class="num">' + d.count.toLocaleString() + '</td></tr>';
+      }).join('');
+
+      const all = o.totalResponses || 1;
+      document.getElementById('partTable').innerHTML = o.polls.length
+        ? o.polls.map(function (p) {
+            const share = Math.round(100 * p.responseCount / all);
+            return '<tr>' +
+              '<td><a class="admin-poll-link" href="results.html?id=' + p.id + '"' + (p.status === 'draft' ? ' aria-disabled="true" tabindex="-1"' : '') + '>' +
+                escapeHtml(p.title) + '</a></td>' +
+              '<td>' + statusBadge(p.status) + '</td>' +
+              '<td class="num">' + p.responseCount.toLocaleString() + '</td>' +
+              '<td class="num">' + p.responsesLast7Days.toLocaleString() + '</td>' +
+              '<td><div class="admin-share" title="' + share + '% of all responses"><div class="admin-share-track">' +
+                '<div class="admin-share-fill" style="width: ' + share + '%;"></div></div>' +
+                '<span>' + share + '%</span></div></td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="5" class="admin-empty">No polls yet.</td></tr>';
+    }
+
+    /* ── Polls: list ── */
+    function renderPolls() {
+      const rows = polls.filter(function (p) { return pollFilter === 'all' || p.status === pollFilter; });
+      const counts = { draft: 0, active: 0, closed: 0 };
+      polls.forEach(function (p) { counts[p.status]++; });
+      document.getElementById('pollListSub').textContent = plural(polls.length, 'poll') + ' · ' +
+        counts.draft + ' draft · ' + counts.active + ' live · ' + counts.closed + ' closed';
+
+      document.getElementById('pollTable').innerHTML = rows.length
+        ? rows.map(function (p) {
+            const toggle = p.status === 'active'
+              ? '<button type="button" class="admin-btn admin-btn-sm" data-action="close" data-id="' + p.id + '">Close</button>'
+              : '<button type="button" class="admin-btn admin-btn-sm" data-action="open" data-id="' + p.id + '">' +
+                  (p.status === 'draft' ? 'Publish' : 'Reopen') + '</button>';
+            return '<tr>' +
+              '<td><div class="admin-poll-cell">' + categoryTag(p.category) +
+                '<span class="admin-poll-title">' + escapeHtml(p.title) + '</span></div></td>' +
+              '<td>' + statusBadge(p.status) + '</td>' +
+              '<td class="num">' + p.responseCount.toLocaleString() + '</td>' +
+              '<td>' + (p.closesAt ? longDate(p.closesAt) : '<span class="admin-muted">No date</span>') + '</td>' +
+              '<td><div class="admin-actions">' +
+                '<button type="button" class="admin-btn admin-btn-sm" data-action="edit" data-id="' + p.id + '">Edit</button>' +
+                toggle +
+                (p.status !== 'draft' ? '<a class="admin-btn admin-btn-sm" href="results.html?id=' + p.id + '">Results</a>' : '') +
+                '<button type="button" class="admin-btn admin-btn-sm admin-btn-danger-ghost" data-action="delete" data-id="' + p.id + '"' +
+                  ' aria-label="Delete ' + escapeHtml(p.title) + '"><i class="ti ti-trash" aria-hidden="true"></i></button>' +
+              '</div></td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="5" class="admin-empty">' + (polls.length ? 'No polls with this status.' : 'No polls yet. Create the first one.') + '</td></tr>';
+    }
+
+    document.querySelectorAll('[data-poll-filter]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        pollFilter = btn.dataset.pollFilter;
+        document.querySelectorAll('[data-poll-filter]').forEach(function (b) {
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        renderPolls();
+      });
+    });
+
+    /* Reload both the poll list and the overview figures after any change */
+    function refreshData() {
+      return Promise.all([PulseAPI.adminOverview(), PulseAPI.listPolls()]).then(function (data) {
+        overview = data[0];
+        polls = data[1];
+        renderOverview();
+        renderPolls();
+      });
+    }
+
+    document.getElementById('pollTable').addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const poll = polls.find(function (p) { return p.id === Number(btn.dataset.id); });
+      if (!poll) return;
+      showAlert('polls-alert', '');
+
+      if (btn.dataset.action === 'edit') {
+        openEditor(poll.id);
+        return;
+      }
+      if (btn.dataset.action === 'open' || btn.dataset.action === 'close') {
+        const status = btn.dataset.action === 'open' ? 'active' : 'closed';
+        btn.disabled = true;
+        PulseAPI.updatePoll(poll.id, { status: status }).then(function () {
+          return refreshData();
+        }).then(function () {
+          showAlert('polls-alert', '“' + poll.title + '” is now ' + (status === 'active' ? 'live' : 'closed') + '.', 'success');
+        }).catch(function (err) {
+          if (!handleError(err, 'polls-alert')) btn.disabled = false;
+        });
+        return;
+      }
+      if (btn.dataset.action === 'delete') {
+        confirmAction({
+          title: 'Delete this poll?',
+          text: '“' + poll.title + '” and its ' + plural(poll.responseCount, 'response') +
+            ' will be permanently deleted and removed from every result. This can’t be undone.' +
+            (poll.responseCount ? ' To stop new responses but keep the results, close it instead.' : ''),
+          confirm: 'Delete poll'
+        }).then(function (yes) {
+          if (!yes) return;
+          return PulseAPI.deletePoll(poll.id).then(refreshData).then(function () {
+            showAlert('polls-alert', '“' + poll.title + '” was deleted.', 'success');
+          }).catch(function (err) { handleError(err, 'polls-alert'); });
+        });
+      }
+    });
+
+    /* ── Polls: editor ── */
+    function setFieldError(input, message) {
+      const field = input.closest('.auth-field');
+      const errorEl = document.getElementById(input.id + '-error');
+      if (field) field.classList.toggle('has-error', !!message);
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (errorEl) {
+        errorEl.innerHTML = message ? '<i class="ti ti-alert-circle" aria-hidden="true"></i><span></span>' : '';
+        if (message) errorEl.querySelector('span').textContent = message;
+      }
+      return !message;
+    }
+
+    let uid = 0;
+    function optionRowHTML(option) {
+      const id = 'opt-' + (++uid);
+      return '<li class="admin-option">' +
+        '<label class="sr-only" for="' + id + '">Option text</label>' +
+        '<input type="text" class="admin-input admin-option-text" id="' + id + '" maxlength="200" placeholder="Option, e.g. Approve" value="' + escapeHtml(option.text) + '" />' +
+        '<label class="sr-only" for="' + id + '-d">Option description (optional)</label>' +
+        '<input type="text" class="admin-input admin-option-desc" id="' + id + '-d" maxlength="300" placeholder="Description (optional)" value="' + escapeHtml(option.description || '') + '" />' +
+        '<button type="button" class="admin-btn admin-btn-sm admin-btn-icon" data-q="remove-option" aria-label="Remove this option"><i class="ti ti-x" aria-hidden="true"></i></button>' +
+      '</li>';
+    }
+
+    function questionHTML(question) {
+      const id = 'q-' + (++uid);
+      return '<li class="admin-question">' +
+        '<div class="admin-question-head">' +
+          '<label for="' + id + '" class="admin-question-label"></label>' +
+          '<button type="button" class="admin-btn admin-btn-sm admin-btn-danger-ghost" data-q="remove-question">Remove question</button>' +
+        '</div>' +
+        '<input type="text" class="admin-input admin-question-text" id="' + id + '" maxlength="500" placeholder="Question, e.g. How do you rate…?" value="' + escapeHtml(question.text) + '" />' +
+        '<ul class="admin-option-list">' + question.options.map(optionRowHTML).join('') + '</ul>' +
+        '<button type="button" class="admin-btn admin-btn-sm" data-q="add-option"><i class="ti ti-plus" aria-hidden="true"></i> Add option</button>' +
+      '</li>';
+    }
+
+    /* Keep numbering and "can remove" states right after any change */
+    function syncQuestions() {
+      const items = document.querySelectorAll('#questionList .admin-question');
+      items.forEach(function (q, i) {
+        q.querySelector('.admin-question-label').textContent = 'Question ' + (i + 1);
+        q.querySelector('[data-q="remove-question"]').disabled = items.length === 1;
+        const removes = q.querySelectorAll('[data-q="remove-option"]');
+        removes.forEach(function (b) { b.disabled = removes.length <= 2; });
+      });
+    }
+
+    const BLANK_QUESTION = { text: '', options: [{ text: '' }, { text: '' }] };
+
+    document.getElementById('questionList').addEventListener('click', function (e) {
+      const btn = e.target.closest('[data-q]');
+      if (!btn || btn.disabled) return;
+      const question = btn.closest('.admin-question');
+      if (btn.dataset.q === 'add-option') {
+        question.querySelector('.admin-option-list').insertAdjacentHTML('beforeend', optionRowHTML({ text: '' }));
+        question.querySelector('.admin-option:last-child .admin-option-text').focus();
+      } else if (btn.dataset.q === 'remove-option') {
+        const next = btn.closest('.admin-option').previousElementSibling || btn.closest('.admin-option').nextElementSibling;
+        btn.closest('.admin-option').remove();
+        if (next) next.querySelector('.admin-option-text').focus();
+      } else if (btn.dataset.q === 'remove-question') {
+        const next = question.previousElementSibling || question.nextElementSibling;
+        question.remove();
+        if (next) next.querySelector('.admin-question-text').focus();
+      }
+      syncQuestions();
+    });
+
+    document.getElementById('addQuestion').addEventListener('click', function () {
+      document.getElementById('questionList').insertAdjacentHTML('beforeend', questionHTML(BLANK_QUESTION));
+      syncQuestions();
+      document.querySelector('#questionList .admin-question:last-child .admin-question-text').focus();
+    });
+
+    function showEditor(show) {
+      document.getElementById('pollListView').hidden = show;
+      document.getElementById('pollEditorView').hidden = !show;
+    }
+
+    function fillEditor(poll) {
+      const form = document.getElementById('poll-form');
+      form.querySelectorAll('.auth-field').forEach(function (f) { f.classList.remove('has-error'); });
+      form.querySelectorAll('.auth-error').forEach(function (el) { el.innerHTML = ''; });
+      showAlert('editor-alert', '');
+
+      document.getElementById('editorHeading').textContent = poll ? 'Edit poll' : 'New poll';
+      document.getElementById('ed-title').value = poll ? poll.title : '';
+      document.getElementById('ed-description').value = poll ? poll.description : '';
+      document.getElementById('ed-category').value = poll ? poll.category : '';
+      document.getElementById('ed-closes').value = poll && poll.closesAt ? poll.closesAt.slice(0, 10) : '';
+      document.getElementById('ed-status').value = poll ? poll.status : 'draft';
+
+      /* Drafts can only be chosen while nobody has answered */
+      const locked = !!(poll && poll.responseCount);
+      document.querySelector('#ed-status option[value="draft"]').disabled = locked && poll.status !== 'draft';
+      document.getElementById('questionList').innerHTML =
+        (poll ? poll.questions : [BLANK_QUESTION]).map(questionHTML).join('');
+      document.getElementById('questionsFieldset').disabled = locked;
+      document.getElementById('addQuestion').hidden = locked;
+      const note = document.getElementById('questionsLocked');
+      note.hidden = !locked;
+      if (locked) {
+        note.querySelector('span').textContent = 'Questions are locked because ' + plural(poll.responseCount, 'person has', 'people have') +
+          ' answered. Changing them would make those answers meaningless; create a new poll instead.';
+      }
+      syncQuestions();
+    }
+
+    function openEditor(id) {
+      showAlert('polls-alert', '');
+      if (id === null) {
+        editing = null;
+        fillEditor(null);
+        showEditor(true);
+        document.getElementById('editorHeading').focus();
+        return;
+      }
+      PulseAPI.getPoll(id).then(function (poll) {
+        editing = poll;
+        fillEditor(poll);
+        showEditor(true);
+        document.getElementById('editorHeading').focus();
+      }).catch(function (err) { handleError(err, 'polls-alert'); });
+    }
+
+    function closeEditor() {
+      showEditor(false);
+      editing = null;
+    }
+
+    document.getElementById('newPoll').addEventListener('click', function () { openEditor(null); });
+    document.getElementById('editorBack').addEventListener('click', closeEditor);
+    document.getElementById('editorCancel').addEventListener('click', closeEditor);
+
+    function readQuestions() {
+      return Array.prototype.map.call(document.querySelectorAll('#questionList .admin-question'), function (q) {
+        return {
+          text: q.querySelector('.admin-question-text').value.trim(),
+          options: Array.prototype.map.call(q.querySelectorAll('.admin-option'), function (o) {
+            return { text: o.querySelector('.admin-option-text').value.trim(), description: o.querySelector('.admin-option-desc').value.trim() };
+          })
+        };
+      });
+    }
+
+    function validateQuestions() {
+      let firstBad = null;
+      let message = '';
+      document.querySelectorAll('#questionList .admin-question').forEach(function (q, i) {
+        const text = q.querySelector('.admin-question-text');
+        const bad = !text.value.trim();
+        text.classList.toggle('is-invalid', bad);
+        text.setAttribute('aria-invalid', bad ? 'true' : 'false');
+        if (bad && !firstBad) { firstBad = text; message = 'Question ' + (i + 1) + ' needs its text.'; }
+        q.querySelectorAll('.admin-option-text').forEach(function (o, j) {
+          const badOption = !o.value.trim();
+          o.classList.toggle('is-invalid', badOption);
+          o.setAttribute('aria-invalid', badOption ? 'true' : 'false');
+          if (badOption && !firstBad) { firstBad = o; message = 'Question ' + (i + 1) + ', option ' + (j + 1) + ' needs its text (or remove it).'; }
+        });
+      });
+      const errorEl = document.getElementById('questions-error');
+      errorEl.innerHTML = message ? '<i class="ti ti-alert-circle" aria-hidden="true"></i><span></span>' : '';
+      if (message) errorEl.querySelector('span').textContent = message;
+      document.getElementById('questionsFieldset').classList.toggle('has-error', !!message);
+      return firstBad;
+    }
+
+    document.getElementById('poll-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      showAlert('editor-alert', '');
+      const title = document.getElementById('ed-title');
+      const category = document.getElementById('ed-category');
+      const closes = document.getElementById('ed-closes');
+      const status = document.getElementById('ed-status');
+      const locked = document.getElementById('questionsFieldset').disabled;
+
+      const bad = [];
+      if (!setFieldError(title, title.value.trim().length < 3 ? 'Give the poll a title of at least 3 characters.' : '')) bad.push(title);
+      if (!setFieldError(category, category.value ? '' : 'Choose a category.')) bad.push(category);
+      const today = new Date().toISOString().slice(0, 10);
+      const pastClose = closes.value && closes.value < today && status.value === 'active';
+      if (!setFieldError(closes, pastClose ? 'A live poll needs a closing date of today or later.' : '')) bad.push(closes);
+      const badQuestion = locked ? null : validateQuestions();
+      if (badQuestion) bad.push(badQuestion);
+      if (bad.length) {
+        showAlert('editor-alert', 'Please fix the highlighted ' + (bad.length === 1 ? 'field' : 'fields') + '.');
+        bad[0].focus();
+        return;
+      }
+
+      const payload = {
+        title: title.value.trim(),
+        description: document.getElementById('ed-description').value.trim(),
+        category: category.value,
+        status: status.value,
+        closesAt: closes.value ? closes.value + 'T23:59:59Z' : null
+      };
+      if (!locked) payload.questions = readQuestions();
+
+      const btn = form.querySelector('.auth-submit');
+      btn.disabled = true;
+      btn.querySelector('.auth-submit-label').textContent = 'Saving…';
+      const wasNew = !editing;
+      (editing ? PulseAPI.updatePoll(editing.id, payload) : PulseAPI.createPoll(payload)).then(function (saved) {
+        return refreshData().then(function () {
+          closeEditor();
+          showAlert('polls-alert', '“' + saved.title + '” was ' + (wasNew ? 'created' : 'saved') +
+            (saved.status === 'draft' ? ' as a draft.' : saved.status === 'active' ? ' and is live.' : ' (closed).'), 'success');
+          document.getElementById('pollListHeading').scrollIntoView({ block: 'nearest' });
+        });
+      }).catch(function (err) {
+        if (handleError(err, 'editor-alert')) return;
+        const fieldIds = { title: 'ed-title', category: 'ed-category', closesAt: 'ed-closes', status: 'ed-status', description: 'ed-description' };
+        Object.keys(err.fields || {}).forEach(function (name) {
+          const input = fieldIds[name] && document.getElementById(fieldIds[name]);
+          if (input) setFieldError(input, err.fields[name]);
+        });
+      }).finally(function () {
+        btn.disabled = false;
+        btn.querySelector('.auth-submit-label').textContent = 'Save poll';
+      });
+    });
+
+    /* ── Users ── */
+    function loadUsers() {
+      usersLoaded = true;
+      const request = ++usersRequest;
+      const tbody = document.getElementById('userTable');
+      tbody.setAttribute('aria-busy', 'true');
+      PulseAPI.adminUsers({
+        search: userQuery.search, role: userQuery.role, status: userQuery.status,
+        limit: USERS_PER_PAGE, offset: userQuery.offset
+      }).then(function (page) {
+        if (request !== usersRequest) return;   /* a newer search has started */
+        renderUsers(page);
+      }).catch(function (err) {
+        if (request === usersRequest) handleError(err, 'users-alert');
+      }).finally(function () {
+        if (request === usersRequest) tbody.setAttribute('aria-busy', 'false');
+      });
+    }
+
+    let usersPage = { total: 0, items: [] };
+
+    function userRow(u) {
+      const self = u.id === me.id;
+      const admin = u.role === 'admin';
+      const selfNote = self ? ' title="You can’t change your own access. Ask another admin."' : '';
+      return '<tr data-user="' + u.id + '"' + (u.isActive ? '' : ' class="is-suspended"') + '>' +
+        '<td><div class="admin-user"><span class="admin-user-name">' + escapeHtml(u.fullName) +
+          (self ? ' <span class="admin-you">you</span>' : '') + '</span>' +
+          '<span class="admin-user-email">' + escapeHtml(u.email) + '</span></div></td>' +
+        '<td>' + escapeHtml(u.state.replace(/ STATE$/, '')) + '</td>' +
+        '<td>' + longDate(u.createdAt) + '</td>' +
+        '<td class="num">' + u.responseCount.toLocaleString() + '</td>' +
+        '<td><span class="admin-role is-' + u.role + '">' + (admin ? 'Admin' : 'Citizen') + '</span></td>' +
+        '<td>' + (u.isActive
+          ? '<span class="admin-status is-active"><span class="live-dot" aria-hidden="true"></span>Active</span>'
+          : '<span class="admin-status is-suspended"><span class="live-dot" aria-hidden="true"></span>Suspended</span>') + '</td>' +
+        '<td><div class="admin-actions">' +
+          '<button type="button" class="admin-btn admin-btn-sm" data-user-action="role"' + (self ? ' disabled' : '') + selfNote + '>' +
+            (admin ? 'Remove admin' : 'Make admin') + '</button>' +
+          '<button type="button" class="admin-btn admin-btn-sm' + (u.isActive ? ' admin-btn-danger-ghost' : '') + '" data-user-action="status"' +
+            (self ? ' disabled' : '') + selfNote + '>' + (u.isActive ? 'Suspend' : 'Reactivate') + '</button>' +
+        '</div></td>' +
+      '</tr>';
+    }
+
+    function renderUsers(page) {
+      usersPage = page;
+      const tbody = document.getElementById('userTable');
+      tbody.innerHTML = page.items.length
+        ? page.items.map(userRow).join('')
+        : '<tr><td colspan="7" class="admin-empty">No users match these filters.</td></tr>';
+      const first = page.total ? userQuery.offset + 1 : 0;
+      const last = userQuery.offset + page.items.length;
+      const filtered = userQuery.search || userQuery.role || userQuery.status;
+      document.getElementById('usersSub').textContent = (filtered ? plural(page.total, 'match', 'matches') : plural(page.total, 'user')) + ' · newest first';
+      document.getElementById('usersPage').textContent = page.total ? first + '–' + last + ' of ' + page.total.toLocaleString() : '';
+      document.getElementById('usersPrev').disabled = userQuery.offset === 0;
+      document.getElementById('usersNext').disabled = last >= page.total;
+    }
+
+    document.getElementById('userTable').addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-user-action]');
+      if (!btn || btn.disabled) return;
+      const id = Number(btn.closest('tr').dataset.user);
+      const u = usersPage.items.find(function (x) { return x.id === id; });
+      showAlert('users-alert', '');
+
+      let changes;
+      let dialog;
+      if (btn.dataset.userAction === 'status') {
+        changes = { isActive: !u.isActive };
+        dialog = u.isActive
+          ? { title: 'Suspend ' + u.fullName + '?', confirm: 'Suspend',
+              text: 'They’ll be signed out straight away and won’t be able to sign in or respond to polls. ' +
+                'Their existing responses stay in the results. You can reactivate them at any time.' }
+          : { title: 'Reactivate ' + u.fullName + '?', confirm: 'Reactivate', danger: false,
+              text: 'They’ll be able to sign in and respond to polls again.' };
+      } else {
+        const toAdmin = u.role !== 'admin';
+        changes = { role: toAdmin ? 'admin' : 'citizen' };
+        dialog = toAdmin
+          ? { title: 'Make ' + u.fullName + ' an admin?', confirm: 'Make admin',
+              text: 'Admins can create, edit and delete polls, and suspend or promote any user, including you.' }
+          : { title: 'Remove admin access from ' + u.fullName + '?', confirm: 'Remove admin', danger: false,
+              text: 'They’ll keep their account as a citizen and lose access to this dashboard.' };
+      }
+
+      confirmAction(dialog).then(function (yes) {
+        if (!yes) return;
+        btn.disabled = true;
+        return PulseAPI.adminUpdateUser(id, changes).then(function (updated) {
+          const i = usersPage.items.findIndex(function (x) { return x.id === id; });
+          usersPage.items[i] = updated;
+          renderUsers(usersPage);
+          showAlert('users-alert', updated.fullName + (changes.role
+            ? (updated.role === 'admin' ? ' is now an admin.' : ' is no longer an admin.')
+            : (updated.isActive ? ' has been reactivated.' : ' has been suspended.')), 'success');
+          return PulseAPI.adminOverview().then(function (o) { overview = o; renderOverview(); });
+        }).catch(function (err) {
+          if (!handleError(err, 'users-alert')) btn.disabled = false;
+        });
+      });
+    });
+
+    let searchTimer = null;
+    document.getElementById('userSearch').addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      const value = this.value.trim();
+      searchTimer = setTimeout(function () {
+        userQuery.search = value;
+        userQuery.offset = 0;
+        loadUsers();
+      }, 300);
+    });
+    ['userRole', 'userStatus'].forEach(function (id) {
+      document.getElementById(id).addEventListener('change', function () {
+        userQuery[id === 'userRole' ? 'role' : 'status'] = this.value;
+        userQuery.offset = 0;
+        loadUsers();
+      });
+    });
+    document.getElementById('usersPrev').addEventListener('click', function () {
+      userQuery.offset = Math.max(0, userQuery.offset - USERS_PER_PAGE);
+      loadUsers();
+    });
+    document.getElementById('usersNext').addEventListener('click', function () {
+      userQuery.offset += USERS_PER_PAGE;
+      loadUsers();
+    });
+
+    /* ── Load ── */
+    function load() {
+      if (!PulseAPI.getToken()) {
+        showSignedOut(false);
+        return;
+      }
+      showNotice({ icon: 'loader-2', title: 'Loading the admin dashboard…' });
+      PulseAPI.me().then(function (user) {
+        if (user.role !== 'admin') {
+          showNotAdmin();
+          return;
+        }
+        me = user;
+        return refreshData().then(function () {
+          showNotice(null);
+          showTab(location.hash.slice(1));
+        });
+      }).catch(function (err) {
+        if (handleError(err)) return;
+        showNotice({
+          tone: 'warn', icon: 'wifi-off', title: 'We couldn’t load the admin dashboard',
+          html: escapeHtml(err.message) + ' <button type="button" class="polls-retry" id="adminRetry">Try again</button>'
+        });
+        document.getElementById('adminRetry').addEventListener('click', load);
+      });
+    }
+
+    load();
+  </script>
+
+</body>
+</html>

@@ -17,28 +17,14 @@
   <!-- ============================================================
        TICKER BAR
        ============================================================ -->
-  <div class="ticker" aria-label="Live platform statistics">
-    <div class="ticker-inner">
-
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
-
-      <!-- Duplicate for seamless loop -->
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
-
+  <div class="ticker" aria-label="About PulseAfrica">
+    <!-- Neutral placeholder; ticker.js swaps in live figures from the API -->
+    <div class="ticker-inner" data-ticker>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">PulseAfrica</span><span class="tick-val">Independent civic opinion research</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Coverage</span><span class="tick-val">40 states &middot; 450 tribes</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Responses</span><span class="tick-val">Anonymous by design</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Methodology</span><span class="tick-val">Open and published</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Affiliation</span><span class="tick-val">No party, no government</span></div>
     </div>
   </div>
 
@@ -59,7 +45,7 @@
       <li><a href="results.html">Results</a></li>
       <li><a href="methodology.html">Methodology</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="login.html">Sign in</a></li>
+      <li data-nav-auth><a href="login.html">Sign in</a></li>
     </ul>
 
     <button class="nav-cta" type="button">Share Your Voice</button>
@@ -86,22 +72,22 @@
 
     <div class="page-head-stats">
       <div>
-        <div class="ph-stat-num">14</div>
+        <div class="ph-stat-num" id="statActive">–</div>
         <div class="ph-stat-label">Active polls</div>
       </div>
       <div class="ph-stat-divider"></div>
       <div>
-        <div class="ph-stat-num">6</div>
+        <div class="ph-stat-num" id="statClosed">–</div>
         <div class="ph-stat-label">Closed polls</div>
       </div>
       <div class="ph-stat-divider"></div>
       <div>
-        <div class="ph-stat-num">187<span>K</span></div>
+        <div class="ph-stat-num" id="statResponses">–</div>
         <div class="ph-stat-label">Total responses</div>
       </div>
       <div class="ph-stat-divider"></div>
       <div>
-        <div class="ph-stat-num">6</div>
+        <div class="ph-stat-num" id="statCategories">–</div>
         <div class="ph-stat-label">Categories</div>
       </div>
     </div>
@@ -156,7 +142,7 @@
             <i class="ti ti-layout-grid filter-icon" aria-hidden="true"></i>
             All categories
           </span>
-          <span class="filter-badge">20</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="presidency" type="button">
@@ -164,7 +150,7 @@
             <i class="ti ti-building-community filter-icon" aria-hidden="true"></i>
             Presidency
           </span>
-          <span class="filter-badge">4</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="governors" type="button">
@@ -172,7 +158,7 @@
             <i class="ti ti-building filter-icon" aria-hidden="true"></i>
             Governors
           </span>
-          <span class="filter-badge">3</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="economy" type="button">
@@ -180,7 +166,7 @@
             <i class="ti ti-trending-up filter-icon" aria-hidden="true"></i>
             Economy
           </span>
-          <span class="filter-badge">4</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="security" type="button">
@@ -188,7 +174,7 @@
             <i class="ti ti-shield filter-icon" aria-hidden="true"></i>
             Security
           </span>
-          <span class="filter-badge">3</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="education" type="button">
@@ -196,7 +182,7 @@
             <i class="ti ti-school filter-icon" aria-hidden="true"></i>
             Education
           </span>
-          <span class="filter-badge">3</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="healthcare" type="button">
@@ -204,7 +190,7 @@
             <i class="ti ti-heart-rate-monitor filter-icon" aria-hidden="true"></i>
             Healthcare
           </span>
-          <span class="filter-badge">3</span>
+          <span class="filter-badge">–</span>
         </button>
 
         <button class="filter-btn" data-category="governance" type="button">
@@ -212,7 +198,7 @@
             <i class="ti ti-gavel filter-icon" aria-hidden="true"></i>
             Governance
           </span>
-          <span class="filter-badge">3</span>
+          <span class="filter-badge">–</span>
         </button>
 
       </div>
@@ -242,7 +228,7 @@
     <main class="polls-main" aria-label="Poll listings">
 
       <div class="polls-toolbar">
-        <span class="polls-results-count" id="resultsCount">Showing 20 polls — all categories</span>
+        <span class="polls-results-count" id="resultsCount" aria-live="polite">Loading polls…</span>
         <select class="polls-view-select" aria-label="Filter polls by status" id="viewSelect">
           <option value="all">All polls</option>
           <option value="live">Live only</option>
@@ -251,360 +237,16 @@
       </div>
 
       <!-- Poll cards -->
-      <div class="poll-cards-grid" id="pollsGrid">
-
-        <!-- ── FEATURED poll (full width) ── -->
-        <article class="poll-card-item poll-card-featured" data-category="presidency" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-presidency">Presidency &middot; Featured</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span>
-                Live &middot; Closes Jun 30
-              </span>
-            </div>
-            <h2 class="poll-card-title">Presidential performance — Q2 2026 mid-term assessment</h2>
-            <p class="poll-card-desc">
-              Rate the President's performance across economy, security, education, healthcare, and
-              infrastructure. The most comprehensive national leadership poll of the year.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Approve 52%</span>
-                <span class="sent-neutral-lbl">Neutral 14%</span>
-                <span class="sent-disapprove-lbl">Disapprove 34%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="52% approve, 14% neutral, 34% disapprove">
-                <div class="sent-approve-fill"    style="width: 52%;"></div>
-                <div class="sent-neutral-fill"    style="width: 14%;"></div>
-                <div class="sent-disapprove-fill" style="width: 34%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">51,204 responses &middot; ~4 min</span>
-            <a href="poll.html" target="_blank"><button class="poll-take-btn" type="button">
-              Take this poll
-              <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 2 — Economy ── -->
-        <article class="poll-card-item" data-category="economy" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-economy">Economy</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">Cost of living — household impact survey</h3>
-            <p class="poll-card-desc">
-              How is your household managing rising prices? Data informs the National Economic
-              Advisory Council report due August 2026.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Managing 31%</span>
-                <span class="sent-disapprove-lbl">Struggling 69%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="31% managing, 69% struggling">
-                <div class="sent-approve-fill"    style="width: 31%;"></div>
-                <div class="sent-disapprove-fill" style="width: 69%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">38,771 responses &middot; ~3 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 3 — Security ── -->
-        <article class="poll-card-item" data-category="security" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-security">Security</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">Personal safety perception — state-by-state index</h3>
-            <p class="poll-card-desc">
-              Do you feel safer in your state this year compared to last? Results published
-              per state with demographic breakdowns.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Safer 45%</span>
-                <span class="sent-disapprove-lbl">Less safe 55%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="45% feel safer, 55% feel less safe">
-                <div class="sent-approve-fill"    style="width: 45%;"></div>
-                <div class="sent-disapprove-fill" style="width: 55%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">22,190 responses &middot; ~3 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 4 — Education ── -->
-        <article class="poll-card-item" data-category="education" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-education">Education</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">Public school quality — parental confidence survey</h3>
-            <p class="poll-card-desc">
-              Rate your satisfaction with public school access, quality of instruction, and
-              infrastructure in your state.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Satisfied 47%</span>
-                <span class="sent-disapprove-lbl">Dissatisfied 53%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="47% satisfied, 53% dissatisfied">
-                <div class="sent-approve-fill"    style="width: 47%;"></div>
-                <div class="sent-disapprove-fill" style="width: 53%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">19,340 responses &middot; ~3 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 5 — Healthcare ── -->
-        <article class="poll-card-item" data-category="healthcare" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-healthcare">Healthcare</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">Access to public healthcare — national adequacy poll</h3>
-            <p class="poll-card-desc">
-              Do citizens have adequate access to hospitals, clinics, and essential medicines?
-              Covers all 40 states.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Adequate 41%</span>
-                <span class="sent-disapprove-lbl">Inadequate 59%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="41% adequate, 59% inadequate">
-                <div class="sent-approve-fill"    style="width: 41%;"></div>
-                <div class="sent-disapprove-fill" style="width: 59%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">17,820 responses &middot; ~3 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 6 — Governance ── -->
-        <article class="poll-card-item" data-category="governance" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-governance">Governance</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">Anti-corruption confidence — trust in public institutions</h3>
-            <p class="poll-card-desc">
-              How much do you trust the judiciary, legislature, and civil service to act
-              without corruption?
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Trust 28%</span>
-                <span class="sent-disapprove-lbl">Don't trust 72%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="28% trust, 72% do not trust">
-                <div class="sent-approve-fill"    style="width: 28%;"></div>
-                <div class="sent-disapprove-fill" style="width: 72%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">14,903 responses &middot; ~4 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 7 — Economy (Closed) ── -->
-        <article class="poll-card-item is-closed" data-category="economy" data-status="closed">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-economy">Economy</span>
-              <span class="poll-live-badge is-closed">
-                <span class="live-dot" aria-hidden="true"></span> Closed
-              </span>
-            </div>
-            <h3 class="poll-card-title">Q1 2026 economic outlook — citizen confidence index</h3>
-            <p class="poll-card-desc">
-              Quarterly confidence survey on employment, inflation, and trade.
-              Results published March 2026.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Confident 36%</span>
-                <span class="sent-disapprove-lbl">Not confident 64%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="36% confident, 64% not confident">
-                <div class="sent-approve-fill"    style="width: 36%;"></div>
-                <div class="sent-disapprove-fill" style="width: 64%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">44,210 responses &middot; Closed Mar 31</span>
-            <button class="poll-take-btn" type="button">
-              View results <i class="ti ti-chart-bar" aria-hidden="true"></i>
-            </button>
-          </div>
-        </article>
-
-        <!-- ── Poll 8 — Presidency ── -->
-        <article class="poll-card-item" data-category="presidency" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-presidency">Presidency</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">Foreign policy and diplomatic relations — public rating</h3>
-            <p class="poll-card-desc">
-              Assess the government's handling of international partnerships, trade
-              agreements, and regional security cooperation.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Approve 49%</span>
-                <span class="sent-disapprove-lbl">Disapprove 51%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="49% approve, 51% disapprove">
-                <div class="sent-approve-fill"    style="width: 49%;"></div>
-                <div class="sent-disapprove-fill" style="width: 51%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">11,540 responses &middot; ~4 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 9 — Governors ── -->
-        <article class="poll-card-item" data-category="governors" data-status="live">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-governors">Governors</span>
-              <span class="poll-live-badge">
-                <span class="live-dot" aria-hidden="true"></span> Live
-              </span>
-            </div>
-            <h3 class="poll-card-title">State governor performance — 40-state approval index</h3>
-            <p class="poll-card-desc">
-              Rate your state governor's performance on infrastructure, local security,
-              and service delivery. All 40 states included.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Approve 44%</span>
-                <span class="sent-neutral-lbl">Neutral 18%</span>
-                <span class="sent-disapprove-lbl">Disapprove 38%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="44% approve, 18% neutral, 38% disapprove">
-                <div class="sent-approve-fill"    style="width: 44%;"></div>
-                <div class="sent-neutral-fill"    style="width: 18%;"></div>
-                <div class="sent-disapprove-fill" style="width: 38%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">9,870 responses &middot; ~5 min</span>
-            <a href="poll.html"><button class="poll-take-btn" type="button">
-              Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button></a>
-          </div>
-        </article>
-
-        <!-- ── Poll 10 — Security (Closed) ── -->
-        <article class="poll-card-item is-closed" data-category="security" data-status="closed">
-          <div class="poll-card-head">
-            <div class="poll-card-meta-row">
-              <span class="poll-cat-label cat-security">Security</span>
-              <span class="poll-live-badge is-closed">
-                <span class="live-dot" aria-hidden="true"></span> Closed
-              </span>
-            </div>
-            <h3 class="poll-card-title">Border security and internal displacement — Q1 report</h3>
-            <p class="poll-card-desc">
-              Public perception of border management and the government's response
-              to internally displaced communities. Closed January 2026.
-            </p>
-            <div class="sentiment-preview">
-              <div class="sentiment-labels">
-                <span class="sent-approve-lbl">Adequate 29%</span>
-                <span class="sent-disapprove-lbl">Inadequate 71%</span>
-              </div>
-              <div class="sentiment-bar" role="img" aria-label="29% adequate, 71% inadequate">
-                <div class="sent-approve-fill"    style="width: 29%;"></div>
-                <div class="sent-disapprove-fill" style="width: 71%;"></div>
-              </div>
-            </div>
-          </div>
-          <div class="poll-card-foot">
-            <span class="poll-response-count">31,450 responses &middot; Closed Jan 31</span>
-            <button class="poll-take-btn" type="button">
-              View results <i class="ti ti-chart-bar" aria-hidden="true"></i>
-            </button>
-          </div>
-        </article>
-
+      <!-- Filled in from GET /api/polls by the script below -->
+      <div class="poll-cards-grid" id="pollsGrid" aria-busy="true">
+        <p class="polls-state">
+          <i class="ti ti-loader-2" aria-hidden="true"></i>
+          Loading polls…
+        </p>
       </div><!-- /poll-cards-grid -->
 
       <!-- Pagination -->
-      <nav class="polls-pagination" aria-label="Poll listing pages">
-        <button class="page-btn" aria-label="Previous page" type="button">
-          <i class="ti ti-chevron-left" aria-hidden="true"></i>
-        </button>
-        <button class="page-btn active" type="button">1</button>
-        <button class="page-btn" type="button">2</button>
-        <button class="page-btn" type="button">3</button>
-        <span class="page-ellipsis" aria-hidden="true">&hellip;</span>
-        <button class="page-btn" type="button">8</button>
-        <button class="page-btn" aria-label="Next page" type="button">
-          <i class="ti ti-chevron-right" aria-hidden="true"></i>
-        </button>
-      </nav>
+      <nav class="polls-pagination" id="pollsPagination" aria-label="Poll listing pages" hidden></nav>
 
     </main>
   </div><!-- /polls-layout -->
@@ -671,6 +313,9 @@
   <!-- ============================================================
        JAVASCRIPT — filters, search, mobile nav
        ============================================================ -->
+  <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="ticker.js"></script>
   <script>
     /* ── Mobile nav toggle ── */
     const navToggle = document.getElementById('navToggle');
@@ -707,99 +352,287 @@
       });
     });
 
-    /* ── Filtering logic ── */
-    const cards        = document.querySelectorAll('.poll-card-item');
+    /* ── Polls from the API ──
+       GET /api/polls returns every non-draft poll in one go, so filtering,
+       sorting and pagination all happen here in the browser. */
+    const PAGE_SIZE = 12;
+    const CATEGORY_NAMES = {
+      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
+      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
+    };
+
+    const grid         = document.getElementById('pollsGrid');
+    const pagination   = document.getElementById('pollsPagination');
     const resultsCount = document.getElementById('resultsCount');
 
+    let allPolls       = [];
     let activeCategory = 'all';
-    let activeStatus   = 'all';
+    let activeStatus   = 'all';   /* 'all' | 'live' | 'closed' — "live" is the API's "active" */
+    let activeSort     = 'responses';
     let searchTerm     = '';
+    let currentPage    = 1;
 
-    function applyFilters() {
-      let visible = 0;
-
-      cards.forEach(function (card) {
-        const cardCategory = card.dataset.category;
-        const cardStatus   = card.dataset.status;
-        const cardText     = card.innerText.toLowerCase();
-
-        const categoryMatch = activeCategory === 'all' || cardCategory === activeCategory;
-        const statusMatch   = activeStatus   === 'all' || cardStatus   === activeStatus;
-        const searchMatch   = searchTerm === '' || cardText.includes(searchTerm);
-
-        if (categoryMatch && statusMatch && searchMatch) {
-          card.style.display = '';
-          visible++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      /* Update the featured card span: only applies when all categories shown */
-      const featured = document.querySelector('.poll-card-featured');
-      if (featured && featured.style.display !== 'none') {
-        featured.style.gridColumn = (activeCategory === 'all' && searchTerm === '') ? '1 / -1' : '';
-      }
-
-      /* Update results count label */
-      const catLabel = activeCategory === 'all' ? 'all categories' : activeCategory;
-      resultsCount.textContent = 'Showing ' + visible + ' poll' + (visible !== 1 ? 's' : '') + ' — ' + catLabel;
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text == null ? '' : String(text);
+      return div.innerHTML;
     }
 
-    /* Category buttons */
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    /* 187420 → "187<span>K</span>", matching the original header style */
+    function compactNumber(n) {
+      if (n < 1000) return String(n);
+      const k = n / 1000;
+      return (k < 10 ? k.toFixed(1).replace(/\.0$/, '') : Math.round(k)) + '<span>K</span>';
+    }
+
+    function plural(n, word) {
+      return n.toLocaleString() + ' ' + word + (n === 1 ? '' : 's');
+    }
+
+    /* Rough time to complete: ~30s a question plus a minute for the demographics step */
+    function minutesFor(poll) {
+      return Math.max(1, Math.round(poll.questionCount * 0.5 + 1));
+    }
+
+    /* ── Sentiment bar ──
+       Groups the first question's options into positive / neutral / negative by
+       position: the first half lean positive, the last half negative, and the
+       middle option of an odd-sized list is neutral. Each group is labelled with
+       its option nearest the middle, so "Strongly approve" + "Approve" reads
+       "Approve 52%", just like the original static cards. */
+    function sentimentBuckets(options) {
+      const n = options.length;
+      const half = Math.floor(n / 2);
+      const groups = [
+        { tone: 'approve',    options: options.slice(0, half) },
+        { tone: 'neutral',    options: n % 2 ? [options[half]] : [] },
+        { tone: 'disapprove', options: options.slice(n - half) }
+      ];
+      return groups.filter(function (g) { return g.options.length; }).map(function (g) {
+        const labelOption = g.tone === 'disapprove' ? g.options[0] : g.options[g.options.length - 1];
+        const percent = g.options.reduce(function (sum, o) { return sum + o.percent; }, 0);
+        return { tone: g.tone, label: labelOption.text, percent: Math.round(percent) };
+      });
+    }
+
+    function sentimentHTML(poll) {
+      if (!poll.responseCount || !poll.preview.length) {
+        return '<p class="poll-card-empty-preview">No responses yet' +
+               (poll.status === 'active' ? ' — be the first to share your view.' : '.') + '</p>';
+      }
+      const buckets = sentimentBuckets(poll.preview);
+      const summary = buckets.map(function (b) { return b.percent + '% ' + b.label.toLowerCase(); }).join(', ');
+      return '<div class="sentiment-preview">' +
+        '<div class="sentiment-labels">' +
+          buckets.map(function (b) {
+            return '<span class="sent-' + b.tone + '-lbl">' + escapeHtml(b.label) + ' ' + b.percent + '%</span>';
+          }).join('') +
+        '</div>' +
+        '<div class="sentiment-bar" role="img" aria-label="' + escapeHtml(summary) + '">' +
+          buckets.map(function (b) {
+            return '<div class="sent-' + b.tone + '-fill" style="width: ' + b.percent + '%;"></div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+    }
+
+    function cardHTML(poll, featured) {
+      const live = poll.status === 'active';
+      const category = CATEGORY_NAMES[poll.category] ? poll.category : 'governance';
+      const titleTag = featured ? 'h2' : 'h3';
+
+      const badge = live
+        ? '<span class="poll-live-badge"><span class="live-dot" aria-hidden="true"></span> Live' +
+            (featured && poll.closesAt ? ' &middot; Closes ' + formatDate(poll.closesAt) : '') + '</span>'
+        : '<span class="poll-live-badge is-closed"><span class="live-dot" aria-hidden="true"></span> Closed</span>';
+
+      const footText = plural(poll.responseCount, 'response') + ' &middot; ' +
+        (live ? '~' + minutesFor(poll) + ' min'
+              : (poll.closesAt ? 'Closed ' + formatDate(poll.closesAt) : 'Closed'));
+
+      const action = live
+        ? '<a class="poll-take-btn" href="poll.html?id=' + poll.id + '">' +
+            (featured ? 'Take this poll' : 'Take poll') + ' <i class="ti ti-arrow-right" aria-hidden="true"></i></a>'
+        : '<a class="poll-take-btn" href="results.html?id=' + poll.id + '">' +
+            'View results <i class="ti ti-chart-bar" aria-hidden="true"></i></a>';
+
+      return '<article class="poll-card-item' + (live ? '' : ' is-closed') + (featured ? ' poll-card-featured' : '') + '">' +
+        '<div class="poll-card-head">' +
+          '<div class="poll-card-meta-row">' +
+            '<span class="poll-cat-label cat-' + category + '">' + CATEGORY_NAMES[category] +
+              (featured ? ' &middot; Featured' : '') + '</span>' +
+            badge +
+          '</div>' +
+          '<' + titleTag + ' class="poll-card-title">' + escapeHtml(poll.title) + '</' + titleTag + '>' +
+          '<p class="poll-card-desc">' + escapeHtml(poll.description) + '</p>' +
+          sentimentHTML(poll) +
+        '</div>' +
+        '<div class="poll-card-foot">' +
+          '<span class="poll-response-count">' + footText + '</span>' +
+          action +
+        '</div>' +
+      '</article>';
+    }
+
+    /* ── Filter + sort ── */
+    function matchingPolls() {
+      const polls = allPolls.filter(function (poll) {
+        const statusMatch = activeStatus === 'all' ||
+          (activeStatus === 'live' ? poll.status === 'active' : poll.status === 'closed');
+        const categoryMatch = activeCategory === 'all' || poll.category === activeCategory;
+        const searchMatch = !searchTerm ||
+          (poll.title + ' ' + poll.description).toLowerCase().indexOf(searchTerm) !== -1;
+        return statusMatch && categoryMatch && searchMatch;
+      });
+
+      const sorters = {
+        responses: function (a, b) { return b.responseCount - a.responseCount; },
+        newest:    function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); },
+        /* Live polls closing soonest first; closed polls (and ones with no end date) last */
+        closing: function (a, b) {
+          function key(p) {
+            return p.status === 'active' && p.closesAt ? new Date(p.closesAt).getTime() : Infinity;
+          }
+          return key(a) - key(b) || b.responseCount - a.responseCount;
+        }
+      };
+      return polls.sort(sorters[activeSort]);
+    }
+
+    function renderPagination(totalPages) {
+      pagination.hidden = totalPages <= 1;
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+      }
+      let html = '<button class="page-btn" type="button" aria-label="Previous page" data-page="' + (currentPage - 1) + '"' +
+        (currentPage === 1 ? ' disabled' : '') + '><i class="ti ti-chevron-left" aria-hidden="true"></i></button>';
+      for (let i = 1; i <= totalPages; i++) {
+        html += '<button class="page-btn' + (i === currentPage ? ' active' : '') + '" type="button" data-page="' + i + '"' +
+          (i === currentPage ? ' aria-current="page"' : '') + '>' + i + '</button>';
+      }
+      html += '<button class="page-btn" type="button" aria-label="Next page" data-page="' + (currentPage + 1) + '"' +
+        (currentPage === totalPages ? ' disabled' : '') + '><i class="ti ti-chevron-right" aria-hidden="true"></i></button>';
+      pagination.innerHTML = html;
+    }
+
+    function render() {
+      const polls = matchingPolls();
+      const totalPages = Math.max(1, Math.ceil(polls.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages);
+      const first = (currentPage - 1) * PAGE_SIZE;
+      const pagePolls = polls.slice(first, first + PAGE_SIZE);
+
+      /* The top poll gets the full-width featured card on the unfiltered first page */
+      const showFeatured = currentPage === 1 && activeCategory === 'all' && !searchTerm && activeStatus !== 'closed';
+
+      grid.innerHTML = pagePolls.length
+        ? pagePolls.map(function (poll, i) { return cardHTML(poll, showFeatured && i === 0); }).join('')
+        : '<p class="polls-state"><i class="ti ti-mood-empty" aria-hidden="true"></i>' +
+          (allPolls.length ? 'No polls match these filters.' : 'There are no polls yet — check back soon.') + '</p>';
+
+      const catLabel = activeCategory === 'all' ? 'all categories' : CATEGORY_NAMES[activeCategory].toLowerCase();
+      resultsCount.textContent = polls.length > PAGE_SIZE
+        ? 'Showing ' + (first + 1) + '–' + (first + pagePolls.length) + ' of ' + polls.length + ' polls — ' + catLabel
+        : 'Showing ' + plural(polls.length, 'poll') + ' — ' + catLabel;
+
+      renderPagination(totalPages);
+    }
+
+    /* Header stats and category badges describe everything, not the current filter */
+    function renderStats() {
+      const active = allPolls.filter(function (p) { return p.status === 'active'; }).length;
+      const responses = allPolls.reduce(function (sum, p) { return sum + p.responseCount; }, 0);
+      const categories = {};
+      allPolls.forEach(function (p) { categories[p.category] = (categories[p.category] || 0) + 1; });
+
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statClosed').textContent = allPolls.length - active;
+      document.getElementById('statResponses').innerHTML = compactNumber(responses);
+      document.getElementById('statCategories').textContent = Object.keys(categories).length;
+
+      document.querySelectorAll('.filter-btn').forEach(function (btn) {
+        const key = btn.dataset.category;
+        btn.querySelector('.filter-badge').textContent = key === 'all' ? allPolls.length : (categories[key] || 0);
+      });
+    }
+
+    function loadPolls() {
+      grid.setAttribute('aria-busy', 'true');
+      PulseAPI.listPolls().then(function (polls) {
+        allPolls = polls;
+        renderStats();
+        render();
+      }).catch(function (err) {
+        resultsCount.textContent = 'Polls could not be loaded';
+        grid.innerHTML = '<div class="polls-state polls-state-error" role="alert">' +
+          '<i class="ti ti-wifi-off" aria-hidden="true"></i>' +
+          '<span>' + escapeHtml(err.message) + '</span>' +
+          '<button type="button" class="polls-retry">Try again</button></div>';
+        grid.querySelector('.polls-retry').addEventListener('click', loadPolls);
+      }).finally(function () {
+        grid.setAttribute('aria-busy', 'false');
+      });
+    }
+
+    /* ── Controls ── */
+    function setStatus(status) {
+      activeStatus = status;
+      document.querySelectorAll('.status-opt').forEach(function (btn) {
+        btn.classList.toggle('active', btn.dataset.status === status);
+      });
+      document.getElementById('viewSelect').value = status;
+      currentPage = 1;
+      render();
+    }
+
     document.querySelectorAll('.filter-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         document.querySelectorAll('.filter-btn').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         activeCategory = btn.dataset.category;
-        applyFilters();
+        currentPage = 1;
+        render();
       });
     });
 
-    /* Status buttons (sidebar) */
     document.querySelectorAll('.status-opt').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        document.querySelectorAll('.status-opt').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        activeStatus = btn.dataset.status;
-        /* Sync the toolbar select */
-        document.getElementById('viewSelect').value = btn.dataset.status;
-        applyFilters();
-      });
+      btn.addEventListener('click', function () { setStatus(btn.dataset.status); });
     });
 
-    /* Toolbar select (syncs with sidebar status buttons) */
     document.getElementById('viewSelect').addEventListener('change', function () {
-      activeStatus = this.value;
-      document.querySelectorAll('.status-opt').forEach(function (btn) {
-        btn.classList.toggle('active', btn.dataset.status === activeStatus);
-      });
-      applyFilters();
+      setStatus(this.value);
     });
 
-    /* Sort buttons */
     document.querySelectorAll('.sort-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         document.querySelectorAll('.sort-btn').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
-        /* Sorting is a future-backend concern for MVP; UI state only */
+        activeSort = btn.dataset.sort;
+        currentPage = 1;
+        render();
       });
     });
 
-    /* Search */
     document.getElementById('pollSearch').addEventListener('input', function () {
       searchTerm = this.value.toLowerCase().trim();
-      applyFilters();
+      currentPage = 1;
+      render();
     });
 
-    /* Pagination buttons — UI state only for MVP */
-    document.querySelectorAll('.page-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (btn.querySelector('i')) return; /* skip prev/next arrows */
-        document.querySelectorAll('.page-btn').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-      });
+    pagination.addEventListener('click', function (e) {
+      const btn = e.target.closest('.page-btn');
+      if (!btn || btn.disabled) return;
+      currentPage = Number(btn.dataset.page);
+      render();
+      document.querySelector('.polls-main').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+
+    loadPolls();
   </script>
 
 </body>

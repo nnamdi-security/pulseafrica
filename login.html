@@ -17,24 +17,14 @@
   <!-- ============================================================
        TICKER BAR
        ============================================================ -->
-  <div class="ticker" aria-label="Live platform statistics">
-    <div class="ticker-inner">
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Presidential Approval</span><span class="tick-val">52.4%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Active Polls</span><span class="tick-val">14</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Total Responses</span><span class="tick-val">187,342</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Economy Rating</span><span class="tick-val">39.1%</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Security Satisfaction</span><span class="tick-val">44.7%</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Top Issue</span><span class="tick-val">Cost of Living</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Registered Voices</span><span class="tick-val">31,890</span></div>
-      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Education Approval</span><span class="tick-val">47.2%</span></div>
+  <div class="ticker" aria-label="About PulseAfrica">
+    <!-- Neutral placeholder; ticker.js swaps in live figures from the API -->
+    <div class="ticker-inner" data-ticker>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">PulseAfrica</span><span class="tick-val">Independent civic opinion research</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Coverage</span><span class="tick-val">40 states &middot; 450 tribes</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Responses</span><span class="tick-val">Anonymous by design</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Methodology</span><span class="tick-val">Open and published</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Affiliation</span><span class="tick-val">No party, no government</span></div>
     </div>
   </div>
 
@@ -53,7 +43,7 @@
       <li><a href="results.html">Results</a></li>
       <li><a href="methodology.html">Methodology</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="login.html" class="active">Sign in</a></li>
+      <li data-nav-auth><a href="login.html" class="active">Sign in</a></li>
     </ul>
     <button class="nav-cta" type="button">Share Your Voice</button>
     <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
@@ -434,6 +424,9 @@
   <!-- ============================================================
        JAVASCRIPT
        ============================================================ -->
+  <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="ticker.js"></script>
   <script>
     /* ---------- Mobile nav ---------- */
     const navToggle = document.getElementById('navToggle');
@@ -535,7 +528,12 @@
       field.classList.toggle('is-valid', !message && input.value !== '' && input.type !== 'checkbox');
       input.setAttribute('aria-invalid', message ? 'true' : 'false');
       if (errorEl) {
-        errorEl.innerHTML = message ? '<i class="ti ti-alert-circle" aria-hidden="true"></i> ' + message : '';
+        const html = message ? '<i class="ti ti-alert-circle" aria-hidden="true"></i><span>' + message + '</span>' : '';
+        // Rewriting identical markup would replace a link the user is mid-click on
+        if (errorEl.dataset.html !== html) {
+          errorEl.innerHTML = html;
+          errorEl.dataset.html = html;
+        }
       }
       return !message;
     }
@@ -547,6 +545,11 @@
         number: /\d/.test(pw)
       };
     }
+
+    // Emails the server reported as already registered, so the
+    // "already exists" error survives re-validation on blur
+    const takenEmails = new Set();
+    const EMAIL_TAKEN_MSG = 'An account with this email already exists. <a href="#login" data-view-link="login">Sign in instead</a>.';
 
     // One rule per field id → returns an error message or ''
     const rules = {
@@ -568,6 +571,7 @@
       'reg-email': function (v) {
         if (!v.trim()) return 'Enter your email address.';
         if (!EMAIL_RE.test(v.trim())) return 'Enter a valid email address, e.g. name@example.com.';
+        if (takenEmails.has(v.trim().toLowerCase())) return EMAIL_TAKEN_MSG;
         return '';
       },
       'reg-state': function (v) {
@@ -614,9 +618,12 @@
       return { ok: count === 0, count: count, firstInvalid: firstInvalid };
     }
 
-    function showAlert(id, message) {
+    // fromServer marks banners that explain a failed request (wrong password,
+    // server unreachable…) so refreshAlert() doesn't hide them as fields change.
+    function showAlert(id, message, fromServer) {
       const alert = document.getElementById(id);
       if (!alert) return;
+      alert.dataset.fromServer = fromServer ? 'true' : 'false';
       if (message) {
         alert.querySelector('.auth-alert-text').textContent = message;
         alert.hidden = false;
@@ -634,7 +641,7 @@
     // Keep an open error banner in step with the fields as they get fixed
     function refreshAlert(form) {
       const alert = form.parentElement.querySelector('.auth-alert');
-      if (!alert || alert.hidden) return;
+      if (!alert || alert.hidden || alert.dataset.fromServer === 'true') return;
       const count = form.querySelectorAll('.auth-field.has-error').length;
       showAlert(alert.id, count ? errorSummary(count) : '');
     }
@@ -647,7 +654,8 @@
         refreshAlert(input.form);
       });
       input.addEventListener('input', function () {
-        if (input.closest('.auth-field').classList.contains('has-error')) {
+        const field = input.closest('.auth-field');
+        if (field && field.classList.contains('has-error')) {
           validateInput(input);
           refreshAlert(input.form);
         }
@@ -699,10 +707,9 @@
     });
 
     /* ---------- Submission ----------
-       Phase 1 has no backend: a short delay stands in for the API call.
-       In Phase 3, replace simulateRequest() with fetch() calls to
-       POST /api/auth/login, POST /api/auth/register and
-       POST /api/auth/forgot-password, and pass server errors to showAlert(). */
+       Sign in and Create account call the FastAPI backend through api.js.
+       Password reset has no backend endpoint yet, so it still uses a
+       short simulated delay. */
     function simulateRequest() {
       return new Promise(function (resolve) { setTimeout(resolve, 900); });
     }
@@ -712,6 +719,40 @@
       btn.disabled = loading;
       btn.classList.toggle('loading', loading);
       btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+    }
+
+    function resetForm(form) {
+      form.reset();
+      form.querySelectorAll('.auth-field').forEach(function (f) { f.classList.remove('is-valid', 'has-error'); });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function firstNameOf(fullName) {
+      return fullName.trim().split(/\s+/)[0];
+    }
+
+    // "There are N live polls…" from the API; falls back to generic copy if that call fails
+    function livePollsText() {
+      return PulseAPI.listPolls({ status: 'active' }).then(function (polls) {
+        if (polls.length === 0) return 'There are no live polls right now — check back soon.';
+        return polls.length === 1
+          ? 'There is 1 live poll waiting for your response.'
+          : 'There are ' + polls.length + ' live polls waiting for your response.';
+      }).catch(function () {
+        return 'Live polls are waiting for your response.';
+      });
+    }
+
+    // login.html?next=poll.html%3Fid%3D3 sends the user back there after signing in.
+    // Only a page in this site is accepted (no other domains, no "//" tricks).
+    function nextPage() {
+      const next = new URLSearchParams(location.search).get('next');
+      return next && /^[a-z0-9_-]+\.html(\?[^#]*)?$/i.test(next) ? next : null;
     }
 
     function showSuccess(opts) {
@@ -735,7 +776,25 @@
       document.getElementById('success-title').focus();
     }
 
-    function handleSubmit(form, alertId, onSuccess) {
+    // Shows a server error: per-field messages next to their inputs, plus the banner.
+    // fieldIds maps API field names (camelCase) to input ids in this form.
+    function showServerError(form, alertId, err, fieldIds) {
+      let firstInvalid = null;
+      let count = 0;
+      Object.keys(err.fields || {}).forEach(function (name) {
+        const input = fieldIds && fieldIds[name] && document.getElementById(fieldIds[name]);
+        if (!input) return;
+        setFieldError(input, escapeHtml(err.fields[name]));
+        count++;
+        if (!firstInvalid) firstInvalid = input;
+      });
+      showAlert(alertId, count ? errorSummary(count) : err.message, !count);
+      (firstInvalid || form.querySelector('input')).focus();
+    }
+
+    // Runs client-side validation, then send(form) — a promise for the request.
+    // A rejected ApiError is passed to onError; anything else is a bug and rethrown.
+    function handleSubmit(form, alertId, send, onError) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         const result = validateForm(form);
@@ -746,48 +805,121 @@
         }
         showAlert(alertId, '');
         setLoading(form, true);
-        simulateRequest().then(function () {
+        send(form).catch(function (err) {
+          if (!(err instanceof PulseAPI.ApiError)) throw err;
+          onError(err);
+        }).finally(function () {
           setLoading(form, false);
-          onSuccess(form);
         });
       });
     }
 
-    handleSubmit(document.getElementById('login-form'), 'login-alert', function () {
-      showSuccess({
-        title: 'You’re signed in',
-        text: 'Welcome back. There are 14 live polls waiting for your response.',
-        primary: { href: 'polls.html', label: 'Browse live polls' },
-        showBack: false
+    const loginForm = document.getElementById('login-form');
+    handleSubmit(loginForm, 'login-alert', function (form) {
+      const email = form.querySelector('#login-email').value.trim();
+      const password = form.querySelector('#login-password').value;
+      const remember = form.querySelector('#login-remember').checked;
+      return PulseAPI.login(email, password, remember)
+        .then(function () { return Promise.all([PulseAPI.me(), livePollsText()]); })
+        .then(function (results) {
+          const user = results[0];
+          PulseNav.showUser(user);
+          if (nextPage()) {
+            location.href = nextPage();
+            return;
+          }
+          showSuccess({
+            title: 'You’re signed in',
+            text: 'Welcome back, ' + firstNameOf(user.fullName) + '. ' + results[1],
+            meta: 'Signed in as ' + user.email,
+            primary: { href: 'polls.html', label: 'Browse live polls' },
+            showBack: false
+          });
+          resetForm(form);
+        });
+    }, function (err) {
+      if (err.status === 401) {
+        // Don't say which of the two was wrong — the API doesn't reveal it either.
+        showAlert('login-alert', 'That email and password don’t match an account. Check them and try again.', true);
+        const pw = document.getElementById('login-password');
+        pw.value = '';
+        pw.focus();
+        return;
+      }
+      showServerError(loginForm, 'login-alert', err, { email: 'login-email', password: 'login-password' });
+    });
+
+    const registerForm = document.getElementById('register-form');
+    handleSubmit(registerForm, 'register-alert', function (form) {
+      const payload = {
+        fullName: form.querySelector('#reg-name').value.trim(),
+        email: form.querySelector('#reg-email').value.trim(),
+        state: form.querySelector('#reg-state').value,
+        ageRange: form.querySelector('#reg-age').value,
+        password: form.querySelector('#reg-password').value,
+        confirmPassword: form.querySelector('#reg-confirm').value,
+        terms: form.querySelector('#reg-terms').checked
+      };
+      return PulseAPI.register(payload)
+        // Sign the new user straight in (for this browser session only)
+        .then(function (user) {
+          return PulseAPI.login(payload.email, payload.password, false).then(function () { return user; });
+        })
+        .then(function (user) {
+          if (nextPage()) {
+            location.href = nextPage();
+            return;
+          }
+          PulseNav.refresh();
+          showSuccess({
+            title: 'Account created',
+            text: 'Thank you, ' + firstNameOf(user.fullName) + '. You’re signed in and can respond to every live poll.',
+            meta: 'Signed in as ' + user.email,
+            primary: { href: 'polls.html', label: 'Browse live polls' },
+            showBack: false
+          });
+          resetForm(form);
+          document.getElementById('reg-password').dispatchEvent(new Event('input'));
+        });
+    }, function (err) {
+      if (err.status === 409) {
+        const email = document.getElementById('reg-email');
+        takenEmails.add(email.value.trim().toLowerCase());
+        validateInput(email);
+        showAlert('register-alert', errorSummary(1));
+        email.focus();
+        return;
+      }
+      showServerError(registerForm, 'register-alert', err, {
+        fullName: 'reg-name', email: 'reg-email', state: 'reg-state', ageRange: 'reg-age',
+        password: 'reg-password', confirmPassword: 'reg-confirm', terms: 'reg-terms'
       });
     });
 
-    handleSubmit(document.getElementById('register-form'), 'register-alert', function (form) {
-      const email = form.querySelector('#reg-email').value.trim();
-      const firstName = form.querySelector('#reg-name').value.trim().split(/\s+/)[0];
-      showSuccess({
-        title: 'Account created',
-        text: 'Thank you, ' + firstName + '. Check your inbox and click the verification link to activate your account — verified accounts can respond to every live poll.',
-        meta: 'Verification email sent to ' + email,
-        primary: { href: 'polls.html', label: 'Browse live polls' },
-        showBack: true
-      });
-      form.reset();
-      form.querySelectorAll('.auth-field').forEach(function (f) { f.classList.remove('is-valid', 'has-error'); });
-      document.getElementById('reg-password').dispatchEvent(new Event('input'));
+    // The "Sign in instead" link inside the duplicate-email error is created after page load
+    document.getElementById('reg-email-error').addEventListener('click', function (e) {
+      const link = e.target.closest('[data-view-link]');
+      if (!link) return;
+      e.preventDefault();
+      history.replaceState(null, '', '#login');
+      showView('login');
+      const loginEmail = document.getElementById('login-email');
+      loginEmail.value = document.getElementById('reg-email').value.trim();
+      document.getElementById('login-password').focus();
     });
 
     handleSubmit(document.getElementById('reset-form'), null, function (form) {
-      const email = form.querySelector('#reset-email').value.trim();
-      showSuccess({
-        title: 'Check your inbox',
-        text: 'If an account exists for that address, a password reset link is on its way. The link expires in 30 minutes.',
-        meta: 'Reset link requested for ' + email,
-        showBack: true
+      return simulateRequest().then(function () {
+        const email = form.querySelector('#reset-email').value.trim();
+        showSuccess({
+          title: 'Check your inbox',
+          text: 'If an account exists for that address, a password reset link is on its way. The link expires in 30 minutes.',
+          meta: 'Reset link requested for ' + email,
+          showBack: true
+        });
+        resetForm(form);
       });
-      form.reset();
-      form.querySelectorAll('.auth-field').forEach(function (f) { f.classList.remove('is-valid', 'has-error'); });
-    });
+    }, function () {});
   </script>
 
 </body>

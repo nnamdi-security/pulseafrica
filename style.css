@@ -69,6 +69,17 @@ img {
   to   { transform: translateX(-50%); }
 }
 
+/* No scrolling for people who ask for less motion: the strip can be scrolled by hand */
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    overflow-x: auto;
+  }
+
+  .ticker-inner {
+    animation: none;
+  }
+}
+
 .tick-item {
   display: inline-flex;
   align-items: center;
@@ -172,6 +183,72 @@ img {
 
 .nav-links a.active {
   color: #C8973A;
+}
+
+/* Signed-in state (nav-auth.js): first name + Sign out */
+.nav-links li.nav-auth-in {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #F5F0E8;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-user i {
+  font-size: 16px;
+  color: #C8973A;
+}
+
+a.nav-user:hover,
+a.nav-user:focus-visible,
+a.nav-user.active {
+  color: #C8973A;
+}
+
+/* Admins also get an "Admin" link (nav-auth.js) */
+.nav-admin {
+  color: rgba(245, 240, 232, 0.65);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.nav-admin:hover,
+.nav-admin:focus-visible {
+  color: #F5F0E8;
+}
+
+.nav-admin.active {
+  color: #C8973A;
+}
+
+.nav-signout {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(245, 240, 232, 0.65);
+  cursor: pointer;
+}
+
+.nav-signout:hover,
+.nav-signout:focus-visible {
+  color: #F5F0E8;
 }
 
 /* Nav CTA */
@@ -421,8 +498,11 @@ img {
   font-family: 'Space Mono', monospace;
   font-size: 10px;
   color: rgba(245, 240, 232, 0.5);
-  width: 76px;
+  width: 116px;
   flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mini-bar-track {
@@ -632,6 +712,25 @@ img {
   background: #C8973A;
 }
 
+/* Loading / empty / error message in the featured polls grid (index.html) */
+.home-state {
+  grid-column: 1 / -1;
+  padding: 40px 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #6B7280;
+  background: #fff;
+  border: 0.5px dashed rgba(10, 22, 40, 0.18);
+  border-radius: 8px;
+}
+
+.home-state a,
+.ring-meta-sub a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .poll-cta {
   font-size: 13px;
   color: #0A1628;
@@ -820,6 +919,12 @@ img {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Category rows on the home page link to their poll's results */
+a.sector-row:hover .sector-name,
+a.sector-row:focus-visible .sector-name {
+  color: #F5F0E8;
 }
 
 .sector-name {
@@ -1688,6 +1793,65 @@ footer {
   padding: 0 4px;
 }
 
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.polls-pagination[hidden] {
+  display: none;
+}
+
+/* Loading / empty / error message inside the cards grid (polls.html script) */
+.polls-state {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 56px 24px;
+  background: #fff;
+  border: 0.5px dashed rgba(10, 22, 40, 0.18);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #6B7280;
+  text-align: center;
+}
+
+.polls-state i {
+  font-size: 18px;
+  color: #C8973A;
+}
+
+.polls-state-error i {
+  color: #A32D2D;
+}
+
+.polls-retry {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #0A1628;
+  background: none;
+  border: 1px solid rgba(10, 22, 40, 0.2);
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.polls-retry:hover {
+  border-color: #C8973A;
+  color: #C8973A;
+}
+
+/* Card without responses yet, in place of the sentiment bar */
+.poll-card-empty-preview {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+}
+
 /* ============================================================
    POLLS PAGE — RESPONSIVE
    ============================================================ */
@@ -1858,6 +2022,12 @@ footer {
   border: 1px solid rgba(200, 151, 58, 0.3);
 }
 
+.pph-badge-closed {
+  background: rgba(107, 114, 128, 0.2);
+  color: #c4c8cf;
+  border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
 /* Poll body layout */
 .poll-body {
   display: grid;
@@ -1963,6 +2133,25 @@ footer {
   font-size: 12px;
   color: #6B7280;
   line-height: 1.7;
+}
+
+.poll-sb-method {
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+.poll-sb-method a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Option labels in "Results so far" can be longer than the old sector names */
+.poll-preview-bars .poll-pb-label {
+  width: 104px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Poll main area ── */
@@ -2462,6 +2651,78 @@ footer {
   flex-wrap: wrap;
 }
 
+/* Headings that receive focus from script (tabindex="-1") so screen readers
+   announce the new step; they are not interactive, so no focus ring */
+.poll-screen [tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Status card variants (poll.html: sign-in required, closed, not found…) */
+.ty-icon.is-info {
+  background: rgba(200, 151, 58, 0.1);
+  border-color: rgba(200, 151, 58, 0.3);
+  color: #C8973A;
+}
+
+.ty-icon.is-warn {
+  background: rgba(163, 45, 45, 0.08);
+  border-color: rgba(163, 45, 45, 0.25);
+  color: #A32D2D;
+}
+
+.ty-icon .ti-loader-2 {
+  animation: ty-spin 1s linear infinite;
+}
+
+@keyframes ty-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ty-icon .ti-loader-2 {
+    animation: none;
+  }
+}
+
+/* Demographics validation (poll.html) */
+.poll-submit-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 11px 14px;
+  border: 1px solid rgba(163, 45, 45, 0.25);
+  border-radius: 6px;
+  background: rgba(163, 45, 45, 0.05);
+  font-size: 12px;
+  color: #A32D2D;
+}
+
+.poll-submit-error[hidden] {
+  display: none;
+}
+
+.poll-submit-error i {
+  font-size: 15px;
+  margin-top: 1px;
+}
+
+.demo-field.has-error select {
+  border-color: #A32D2D;
+}
+
+.demo-optional {
+  text-transform: none;
+  letter-spacing: 0;
+  color: #9CA3AF;
+  font-weight: 400;
+}
+
+.btn-poll-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .btn-ty-primary {
   background: #0A1628;
   color: #F5F0E8;
@@ -2685,6 +2946,61 @@ footer {
   background: rgba(200, 151, 58, 0.12);
   color: #C8973A;
   border: 1px solid rgba(200, 151, 58, 0.3);
+}
+
+.results-badge-closed {
+  background: rgba(107, 114, 128, 0.2);
+  color: #c4c8cf;
+  border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+/* Poll + question pickers (results.html script) */
+.results-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: -8px 0 28px;
+}
+
+.results-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 0 1 360px;
+}
+
+.results-picker[hidden] {
+  display: none;
+}
+
+.results-picker label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 232, 0.55);
+}
+
+.results-picker select {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #F5F0E8;
+  background: rgba(245, 240, 232, 0.06);
+  border: 1px solid rgba(245, 240, 232, 0.18);
+  border-radius: 5px;
+  padding: 9px 12px;
+  text-overflow: ellipsis;
+}
+
+.results-picker select:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: 1px;
+}
+
+.results-picker select option {
+  color: #0A1628;
 }
 
 /* Headline stat strip */
@@ -3103,6 +3419,125 @@ footer {
   font-size: 12px;
   color: #6B7280;
   line-height: 1.7;
+}
+
+.results-meth-note a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.results-panel[hidden],
+.results-tabs[hidden],
+.results-notice[hidden],
+.results-stat[hidden],
+.results-stat-divider[hidden] {
+  display: none;
+}
+
+/* Let grid columns shrink below their content so long labels truncate */
+.results-row-2col > * {
+  min-width: 0;
+}
+
+/* Long labels (question text) sit above their bar */
+.results-hbar-row.is-stacked {
+  flex-wrap: wrap;
+  row-gap: 5px;
+}
+
+.results-hbar-row.is-stacked .results-hbar-label {
+  width: 100%;
+}
+
+.results-hbar-row.is-current .results-hbar-label {
+  color: #0A1628;
+  font-weight: 600;
+}
+
+.results-hbar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Groups with too few responses to read much into */
+.results-hbar-row.is-low-sample,
+.state-heat-cell.is-low-sample {
+  opacity: 0.45;
+}
+
+.results-empty {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* Loading / error / not found / no responses */
+.results-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.results-notice > i {
+  font-size: 22px;
+  color: #C8973A;
+  margin-top: 1px;
+}
+
+.results-notice.is-warn > i {
+  color: #A32D2D;
+}
+
+.results-notice .ti-loader-2 {
+  animation: ty-spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .results-notice .ti-loader-2 {
+    animation: none;
+  }
+}
+
+.results-notice-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 4px;
+}
+
+.results-notice-text {
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.results-notice-text a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.results-notice-text .polls-retry {
+  margin-left: 6px;
+}
+
+/* Chart.js failed to load (it comes from a CDN) */
+.results-chart-wrap[data-chart-missing]::after {
+  content: attr(data-chart-missing);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6B7280;
+  background: #f9f7f4;
+  border-radius: 6px;
 }
 
 /* ============================================================
@@ -4655,6 +5090,13 @@ footer {
   display: flex;
 }
 
+.auth-error a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .auth-field.has-error .auth-hint {
   display: none;
 }
@@ -5060,5 +5502,877 @@ footer {
   .auth-aside-stat-label {
     font-size: 8.5px;
     letter-spacing: 0.08em;
+  }
+}
+
+/* ============================================================
+   USER DASHBOARD — dashboard.html
+   Reuses .page-head, .results-tabs, .results-card and the
+   .auth-* form styles from login.html.
+   ============================================================ */
+.dash-page [hidden],
+.dash-page .results-panel[hidden] {
+  display: none;
+}
+
+.dash-page .results-notice:focus {
+  outline: none;
+}
+
+/* Profile details */
+.dash-profile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  margin: 14px 0 20px;
+}
+
+.dash-profile dt {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B7280;
+  margin-bottom: 4px;
+}
+
+.dash-profile dd {
+  font-size: 14px;
+  color: #0A1628;
+  overflow-wrap: anywhere;
+}
+
+.dash-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2D6A4F;
+}
+
+.dash-link:hover,
+.dash-link:focus-visible {
+  color: #C8973A;
+}
+
+.dash-link[hidden] {
+  display: none;
+}
+
+/* Lists of polls (waiting, recent, history) */
+.dash-list {
+  list-style: none;
+  margin: 8px 0 18px;
+  padding: 0;
+}
+
+.dash-item {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.07);
+}
+
+.dash-item:first-child {
+  padding-top: 4px;
+}
+
+.dash-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.dash-item-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0A1628;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.dash-item-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dash-item-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+}
+
+.dash-empty {
+  padding: 18px 0;
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.dash-empty a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* History header + status filter */
+.dash-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dash-filter {
+  display: inline-flex;
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dash-filter-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #4a4a4a;
+  background: #fff;
+  border: none;
+  border-left: 1px solid rgba(10, 22, 40, 0.12);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.dash-filter-btn:first-child {
+  border-left: none;
+}
+
+.dash-filter-btn.active {
+  background: #0A1628;
+  color: #F5F0E8;
+}
+
+.dash-filter-btn:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: -2px;
+}
+
+/* Settings forms */
+.dash-form .auth-submit {
+  width: auto;
+  align-self: flex-start;
+  padding: 11px 22px;
+  cursor: pointer;
+}
+
+.dash-form input[readonly] {
+  color: #6B7280;
+  background: #f4f2ee;
+  cursor: default;
+}
+
+.auth-alert.is-success {
+  background: rgba(45, 106, 79, 0.06);
+  border-color: rgba(45, 106, 79, 0.25);
+  border-left-color: #2D6A4F;
+}
+
+.auth-alert.is-success i,
+.auth-alert.is-success .auth-alert-text {
+  color: #1a4d33;
+}
+
+/* Delete account */
+.dash-danger {
+  border-color: rgba(163, 45, 45, 0.3);
+}
+
+.dash-danger .results-card-label {
+  color: #A32D2D;
+}
+
+.dash-delete-form {
+  max-width: 440px;
+}
+
+.dash-delete-btn {
+  background: #A32D2D;
+}
+
+.dash-delete-btn:hover {
+  background: #842323;
+}
+
+@media (max-width: 600px) {
+  .dash-profile {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   ADMIN DASHBOARD — admin.html
+   Builds on the user dashboard styles (.dash-*), .results-*
+   cards and tabs, and the .auth-* form styles.
+   ============================================================ */
+
+/* Buttons */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0A1628;
+  background: #fff;
+  border: 1px solid rgba(10, 22, 40, 0.18);
+  border-radius: 5px;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.admin-btn:hover:not(:disabled) {
+  border-color: #C8973A;
+  color: #7a4c08;
+}
+
+.admin-btn:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: 2px;
+}
+
+.admin-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-btn[hidden] {
+  display: none;
+}
+
+.admin-btn-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.admin-btn-icon {
+  padding: 5px 8px;
+}
+
+.admin-btn-primary {
+  background: #0A1628;
+  border-color: #0A1628;
+  color: #F5F0E8;
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: #1a2a42;
+  color: #F5F0E8;
+}
+
+.admin-btn-danger {
+  background: #A32D2D;
+  border-color: #A32D2D;
+  color: #fff;
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  background: #842323;
+  border-color: #842323;
+  color: #fff;
+}
+
+.admin-btn-danger-ghost {
+  color: #A32D2D;
+}
+
+.admin-btn-danger-ghost:hover:not(:disabled) {
+  border-color: #A32D2D;
+  color: #842323;
+}
+
+/* Toolbar: filters, search, "New poll" */
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-input {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #0A1628;
+  background: #fff;
+  border: 1px solid rgba(10, 22, 40, 0.18);
+  border-radius: 5px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #C8973A;
+  box-shadow: 0 0 0 3px rgba(200, 151, 58, 0.15);
+}
+
+.admin-input.is-invalid {
+  border-color: #A32D2D;
+}
+
+input[type="search"].admin-input {
+  width: 220px;
+}
+
+/* Tables */
+.admin-table-wrap {
+  /* position: relative so absolutely positioned children (the .sr-only
+     labels) are clipped by the scroll box instead of widening the page */
+  position: relative;
+  overflow-x: auto;
+  margin-top: 14px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B7280;
+  text-align: left;
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.1);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.06);
+  color: #374151;
+  vertical-align: middle;
+}
+
+.admin-table .num {
+  text-align: right;
+  font-family: 'Space Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table-compact td,
+.admin-table-compact th {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.admin-empty {
+  text-align: center;
+  color: #6B7280;
+  padding: 28px 0 !important;
+}
+
+.admin-muted {
+  color: #9CA3AF;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.admin-poll-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.admin-poll-title,
+.admin-poll-link {
+  font-weight: 500;
+  color: #0A1628;
+}
+
+.admin-poll-link:hover {
+  color: #7a4c08;
+}
+
+.admin-poll-link[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+/* Status and role badges (always a label, never colour alone) */
+.admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.admin-status .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.admin-status.is-active { color: #2D6A4F; }
+.admin-status.is-draft  { color: #7a4c08; }
+.admin-status.is-closed { color: #6B7280; }
+.admin-status.is-suspended { color: #A32D2D; }
+
+.admin-role {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(10, 22, 40, 0.06);
+  color: #374151;
+}
+
+.admin-role.is-admin {
+  background: rgba(200, 151, 58, 0.14);
+  color: #7a4c08;
+}
+
+.admin-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 200px;
+}
+
+.admin-user-name {
+  font-weight: 500;
+  color: #0A1628;
+}
+
+.admin-user-email {
+  font-size: 12px;
+  color: #6B7280;
+  overflow-wrap: anywhere;
+}
+
+.admin-you {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2D6A4F;
+  margin-left: 4px;
+}
+
+.admin-table tr.is-suspended td {
+  background: rgba(163, 45, 45, 0.03);
+}
+
+/* Share of all responses */
+.admin-share {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.admin-share-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(10, 22, 40, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.admin-share-fill {
+  height: 100%;
+  background: #C8973A;
+  border-radius: 0 3px 3px 0;
+}
+
+.admin-share span {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+  width: 32px;
+  text-align: right;
+}
+
+/* Platform totals */
+.admin-totals {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.admin-totals-group dd {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.06);
+}
+
+.admin-totals-group dd span {
+  color: #6B7280;
+}
+
+.admin-totals-group dd strong {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: #0A1628;
+}
+
+/* Responses-per-day column chart: one series, rounded data ends on the
+   baseline, a 2px gap between columns, tooltip on hover and focus */
+.admin-columns {
+  margin-top: 14px;
+}
+
+.admin-columns-plot {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 2px;
+  align-items: end;
+  height: 150px;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.25);
+  background-image: linear-gradient(rgba(10, 22, 40, 0.05) 1px, transparent 1px);
+  background-size: 100% 50%;
+}
+
+.admin-col {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: default;
+}
+
+.admin-col:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: 2px;
+}
+
+.admin-col-bar {
+  width: 100%;
+  min-height: 2px;
+  background: #C8973A;
+  border-radius: 4px 4px 0 0;
+  transition: background 0.15s;
+}
+
+.admin-col-bar.is-zero {
+  background: rgba(10, 22, 40, 0.12);
+}
+
+.admin-col:hover .admin-col-bar,
+.admin-col:focus-visible .admin-col-bar {
+  background: #a87a28;
+}
+
+.admin-col-label {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #6B7280;
+}
+
+.admin-col::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0A1628;
+  color: #F5F0E8;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  white-space: nowrap;
+  padding: 5px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  z-index: 2;
+}
+
+.admin-col:first-child::after { left: 0; transform: none; }
+.admin-col:last-child::after { left: auto; right: 0; transform: none; }
+
+.admin-col:hover::after,
+.admin-col:focus-visible::after {
+  opacity: 1;
+}
+
+.admin-columns-plot .admin-col {
+  height: 150px;
+}
+
+.admin-columns-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #9CA3AF;
+}
+
+.admin-details {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.admin-details summary {
+  cursor: pointer;
+  color: #2D6A4F;
+  font-weight: 500;
+}
+
+.admin-details[open] summary {
+  margin-bottom: 6px;
+}
+
+/* Poll editor */
+.admin-back {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-editor-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #0A1628;
+  margin: 10px 0 18px;
+}
+
+.admin-editor-title:focus {
+  outline: none;
+}
+
+.admin-editor {
+  max-width: 860px;
+}
+
+.admin-textarea {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #0A1628;
+  background: #f9f7f4;
+  border: 1px solid rgba(10, 22, 40, 0.14);
+  border-radius: 5px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.admin-textarea:focus {
+  outline: none;
+  border-color: #C8973A;
+  background: #fff;
+}
+
+.admin-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.admin-questions {
+  border: 1px solid rgba(10, 22, 40, 0.1);
+  border-radius: 8px;
+  padding: 16px 18px 18px;
+  margin: 0;
+  min-width: 0;
+}
+
+.admin-questions legend {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B7280;
+  padding: 0 6px;
+}
+
+.admin-questions.has-error {
+  border-color: rgba(163, 45, 45, 0.4);
+}
+
+.admin-questions.has-error .admin-questions-error {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.admin-questions:disabled .admin-question {
+  opacity: 0.65;
+}
+
+.admin-locked {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: #7a4c08;
+  background: rgba(200, 151, 58, 0.08);
+  border-radius: 5px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+}
+
+.admin-locked[hidden] {
+  display: none;
+}
+
+.admin-question-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-question {
+  background: #f9f7f4;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.admin-question-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.admin-question-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #C8973A;
+}
+
+.admin-question-text {
+  width: 100%;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.admin-option-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-option {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr auto;
+  gap: 6px;
+}
+
+.admin-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-editor-actions .auth-submit {
+  margin-top: 0;
+}
+
+/* Users pager */
+.admin-pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #6B7280;
+}
+
+/* Confirmation dialog */
+.admin-dialog {
+  border: none;
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 440px;
+  width: calc(100% - 32px);
+  box-shadow: 0 20px 60px rgba(10, 22, 40, 0.3);
+}
+
+.admin-dialog::backdrop {
+  background: rgba(10, 22, 40, 0.55);
+}
+
+.admin-dialog h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 10px;
+}
+
+.admin-dialog p {
+  font-size: 13px;
+  color: #4a4a4a;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.admin-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .admin-row-3,
+  .admin-totals {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-option {
+    grid-template-columns: 1fr auto;
+  }
+
+  .admin-option-desc {
+    grid-column: 1 / 2;
+  }
+
+  input[type="search"].admin-input {
+    width: 100%;
   }
 }

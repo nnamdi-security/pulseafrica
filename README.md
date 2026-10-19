@@ -4,13 +4,25 @@
 
 PulseAfrica lets citizens participate in public opinion polls, rate the performance of public leaders, and view transparent, methodology-backed results — in the spirit of YouGov or Pew Research Center, scoped for a solo full-stack developer to build end to end.
 
-This repository currently contains the **Phase 1 frontend** (HTML, CSS, vanilla JS — no framework, no backend yet). It is a work in progress.
+This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no framework) and the start of the **Phase 2 backend** (Python, FastAPI, PostgreSQL) in [`backend/`](backend/). It is a work in progress.
 
 ---
 
 ## Status
 
-🚧 **In progress — frontend only.** No backend, database, or authentication has been built yet. All data on every page (poll counts, response numbers, approval ratings, state names) is static placeholder content hard-coded into the HTML, written to *look* like a live system.
+🚧 **In progress.** The frontend pages are built and the backend API (auth, polls, responses, results) lives in [`backend/`](backend/). These pages now run on the real API:
+
+- **`login.html`**: sign in and create account
+- **`polls.html`**: the poll directory, with live counts, filters, sorting and search
+- **`poll.html`**: taking a poll (`poll.html?id=1`), from sign-in through to the thank-you screen
+- **`results.html`**: the results dashboard (`results.html?id=1`), with overview, demographic, state and trend tabs
+- **`dashboard.html`**: the signed-in user's dashboard: profile, participation history and account settings (reached from the user's name in the nav)
+- **`admin.html`**: the admin dashboard: platform totals and participation, poll management and user management (an "Admin" link appears in the nav for admins)
+- **`index.html`**: the home page's featured result, platform stats, featured polls and results by category
+- **The ticker** on every page shows live headline results and platform figures. Until they load, or if the API is down, it shows a neutral line about the platform instead of numbers.
+- **The nav** on every page shows the signed-in user's name and a Sign out button
+
+No page shows hard-coded poll numbers any more.
 
 ---
 
@@ -25,11 +37,11 @@ This repository currently contains the **Phase 1 frontend** (HTML, CSS, vanilla 
 | 5 | Methodology | `methodology.html` | Long-form trust document explaining sampling, weighting, margin of error, and limitations |
 | 6 | About | `about.html` | Mission, vision, values, founding story timeline, team, and platform goals |
 | 7 | Login / Register | `login.html` | Sign in, create account, and reset password views with inline validation, error and success states (`login.html#register` opens registration) |
+| 8 | User dashboard | `dashboard.html` | Profile, live polls still to answer, participation history, and account settings: edit profile, change password, delete account (`#history` / `#settings` open those tabs) |
+| 9 | Admin dashboard | `admin.html` | Admins only. Totals and responses per day; create, edit, publish, close, reopen and delete polls; search users, suspend / reactivate them and grant or remove admin access (`#polls` / `#users` open those tabs) |
 
 ### Not yet built
-- User dashboard (profile, participation history, account settings)
-- Admin dashboard (poll management, user management)
-- Backend API, database, authentication
+Every page in the original brief now exists and runs on the API. See the roadmap below for what's left.
 
 ---
 
@@ -44,7 +56,13 @@ pulseafrica/
 ├── methodology.html     Methodology / trust document
 ├── about.html          About page
 ├── login.html          Login / Register / reset password
-└── style.css           Single shared stylesheet for all pages
+├── dashboard.html      User dashboard: profile, history, settings
+├── admin.html          Admin dashboard: overview, polls, users
+├── style.css           Single shared stylesheet for all pages
+├── api.js              Shared API client: fetch helper, token storage, auth calls
+├── nav-auth.js         Shows the signed-in user's name + Sign out in the nav
+├── ticker.js           Fills the ticker on every page from the API
+└── backend/            FastAPI + PostgreSQL API (see backend/README.md)
 ```
 
 All pages share **one stylesheet** (`style.css`). Each page's styles live in a clearly labeled section inside that file, e.g.:
@@ -85,6 +103,8 @@ This three-typeface system is deliberate: serif for institutional voice, sans fo
 
 ## How to run this locally
 
+### Frontend
+
 No build step, no dependencies to install. It's static HTML/CSS/JS.
 
 1. Open the `pulseafrica/` folder in VS Code
@@ -93,6 +113,14 @@ No build step, no dependencies to install. It's static HTML/CSS/JS.
 4. It opens at `http://localhost:5500`
 
 Navigate between pages using the top nav — all internal links (`index.html`, `polls.html`, `poll.html`, `results.html`, `methodology.html`, `about.html`, `login.html`) are already wired up.
+
+### Backend
+
+The API is Python + FastAPI + PostgreSQL. Setup steps, the database schema, and every endpoint are documented in **[`backend/README.md`](backend/README.md)**. In short: `docker compose up -d`, install `requirements.txt`, `alembic upgrade head`, then `uvicorn app.main:app --reload`. Interactive API docs are then at `http://localhost:8000/docs`.
+
+For a populated demo, run `python -m app.seed` once after migrating. It adds the 10 polls from the original static page and 300 demo voters' responses, spread over each poll's open period so the trend charts have data.
+
+The connected pages need the backend running. Open the page through Live Server (`http://localhost:5500` or `http://127.0.0.1:5500`); opening the HTML file directly (`file://`) is blocked by the API's CORS settings.
 
 ---
 
@@ -116,24 +144,31 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 - [x] Methodology
 - [x] About
 - [x] Login / Register
-- [ ] User dashboard
-- [ ] Admin dashboard
+- [x] User dashboard
+- [x] Admin dashboard
 
-**Phase 2 — Backend**
-- [ ] Node.js + Express API
-- [ ] MongoDB or PostgreSQL schema (Users, Polls, Questions, Responses)
-- [ ] JWT authentication + role-based access control
-- [ ] REST endpoints for auth, polls, responses, analytics
+**Phase 2 — Backend** (Python + FastAPI + PostgreSQL)
+- [x] FastAPI project scaffold with SQLAlchemy 2.0 + Alembic migrations
+- [x] PostgreSQL schema (Users, Polls, Questions, Options, Responses, Answers)
+- [x] JWT authentication + role-based access control (citizen / admin)
+- [x] REST endpoints for auth, polls, responses, results
+- [x] Test suite (pytest)
+- [ ] Rate limiting, email verification, password reset
+- [ ] Weighted results + margin of error
 
 **Phase 3 — Integration**
-- [ ] Wire frontend forms to live API
+- [x] Wire login / register to the auth API (`api.js`)
+- [x] Wire polls directory and single poll pages to the API
+- [x] Wire the results dashboard (`results.html?id=…`) to the API
+- [x] Wire the home page and ticker to the API
+- [x] Sign-in state in the nav (user's name, sign out) via `nav-auth.js`
 - [ ] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates
 
 **Phase 4 — Deployment**
 - [ ] Frontend → Vercel
-- [ ] Backend → Render
-- [ ] Database → MongoDB Atlas (or managed Postgres)
+- [ ] Backend → Render (FastAPI web service)
+- [ ] Database → Render PostgreSQL (or Neon / Supabase)
 
 ---
 
