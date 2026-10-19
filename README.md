@@ -10,7 +10,7 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 
 ## Status
 
-🚧 **In progress.** The frontend pages are built. The backend API (auth, polls, responses, results) is scaffolded in [`backend/`](backend/) but **not yet wired to the frontend**, so every page still shows static placeholder content (poll counts, response numbers, approval ratings) hard-coded into the HTML.
+🚧 **In progress.** The frontend pages are built. The backend API (auth, polls, responses, results) is scaffolded in [`backend/`](backend/) and **sign in / create account on `login.html` now use the real API**. Every other page still shows static placeholder content (poll counts, response numbers, approval ratings) hard-coded into the HTML.
 
 ---
 
@@ -29,7 +29,7 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 ### Not yet built
 - User dashboard (profile, participation history, account settings)
 - Admin dashboard (poll management, user management)
-- Connecting the frontend pages to the backend API
+- Connecting the remaining pages (polls, single poll, results) to the backend API
 
 ---
 
@@ -45,6 +45,7 @@ pulseafrica/
 ├── about.html          About page
 ├── login.html          Login / Register / reset password
 ├── style.css           Single shared stylesheet for all pages
+├── api.js              Shared API client: fetch helper, token storage, auth calls
 └── backend/            FastAPI + PostgreSQL API (see backend/README.md)
 ```
 
@@ -101,6 +102,8 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 
 The API is Python + FastAPI + PostgreSQL. Setup steps, the database schema, and every endpoint are documented in **[`backend/README.md`](backend/README.md)**. In short: `docker compose up -d`, install `requirements.txt`, `alembic upgrade head`, then `uvicorn app.main:app --reload`. Interactive API docs are then at `http://localhost:8000/docs`.
 
+Sign in and Create account on `login.html` need the backend running. Open the page through Live Server (`http://localhost:5500` or `http://127.0.0.1:5500`); opening the HTML file directly (`file://`) is blocked by the API's CORS settings.
+
 ---
 
 ## Conventions used in this codebase
@@ -136,7 +139,9 @@ The API is Python + FastAPI + PostgreSQL. Setup steps, the database schema, and 
 - [ ] Weighted results + margin of error
 
 **Phase 3 — Integration**
-- [ ] Wire frontend forms to live API
+- [x] Wire login / register to the auth API (`api.js`)
+- [ ] Wire polls, single poll and results pages to the API
+- [ ] Sign-in state in the nav (show the user's name, sign out)
 - [ ] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates
 

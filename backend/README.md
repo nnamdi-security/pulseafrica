@@ -216,14 +216,25 @@ These numbers are **raw, unweighted counts**. Weighting by age, gender and state
 
 CORS already allows Live Server (`http://localhost:5500` and `http://127.0.0.1:5500`). Add more origins in `.env` with `CORS_ORIGINS`.
 
-```js
-const res = await fetch("http://localhost:8000/api/auth/login", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email, password }),
-});
-const { accessToken } = await res.json();
+Pages talk to the API through the shared client in [`../api.js`](../api.js). Load it before the page's own script:
+
+```html
+<script src="api.js"></script>
 ```
+
+```js
+PulseAPI.login(email, password, remember)   // stores the token
+  .then(function () { return PulseAPI.me(); })
+  .then(function (user) { console.log('Hi', user.fullName); })
+  .catch(function (err) {
+    // err.status: HTTP status (0 = server unreachable)
+    // err.message: safe to show the user; err.fields: per-field validation errors
+  });
+```
+
+The token is kept in `localStorage` when "Keep me signed in" is ticked, otherwise in `sessionStorage`, and sent as `Authorization: Bearer …` on every request. The API address defaults to `http://localhost:8000/api`; set `window.PULSE_API_BASE` before loading `api.js` to point elsewhere (e.g. production).
+
+`login.html` is wired up: sign in, create account (which signs the new user straight in), duplicate-email and wrong-password errors, and a "server unreachable" message. The password reset form is still simulated because there's no reset endpoint yet.
 
 ---
 
