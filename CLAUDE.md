@@ -20,7 +20,7 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 | Frontend | Static HTML5 + one CSS file + vanilla JS (no build). Chart.js 4.4.1 (results only), Tabler Icons, Google Fonts via CDN | repo root: 9 `*.html`, `style.css`, `api.js`, `nav-auth.js`, `ticker.js`, `images/` |
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
-| Tests | pytest + FastAPI `TestClient` (75 tests) | `backend/tests/` |
+| Tests | pytest + FastAPI `TestClient` (81 tests); Python Playwright browser suite (63 tests) | `backend/tests/`, `e2e/` |
 
 **A Next.js frontend is PROPOSED, not implemented.** Don't create `frontend/`, add Node tooling, or write React/Next.js code unless the user has approved a migration milestone (M5–M8 in [docs/ROADMAP.md](docs/ROADMAP.md)). Use the `frontend-migration` skill only then.
 
@@ -68,12 +68,14 @@ docker compose up -d                       # Postgres 16 (dev)
 source .venv/bin/activate                  # after: python -m venv .venv && pip install -r requirements.txt
 alembic upgrade head                       # apply migrations
 uvicorn app.main:app --reload              # API on :8000, docs at /docs
-pytest                                     # 75 tests on in-memory SQLite (1 Postgres-only test skipped)
+pytest                                     # 81 tests on in-memory SQLite (1 Postgres-only test skipped)
 TEST_DATABASE_URL=postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica_test pytest   # throwaway DB only
 alembic check                              # models match migrations?
 python -m app.create_admin you@example.com
 # frontend (repo root): VS Code Live Server on :5500, or
 python -m http.server 5500 --bind 127.0.0.1
+# browser tests (e2e/; own venv: pip install -r requirements.txt && python -m playwright install chromium)
+E2E_POSTGRES_URL=postgresql://pulseafrica:pulseafrica@localhost:5432/postgres pytest   # creates and drops its own database; needs ports 8000 and 5500 free
 ```
 
 ## Known open issues

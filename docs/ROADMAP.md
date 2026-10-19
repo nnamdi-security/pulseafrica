@@ -29,10 +29,10 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance:** every document is consistent with the code at `7119fa7`; the test baseline was recorded from real runs (43/43 on SQLite and on Postgres).
 - **Completion condition:** this PR is reviewed and merged.
 
-## M1: Critical stabilisation (COMPLETED, pending merge of PR #6)
+## M1: Critical stabilisation (COMPLETED)
 
-- **Progress:** Batch A merged in PR #5 (DOC-01, SEC-01, SEC-02, SEC-06, INT-01 part 1, and the Postgres concurrency test). Batches B and C are in PR #6: PRIV-01 (*k* = 10), INT-01 part 2 (effective status), METH-01, PRIV-02 and FE-01, following owner decisions D1–D4, D4a and INT-01a ([decision records 0001–0004](decisions/README.md)). Every M1 finding is marked fixed in AUDIT.md with its commit.
-- **Left for later milestones:** the live-results timing leak (needs a decision on delayed or batched results); the "Anonymous Data" badge and ticker placeholder on every page (copy decision); METH-02's methodology claims (M4); hiding demo polls by environment (M9).
+- **Progress:** Batch A merged in PR #5 (DOC-01, SEC-01, SEC-02, SEC-06, INT-01 part 1, and the Postgres concurrency test). Batches B and C merged in PR #6: PRIV-01 (*k* = 10), INT-01 part 2 (effective status), METH-01, PRIV-02 and FE-01, following owner decisions D1–D4, D4a and INT-01a ([decision records 0001–0004](decisions/README.md)). Every M1 finding is marked fixed in AUDIT.md with its commit.
+- **Left for later milestones:** ~~the live-results timing leak~~ and ~~the "Anonymous Data" badge and ticker~~ (both done in M2); METH-02's methodology claims (M4); hiding demo polls by environment (M9).
 
 - **Objective:** remove the defects that make the current application unsafe or misleading.
 - **Dependencies:** M0. Product decisions D1–D3 (below) for the copy-related items.
@@ -56,7 +56,13 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** changing privacy and methodology wording without approval. Mitigation: decisions D1–D3 first.
 - **Completion condition:** all M1 findings closed in AUDIT.md with links to their commits.
 
-## M2: Regression safety net (NOT STARTED)
+## M2: Regression safety net (COMPLETED, pending merge of PR #7 and branch protection)
+
+- **Progress:** all in PR #7, following owner decisions D8–D11 ([0005–0008](decisions/README.md)), per the [Milestone 2 plan](https://claude.ai/code/artifact/5247e3dc-01c6-47ac-8c30-a5dacc04eb5e):
+  - **Safety net:** a Python Playwright suite in `e2e/` (all 8 journeys, axe on every page, a retired-copy check), the "Browser tests" workflow, and a migration up/down/up check in the backend workflow. TEST-01 fixed.
+  - **Milestone 1 follow-ups:** results released in steps of 10 with breakdowns after close (D10, the live-results timing leak); "Totals Only" badge and ticker (D9); the "United STATEs" footer typo on `poll.html`.
+  - **Not done:** TEST-02 (the `httpx2` swap needs dependency approval).
+- **Deliverables as built:** `e2e/` and `.github/workflows/browser-tests.yml` (instead of one `ci.yml`, alongside the existing `backend-tests.yml`).
 
 - **Objective:** automated protection of every current user journey. **A prerequisite for any frontend work.**
 - **Dependencies:** M1, so the tests describe correct behaviour.

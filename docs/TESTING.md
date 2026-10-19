@@ -12,14 +12,16 @@
 
 | Command (run from `backend/`) | Collected | Passed | Failed | Skipped | Errors | Time |
 |---|---|---|---|---|---|---|
-| `pytest` (in-memory SQLite, the default) | 75 | **74** | 0 | 1 | 0 | ~62 s |
-| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 75 | **75** | 0 | 0 | 0 | ~72 s |
+| `pytest` (in-memory SQLite, the default) | 81 | **80** | 0 | 1 | 0 | ~66 s |
+| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 81 | **81** | 0 | 0 | 0 | ~79 s |
+| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium) | 63 | **63** | 0 | 0 | 0 | ~78 s |
 
-The counts above were updated after Milestone 1 Batches B and C (PRIV-01, INT-01 part 2, METH-01, PRIV-02, FE-01). The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
+The counts above were updated in Milestone 2 (results released in steps, decision 0006; the browser suite, decision 0005). The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 
 - **One warning in both runs:** `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead` (AUDIT [TEST-02](AUDIT.md#test-02)). It comes from the test client, not from app code.
 - **No environment-related failures or missing dependencies.**
-- **Frontend:** there are no automated frontend tests to run ([TEST-01](AUDIT.md#test-01)).
+- **Frontend:** the browser suite in `e2e/` covers every journey below ([TEST-01](AUDIT.md#test-01) fixed in Milestone 2).
+- **CI:** `.github/workflows/backend-tests.yml` runs pytest on SQLite and Postgres 16 and the migration cycle (`upgrade head`, `check`, `downgrade base`, `upgrade head`, `check`); `.github/workflows/browser-tests.yml` runs the browser suite and keeps Playwright traces of failures.
 
 ### Tests by file
 
@@ -29,10 +31,34 @@ The counts above were updated after Milestone 1 Batches B and C (PRIV-01, INT-01
 | `tests/test_auth.py` | 9 | Register (success, duplicate, validation rules), login, `/me`, invalid tokens, 72/73-byte and multi-byte passwords, over-long login (SEC-02) |
 | `tests/test_account.py` | 9 | Profile update and validation, password change, my-responses (no answers leaked), account deletion removes responses, over-long passwords (SEC-02), last-admin deletion guard (SEC-06) |
 | `tests/test_polls.py` | 21 | Admin-only creation, drafts hidden, filters, one response per user, answer validation, closed polls, results breakdowns, counts, preview, `hasResponded`, categories, optional demographics, trend, past closing date refused and reported as closed everywhere (INT-01), simultaneous duplicate submissions (Postgres only) |
-| `tests/test_results.py` | 10 | Minimum group size (PRIV-01): probe P3, the 9/10 boundary, overall counts unchanged, skipped optional questions, polls under 10 responses, trend suppression and day/week/month grouping, and a randomised check that no breakdown or trend leaves a remainder of 1–9 |
+| `tests/test_results.py` | 16 | Minimum group size (PRIV-01): probe P3, the 9/10 boundary, overall counts unchanged, skipped optional questions, polls under 10 responses, trend suppression and day/week/month grouping, and a randomised check that no breakdown or trend leaves a remainder of 1–9. Release steps (decision 0006): open polls hold breakdowns and trend, one response can't move the figures, closing (or passing the closing date) releases breakdowns, closed polls count whole steps only, the list preview steps too |
 | `tests/test_admin.py` | 11 | Admin-only access, overview, edit, open/close, past closing date, questions locked once answered, delete, user list and filters, suspend/reactivate, permissions, last-active-admin protection |
 | `tests/test_stats.py` | 2 | Empty platform, counts exclude drafts, no synthetic polls |
 | `tests/test_seed.py` | 4 | Seed polls are valid payloads, turnout table, drift helper, seeded polls flagged synthetic in polls, results and stats (METH-01) |
+
+### Browser tests by file (`e2e/`)
+
+| File | Tests | Covers |
+|---|---|---|
+| `test_browse_polls.py` | 1 | Journey 1: browse, search (match and no match), status and category filters, demo-data note |
+| `test_take_poll.py` | 1 | Journey 2: sign-in gate, `?next=` return, Next disabled until answered, prefilled demographics, submit, thank-you count, "already responded" on reload |
+| `test_results.py` | 2 | Journey 3: tabs, poll and question pickers; an open poll holds its breakdowns, a closed one shows them (decision 0006) |
+| `test_register_and_login.py` | 2 | Journey 4: empty form, password mismatch, taken email (409), success; wrong password then success |
+| `test_dashboard.py` | 2 | Journey 5: history, profile edit, wrong then right current password, delete behind its confirmation; signed-out state |
+| `test_admin.py` | 3 | Journey 6: create a draft, publish, close, cancelled and confirmed delete; suspend, reactivate, promote and demote a user (checked against the API); a citizen is refused |
+| `test_server_down.py` | 4 | Journey 7: polls, poll, results and login pages with the API unreachable |
+| `test_mobile.py` | 14 | Journey 8: no sideways scroll at 390px on every page and tab, signed in where needed |
+| `test_accessibility.py` | 15 | axe on all 9 pages (and tabs), failing on serious or critical violations except the known FE-03 contrast ones |
+| `test_copy.py` | 19 | No page claims anonymity or "never linked" (decisions 0003, 0007); all 9 pages carry the "Totals Only" badge and ticker |
+
+## How the browser tests work
+
+- **Setup:** `python -m venv .venv && pip install -r e2e/requirements.txt && python -m playwright install chromium` (it includes the backend's requirements). Run `pytest` from `e2e/` with `E2E_POSTGRES_URL` set to any database on a Postgres server where the role may create databases.
+- **Isolation:** each run creates its own database (`pulseafrica_e2e_<random>`), runs `alembic upgrade head` and `python -m app.seed`, registers an admin, starts the API on `localhost:8000` and serves the pages on `127.0.0.1:5500`, then drops the database. Ports 8000 and 5500 must be free. No other database is touched.
+- **Data:** journeys that change data use their own freshly registered users and polls, so the order of tests doesn't matter. Seeded polls are looked up by title.
+- **Waiting:** only Playwright's auto-waiting assertions and `networkidle`; no fixed sleeps. Every journey fails on a JavaScript page error.
+- **Viewports:** the journeys run at Playwright's default 1280×720; `test_mobile.py` uses 390×844.
+- **Accessibility baseline:** axe's `color-contrast` rule fails on every page (FE-03, waiting on decision D7) and is excluded until then. Any other serious or critical violation fails the run.
 
 ## How the backend tests work
 
@@ -57,17 +83,16 @@ The counts above were updated after Milestone 1 Batches B and C (PRIV-01, INT-01
 
 | Gap | Risk | Planned in |
 |---|---|---|
-| No end-to-end tests of the 9 pages | Frontend regressions go unnoticed; no parity check for a migration | Milestone 2 |
-| No CI | Tests depend on someone remembering to run them | Milestone 2 |
-| No tests for PRIV-01 | The defect is untested until suppression is built | Milestone 1, Batch B |
-| No migration up/down test in the suite | A broken downgrade would only be found by hand | Milestone 2 |
-| No accessibility checks | FE-03 and FE-04 regressions | Milestone 2 (axe in Playwright) |
+| CI isn't yet required for merging | A red PR can still be merged | Owner sets branch protection ([decision 0008](decisions/0008-required-ci-checks.md)) |
+| Contrast excluded from the axe checks | FE-03 regressions go unnoticed | Decision D7 |
+| Starlette test-client deprecation warning | Breaks when Starlette drops httpx support | [TEST-02](AUDIT.md#test-02): moving to `httpx2` needs the owner's approval of the dependency swap |
+| Chromium only | Safari- or Firefox-only regressions | Not planned |
 
 ## Proposed frontend testing strategy
 
 ### Now, for the current HTML/JS frontend (Milestone 2)
 
-- **Tooling:** Playwright end-to-end tests in a top-level `e2e/` folder with its own `package.json`. They drive the real pages against a real API on a throwaway Postgres database seeded with `python -m app.seed`.
+- **Tooling (implemented in Milestone 2, [decision 0005](decisions/0005-browser-tests-in-python.md)):** Python Playwright (`pytest-playwright`) in a top-level `e2e/` folder with its own `requirements.txt`, driving the real pages against a real API on a throwaway Postgres database seeded with `python -m app.seed`. See "How the browser tests work" above.
 - **Journeys:**
   1. Browse, filter and search polls.
   2. Take a poll: sign-in gate → `?next=` return → submit → thank-you numbers → "already responded" on reload.
@@ -77,7 +102,7 @@ The counts above were updated after Milestone 1 Batches B and C (PRIV-01, INT-01
   6. Admin: create/publish/close/delete a poll; suspend, reactivate, promote and demote a user.
   7. Server-down states.
   8. Mobile width (390px): no horizontal scroll.
-- **Accessibility:** run `@axe-core/playwright` on each page; fail on new serious violations.
+- **Accessibility:** `axe-playwright-python` on each page; fail on new serious violations.
 - **These are the parity suite:** the same tests, with locator changes, must pass against any migrated frontend. That's what makes a migration verifiable ([FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md#verifying-functional-parity)).
 
 ### Later, if the Next.js migration is approved (Milestone 5+)

@@ -34,7 +34,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
 | [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Confirmed (inspection) |
 | [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Reproduced (computed) |
-| [TEST-01](#test-01) | MEDIUM | Testing | No frontend or end-to-end tests and no CI | Confirmed (inspection) |
+| [TEST-01](#test-01) | MEDIUM | Testing | No frontend or end-to-end tests and no CI | Fixed (M2) |
 | [DEP-01](#dep-01) | MEDIUM | Deployment | No production configuration (server, proxy headers, logging, deploy files) | Confirmed (inspection) |
 | [SEC-09](#sec-09) | LOW | Security | Registration reveals whether an email is already registered | Reproduced |
 | [SEC-10](#sec-10) | LOW | Security | `/docs` and `/openapi.json` are public in every environment | Reproduced |
@@ -290,6 +290,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** nothing protects the frontend user journeys from regressions, which is a significant risk for any migration (see [TESTING.md](TESTING.md)).
 - **Recommended fix:** commit a Playwright end-to-end suite covering the core journeys *before* any frontend migration, and run it in CI along with pytest.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M2, commits `9af3d73` and `d7f6090`; CI from PR #4 and `f5e6652`):** decision D8 ([0005](decisions/0005-browser-tests-in-python.md)). `e2e/` holds a Python Playwright suite of all 8 journeys in [TESTING.md](TESTING.md), axe checks on every page and a check that retired privacy claims stay out, run by the new "Browser tests" workflow on every PR. The backend workflow now also checks migrations up/down/up. Deliberately breaking the polls search made journey 1 fail. axe found two serious violations besides FE-03's contrast ones, both fixed in `36e4a6d`: the poll progress bar had no accessible name, and the admin chart bars used `aria-label` without a role. Making the checks required for merging is the owner's step ([0008](decisions/0008-required-ci-checks.md)).
 
 <a id="dep-01"></a>
 ### DEP-01: No production deployment configuration (MEDIUM)
@@ -423,6 +424,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 
 - **Evidence:** every pytest run emits `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead.`
 - **Recommended fix:** follow the upstream migration when it's stable, and pin the test dependencies.
+- **Status (M2):** still open. Replacing `httpx` with `httpx2` (2.14) in `requirements.txt` removes the warning in a local run, but swapping a dependency needs the owner's approval, so it wasn't committed.
 
 ---
 
