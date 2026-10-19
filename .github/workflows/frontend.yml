@@ -1,0 +1,64 @@
+name: Frontend
+
+# The Next.js app in frontend/ (decisions 0016 and 0018). Its browser checks run in the
+# "Browser tests" workflow, which builds it too.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # The API types are generated from the backend's schema, so the check needs its packages
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: API types match the backend
+        env:
+          PYTHON: python
+        run: pnpm api:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Unit and component tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: JavaScript budget
+        run: pnpm budget
