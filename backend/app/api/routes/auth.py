@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
 from sqlalchemy import delete, select, update
 
+from app.api import ratelimit
 from app.api.deps import CurrentUser, DbSession
 from app.api.rules import effective_status, ensure_another_active_admin
 from app.core.security import create_access_token, hash_password, verify_password
@@ -20,7 +21,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register(payload: UserRegister, db: DbSession) -> User:
+def register(payload: UserRegister, db: DbSession, request: Request) -> User:
+    ratelimit.enforce(db, ratelimit.REGISTER_PER_ADDRESS, ratelimit.client_address(request))
     email = payload.email.lower()
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email is already registered")
@@ -39,10 +41,14 @@ def register(payload: UserRegister, db: DbSession) -> User:
 
 
 @router.post("/login", response_model=Token)
-def login(payload: UserLogin, db: DbSession) -> Token:
-    user = db.scalar(select(User).where(User.email == payload.email.lower()))
+def login(payload: UserLogin, db: DbSession, request: Request) -> Token:
+    email = payload.email.lower()
+    ratelimit.enforce(db, ratelimit.LOGIN_PER_ADDRESS, ratelimit.client_address(request))
+    ratelimit.check(db, ratelimit.FAILED_LOGINS_PER_ACCOUNT, email)
+    user = db.scalar(select(User).where(User.email == email))
     # Same message for "no such user" and "wrong password" so attackers can't probe for emails.
     if user is None or not verify_password(payload.password, user.hashed_password) or not user.is_active:
+        ratelimit.record(db, ratelimit.FAILED_LOGINS_PER_ACCOUNT, email)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
     return Token(access_token=create_access_token(user.id))
 
@@ -65,14 +71,15 @@ def update_profile(payload: ProfileUpdate, db: DbSession, user: CurrentUser) -> 
     return user
 
 
-def _check_password(user: User, password: str) -> None:
+def _check_password(db: DbSession, user: User, password: str) -> None:
+    ratelimit.enforce(db, ratelimit.PASSWORD_CHECKS_PER_USER, str(user.id))
     if not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Your current password is incorrect")
 
 
 @router.post("/me/password", status_code=status.HTTP_204_NO_CONTENT)
 def change_password(payload: PasswordChange, db: DbSession, user: CurrentUser) -> None:
-    _check_password(user, payload.current_password)
+    _check_password(db, user, payload.current_password)
     user.hashed_password = hash_password(payload.new_password)
     db.commit()
 
@@ -80,7 +87,7 @@ def change_password(payload: PasswordChange, db: DbSession, user: CurrentUser) -
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account(payload: AccountDelete, db: DbSession, user: CurrentUser) -> None:
     """Deletes the account and every response it made. Polls an admin created are kept."""
-    _check_password(user, payload.password)
+    _check_password(db, user, payload.password)
     ensure_another_active_admin(db, user)
     # Explicit deletes rather than relying on ON DELETE CASCADE, which SQLite
     # (used by the tests) only enforces when foreign keys are switched on.

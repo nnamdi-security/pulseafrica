@@ -30,6 +30,12 @@ class Settings(BaseSettings):
 
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5500", "http://127.0.0.1:5500"]
 
+    # Limits on login, register and password checks (decision 0009). Off only for the browser
+    # suite, which signs many users in from one address.
+    rate_limiting: bool = True
+    # Addresses of reverse proxies whose X-Forwarded-For header gives the client's address.
+    trusted_proxies: Annotated[list[str], NoDecode] = []
+
     @model_validator(mode="before")
     @classmethod
     def require_secret(cls, data: Any) -> Any:
@@ -47,9 +53,9 @@ class Settings(BaseSettings):
             )
         return value
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "trusted_proxies", mode="before")
     @classmethod
-    def split_origins(cls, value: str | list[str]) -> list[str]:
+    def split_list(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
