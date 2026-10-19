@@ -7,7 +7,8 @@ Demo voters get emails like voter1@demo.pulseafrica.example and an unusable
 password, so nobody can sign in as them. Their answers are drawn at random,
 weighted towards the percentages the static cards used to display, and spread
 over the time each poll has been open with a gentle drift in opinion, so the
-results page's trend charts have something to show.
+results page's trend charts have something to show. Every seeded poll is
+flagged is_synthetic, so the pages label it as demonstration data.
 """
 
 import argparse
@@ -148,86 +149,92 @@ def drifted(weights: list[float], drift: float, t: float) -> list[float]:
     return [w * max(0.05, 1 + shift * k) for w, k in zip(weights, tone)]
 
 
+def seed(db, voters: int = 300) -> None:
+    """Add the demo polls, flagged as synthetic, and `voters` demo voters' responses to an empty database."""
+    rng = random.Random(2026)  # same demo data every run
+    now = datetime.now(timezone.utc)
+
+    polls = []
+    for index, (category, status, days, title, description, questions) in enumerate(POLLS):
+        poll = Poll(
+            title=title,
+            description=description,
+            category=category,
+            status=PollStatus(status),
+            closes_at=now + timedelta(days=days),
+            # Spread creation dates so "Newest first" has something to sort
+            created_at=now - timedelta(days=60 - index * 5 if days > 0 else 300 - index),
+            # Demonstration data must never pass for real research (METH-01)
+            is_synthetic=True,
+            questions=[
+                Question(
+                    text=text,
+                    position=q_index,
+                    options=[
+                        Option(text=o_text, description=o_desc, position=o_index)
+                        for o_index, (o_text, o_desc, _) in enumerate(options)
+                    ],
+                )
+                for q_index, (text, options) in enumerate(questions)
+            ],
+        )
+        db.add(poll)
+        polls.append((poll, questions))
+    db.flush()
+
+    # Each poll's responses arrive between its creation and now (or its closing
+    # date), with opinion drifting by up to ±30% over that time
+    windows = []
+    for poll, _ in polls:
+        end = min(now, poll.closes_at)
+        drift = rng.uniform(-0.3, 0.3)
+        windows.append((poll.created_at, (end - poll.created_at).total_seconds(), drift))
+
+    unusable = hash_password(secrets.token_urlsafe(32))
+    for i in range(1, voters + 1):
+        voter = User(
+            full_name=f"Demo Voter {i}",
+            email=f"voter{i}@demo.pulseafrica.example",
+            hashed_password=unusable,
+            state=rng.choice(STATES),
+            age_range=rng.choice(AGE_RANGES),
+            # Active, so the admin user list doesn't show them as suspended; the
+            # random, unknown password means nobody can sign in as them
+        )
+        db.add(voter)
+        db.flush()
+        for (poll, questions), turnout, (start, span, drift) in zip(polls, TURNOUT, windows):
+            if rng.random() > turnout:
+                continue
+            t = rng.random()
+            answers = []
+            for question, (_, options) in zip(poll.questions, questions):
+                weights = drifted([w for _, _, w in options], drift, t)
+                option = rng.choices(question.options, weights=weights)[0]
+                answers.append(Answer(question_id=question.id, option_id=option.id))
+            db.add(Response(
+                poll_id=poll.id,
+                user_id=voter.id,
+                age_range=voter.age_range,
+                gender=rng.choice(GENDERS),
+                state=voter.state,
+                education=rng.choice(EDUCATION_LEVELS),
+                occupation=rng.choice(OCCUPATIONS),
+                created_at=start + timedelta(seconds=span * t),
+                answers=answers,
+            ))
+    db.commit()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--responses", type=int, default=300, help="number of demo voters (default 300)")
     args = parser.parse_args()
 
-    rng = random.Random(2026)  # same demo data every run
-    now = datetime.now(timezone.utc)
-
     with SessionLocal() as db:
         if db.scalar(select(func.count()).select_from(Poll)):
             sys.exit("The database already has polls; seed only runs on an empty database.")
-
-        polls = []
-        for index, (category, status, days, title, description, questions) in enumerate(POLLS):
-            poll = Poll(
-                title=title,
-                description=description,
-                category=category,
-                status=PollStatus(status),
-                closes_at=now + timedelta(days=days),
-                # Spread creation dates so "Newest first" has something to sort
-                created_at=now - timedelta(days=60 - index * 5 if days > 0 else 300 - index),
-                questions=[
-                    Question(
-                        text=text,
-                        position=q_index,
-                        options=[
-                            Option(text=o_text, description=o_desc, position=o_index)
-                            for o_index, (o_text, o_desc, _) in enumerate(options)
-                        ],
-                    )
-                    for q_index, (text, options) in enumerate(questions)
-                ],
-            )
-            db.add(poll)
-            polls.append((poll, questions))
-        db.flush()
-
-        # Each poll's responses arrive between its creation and now (or its closing
-        # date), with opinion drifting by up to ±30% over that time
-        windows = []
-        for poll, _ in polls:
-            end = min(now, poll.closes_at)
-            drift = rng.uniform(-0.3, 0.3)
-            windows.append((poll.created_at, (end - poll.created_at).total_seconds(), drift))
-
-        unusable = hash_password(secrets.token_urlsafe(32))
-        for i in range(1, args.responses + 1):
-            voter = User(
-                full_name=f"Demo Voter {i}",
-                email=f"voter{i}@demo.pulseafrica.example",
-                hashed_password=unusable,
-                state=rng.choice(STATES),
-                age_range=rng.choice(AGE_RANGES),
-                # Active, so the admin user list doesn't show them as suspended; the
-                # random, unknown password means nobody can sign in as them
-            )
-            db.add(voter)
-            db.flush()
-            for (poll, questions), turnout, (start, span, drift) in zip(polls, TURNOUT, windows):
-                if rng.random() > turnout:
-                    continue
-                t = rng.random()
-                answers = []
-                for question, (_, options) in zip(poll.questions, questions):
-                    weights = drifted([w for _, _, w in options], drift, t)
-                    option = rng.choices(question.options, weights=weights)[0]
-                    answers.append(Answer(question_id=question.id, option_id=option.id))
-                db.add(Response(
-                    poll_id=poll.id,
-                    user_id=voter.id,
-                    age_range=voter.age_range,
-                    gender=rng.choice(GENDERS),
-                    state=voter.state,
-                    education=rng.choice(EDUCATION_LEVELS),
-                    occupation=rng.choice(OCCUPATIONS),
-                    created_at=start + timedelta(seconds=span * t),
-                    answers=answers,
-                ))
-        db.commit()
+        seed(db, args.responses)
 
     print(f"Created {len(POLLS)} polls and {args.responses} demo voters.")
 

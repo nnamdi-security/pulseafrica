@@ -36,4 +36,7 @@ def platform_stats(db: DbSession) -> PlatformStats:
             select(func.count()).select_from(public_responses).where(public_responses.c.created_at >= week_ago)
         ) or 0,
         trending_poll_id=trending,
+        synthetic_polls=db.scalar(
+            select(func.count()).where(Poll.status != PollStatus.draft, Poll.is_synthetic.is_(True))
+        ) or 0,
     )

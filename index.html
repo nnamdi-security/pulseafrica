@@ -124,6 +124,11 @@
 
         <!-- Every answer option for the featured question -->
         <div class="mini-bars" id="heroBars"></div>
+
+        <p class="demo-notice is-dark hero-demo-notice" id="heroDemoNotice" role="note" hidden>
+          <i class="ti ti-flask" aria-hidden="true"></i>
+          <span><strong>Demonstration data.</strong> Simulated responses, not real opinion research.</span>
+        </p>
       </div>
 
     </div>
@@ -166,6 +171,12 @@
     <p class="section-sub">
       These polls are currently open. Your participation directly contributes
       to the national data record.
+    </p>
+
+    <!-- Shown when the platform holds seeded demonstration data (METH-01) -->
+    <p class="demo-notice home-demo-notice" id="homeDemoNotice" role="note" hidden>
+      <i class="ti ti-flask" aria-hidden="true"></i>
+      <span><strong>Demonstration data.</strong> Figures on this page include simulated responses created to demonstrate PulseAfrica. They are not real opinion research.</span>
     </p>
 
     <!-- The three live polls with the most responses (filled in by the script below) -->
@@ -468,6 +479,7 @@
       document.getElementById('homeVoices').innerHTML = compactNumber(stats.registeredUsers);
       document.getElementById('homeActive').textContent = stats.activePolls;
       document.getElementById('homeStates').textContent = stats.statesCovered;
+      document.getElementById('homeDemoNotice').hidden = !stats.syntheticPolls;
     }
 
     /* Hero card: the biggest live presidency poll, or else the biggest live poll */
@@ -477,6 +489,7 @@
       document.getElementById('heroTakePoll').href = 'poll.html?id=' + poll.id;
       document.getElementById('heroResults').href = 'results.html?id=' + poll.id;
       document.getElementById('heroCardLabel').textContent = PulseLive.shortTitle(poll.title) + ' — live';
+      document.getElementById('heroDemoNotice').hidden = !poll.isSynthetic;
       card.setAttribute('aria-label', 'Featured poll result: ' + poll.title);
 
       const percent = h ? Math.round(h.percent) : 0;

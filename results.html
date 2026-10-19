@@ -147,6 +147,12 @@
        ============================================================ -->
   <div class="results-dashboard">
 
+    <!-- Seeded demonstration data (METH-01) -->
+    <p class="demo-notice results-card-full" id="resDemoNotice" role="note" hidden>
+      <i class="ti ti-flask" aria-hidden="true"></i>
+      <span><strong>Demonstration data.</strong> These results come from simulated respondents created to demonstrate PulseAfrica. They are not real opinion research.</span>
+    </p>
+
     <!-- Loading / error / not found / no responses yet -->
     <div class="results-card results-card-full results-notice" id="resNotice" role="status">
       <i class="ti ti-loader-2" aria-hidden="true"></i>
@@ -598,7 +604,9 @@
           ? '<span class="results-badge results-badge-live"><span class="results-live-dot" aria-hidden="true"></span>Live &middot; ' +
               plural(results.totalResponses, 'response') + '</span>'
           : '<span class="results-badge results-badge-closed">Closed &middot; ' + plural(results.totalResponses, 'response') + '</span>') +
-        '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>';
+        '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>' +
+        (results.isSynthetic ? '<span class="results-badge results-badge-cat">Demo data</span>' : '');
+      document.getElementById('resDemoNotice').hidden = !results.isSynthetic;
 
       const picker = document.getElementById('questionPicker');
       document.getElementById('questionPickerWrap').hidden = results.questions.length < 2;

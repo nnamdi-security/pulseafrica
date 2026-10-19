@@ -65,7 +65,7 @@ Clients should show `detail` strings: they're written to be user-safe.
 | PATCH | `/polls/{id}` | admin | any of the POST fields | 200 `PollOut` | 404 · 409 questions locked / back to draft with responses · 422 |
 | DELETE | `/polls/{id}` | admin | — | 204: deletes the poll, its questions and options, **and every response to it** | 404 |
 
-- **`PollSummary`:** `{id, title, description, category, status, closesAt, createdAt, responseCount, questionCount, preview: [{text, count, percent}]}`. `preview` covers the **first question's** options, and is `[]` until the poll has at least 10 responses (the minimum group size, [decision 0001](decisions/0001-minimum-public-group-size.md)).
+- **`PollSummary`:** `{id, title, description, category, status, closesAt, createdAt, isSynthetic, responseCount, questionCount, preview: [{text, count, percent}]}`. `isSynthetic` is `true` for seeded demonstration polls ([METH-01](AUDIT.md#meth-01)); pages label them. `preview` covers the **first question's** options, and is `[]` until the poll has at least 10 responses (the minimum group size, [decision 0001](decisions/0001-minimum-public-group-size.md)).
 - **`PollOut`:** `PollSummary` plus `questions: [{id, text, options: [{id, text, description}]}]` (ordered by position) and `hasResponded`: `true`/`false` when signed in, `null` when not.
 
 **Business rules** (enforced in `routes/polls.py`):
@@ -89,7 +89,7 @@ Demographics are **self-reported for each response**. They can differ from the p
 |---|---|---|---|
 | GET | `/results/{pollId}` | — | 200 `PollResults` for active and closed polls; 404 for drafts, even for admins ([BE-04](AUDIT.md#be-04)) |
 
-- **`PollResults`:** `{pollId, title, totalResponses, minGroupSize, resultsWithheld, statesCovered, trendInterval, questions: [QuestionResult]}`.
+- **`PollResults`:** `{pollId, title, isSynthetic, totalResponses, minGroupSize, resultsWithheld, statesCovered, trendInterval, questions: [QuestionResult]}`.
   - `minGroupSize`: the smallest group shown (10). Clients use this value rather than their own.
   - `resultsWithheld`: `true` when `totalResponses < minGroupSize`. Every option's `count` and `percent` are then `null`, and every breakdown and the trend are empty; only the totals are shown.
   - `statesCovered`: distinct states among the respondents, including states whose group is withheld.
@@ -112,10 +112,11 @@ The groups follow these rules:
 
 | Method | Path | Auth | Success |
 |---|---|---|---|
-| GET | `/stats` | — | 200 `{activePolls, closedPolls, totalResponses, registeredUsers, statesCovered, responsesLast7Days, trendingPollId}` |
+| GET | `/stats` | — | 200 `{activePolls, closedPolls, totalResponses, registeredUsers, statesCovered, responsesLast7Days, trendingPollId, syntheticPolls}` |
 
 - **Drafts:** excluded from every figure.
 - **`registeredUsers`:** counts every account, including seeded demo voters ([METH-01](AUDIT.md#meth-01)).
+- **`syntheticPolls`:** how many public polls hold demonstration data; the ticker and home page show a notice when it isn't 0.
 - **`trendingPollId`:** the active poll with the most responses in the last 7 days, or `null`.
 
 ### Admin (`/api/admin`, admin only)

@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, func
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, false, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -26,6 +26,8 @@ class Poll(Base):
     closes_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # Demonstration data from app.seed, never genuine responses (METH-01, decision 0004)
+    is_synthetic: Mapped[bool] = mapped_column(default=False, server_default=false())
 
     questions: Mapped[list["Question"]] = relationship(
         back_populates="poll", cascade="all, delete-orphan", order_by="Question.position"

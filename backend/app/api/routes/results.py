@@ -196,6 +196,7 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
     return PollResults(
         poll_id=poll.id,
         title=poll.title,
+        is_synthetic=poll.is_synthetic,
         total_responses=total_responses,
         min_group_size=MIN_GROUP_SIZE,
         results_withheld=withheld_all,

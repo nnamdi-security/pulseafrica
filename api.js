@@ -199,13 +199,14 @@
       return request('POST', '/responses', payload);
     },
 
-    // → counts and percentages, overall and by state / age range / gender
+    // → counts and percentages, overall and by state / age range / gender;
+    //   groups under minGroupSize are withheld on the server (PRIV-01)
     getResults: function (pollId) {
       return request('GET', '/results/' + encodeURIComponent(pollId));
     },
 
     // → { activePolls, closedPolls, totalResponses, registeredUsers,
-    //     statesCovered, responsesLast7Days, trendingPollId }
+    //     statesCovered, responsesLast7Days, trendingPollId, syntheticPolls }
     getStats: function () {
       return request('GET', '/stats');
     },

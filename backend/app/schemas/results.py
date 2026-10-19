@@ -64,6 +64,8 @@ class QuestionResult(CamelModel):
 class PollResults(CamelModel):
     poll_id: int
     title: str
+    # Demonstration data (from the seed), not genuine responses
+    is_synthetic: bool
     total_responses: int
     # Groups and periods smaller than this are not shown
     min_group_size: int
