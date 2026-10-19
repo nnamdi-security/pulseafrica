@@ -66,3 +66,18 @@ def test_delete_account_removes_responses(client, admin_headers, citizen_headers
 
     # The email can be registered again
     register_and_login(client)
+
+
+def test_over_long_passwords_on_account_actions(client, citizen_headers):
+    too_long = "a1" + "b" * 78  # 80 bytes
+    wrong = {"currentPassword": too_long, "newPassword": "newsecret1", "confirmPassword": "newsecret1"}
+    res = client.post("/api/auth/me/password", json=wrong, headers=citizen_headers)
+    assert res.status_code == 403
+    assert res.json() == {"detail": "Your current password is incorrect"}
+
+    new_too_long = {"currentPassword": "secret123", "newPassword": too_long, "confirmPassword": too_long}
+    assert client.post("/api/auth/me/password", json=new_too_long, headers=citizen_headers).status_code == 422
+
+    res = client.request("DELETE", "/api/auth/me", json={"password": too_long}, headers=citizen_headers)
+    assert res.status_code == 403
+    assert client.get("/api/auth/me", headers=citizen_headers).status_code == 200

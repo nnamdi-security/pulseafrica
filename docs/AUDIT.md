@@ -19,7 +19,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | ID | Priority | Area | Finding | Status |
 |---|---|---|---|---|
 | [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Fixed (M1) |
-| [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Reproduced |
+| [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Fixed (M1) |
 | [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Confirmed (inspection) |
 | [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Reproduced |
 | [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Reproduced |
@@ -101,6 +101,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - In `verify_password`, treat over-length input as a failed match.
   - Add tests for 72/73-byte and multi-byte passwords.
 - **Verification status:** Reproduced.
+- **Resolution (M1):** fixed. `NewPassword` rejects more than 72 UTF-8 bytes with a 422 that says so (the old 128-character cap is replaced by the byte cap). `verify_password` treats over-length input as a failed match, so login gives 401 and the password re-checks give 403. The register and change-password placeholders now read "8 to 72 characters". Tests in `test_auth.py` and `test_account.py`.
 
 <a id="sec-03"></a>
 ### SEC-03: No rate limiting or lockout (HIGH)

@@ -27,7 +27,7 @@ The FastAPI backend is the single source of truth for authentication, authorizat
 | 409 | `{"detail": "…"}` | Business-rule conflict (duplicate email or response, closed poll, locked questions, last admin) |
 | 422 | `{"detail": [{"loc": ["body","email"], "msg": "…", "type": "…"}]}` | Validation error. `api.js` turns these into `err.fields[<field>]`, with "Value error, " stripped |
 | 422 | `{"detail": "The closing date has passed…"}` | Raised manually for an invalid poll state transition |
-| 500 | Text | Unhandled error. **Known trigger:** passwords over 72 bytes ([SEC-02](AUDIT.md#sec-02)) |
+| 500 | Text | Unhandled error. No known trigger (over-72-byte passwords were fixed under [SEC-02](AUDIT.md#sec-02)) |
 
 Clients should show `detail` strings: they're written to be user-safe.
 
@@ -45,11 +45,11 @@ Clients should show `detail` strings: they're written to be user-safe.
 
 | Method | Path | Auth | Request | Success | Errors |
 |---|---|---|---|---|---|
-| POST | `/auth/register` | — | `{fullName (2–120), email, state, ageRange, password (8–128, a letter + a digit), confirmPassword, terms: true}` | 201 `UserOut` | 409 email exists · 422 |
+| POST | `/auth/register` | — | `{fullName (2–120), email, state, ageRange, password (8+ characters and at most 72 UTF-8 bytes, a letter + a digit), confirmPassword, terms: true}` | 201 `UserOut` | 409 email exists · 422 |
 | POST | `/auth/login` | — | `{email, password}` | 200 `{accessToken, tokenType:"bearer"}` | 401 (also for suspended users) |
 | GET | `/auth/me` | user | — | 200 `UserOut` | 401 |
 | PATCH | `/auth/me` | user | any of `{fullName, state, ageRange}`. Email can't be changed | 200 `UserOut` | 401 · 422 |
-| POST | `/auth/me/password` | user | `{currentPassword, newPassword, confirmPassword}` | 204 | 403 wrong current · 422 |
+| POST | `/auth/me/password` | user | `{currentPassword, newPassword, confirmPassword}` (`newPassword` as for register) | 204 | 403 wrong current (also for an over-72-byte one) · 422 |
 | DELETE | `/auth/me` | user | `{password}` | 204: deletes the account **and all its responses**; polls it created are kept, with `created_by_id = null` | 403 · 401 |
 | GET | `/auth/me/responses` | user | — | 200 `[{pollId, pollTitle, category, pollStatus, closesAt, respondedAt}]`, newest first. **Never includes answers** | 401 |
 

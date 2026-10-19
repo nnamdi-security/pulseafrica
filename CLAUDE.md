@@ -81,7 +81,6 @@ python -m http.server 5500 --bind 127.0.0.1
 Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them **only** when a task covers them.
 
 - **HIGH:**
-  - SEC-02 (over-72-byte passwords → 500);
   - SEC-03 (no rate limiting);
   - INT-01 (responses accepted after the closing date);
   - PRIV-01 (groups of one in public results);

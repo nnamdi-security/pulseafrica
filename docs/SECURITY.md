@@ -46,7 +46,6 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 
 | ID | Priority | Summary |
 |---|---|---|
-| SEC-02 | HIGH | Over-72-byte passwords → 500 on register, login and password change |
 | SEC-03 | HIGH | No rate limiting or lockout |
 | PRIV-01 | HIGH | Public results reveal groups of one |
 | PRIV-02 | HIGH | Privacy copy contradicts the data model |

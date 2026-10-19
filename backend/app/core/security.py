@@ -5,13 +5,19 @@ import jwt
 
 from app.core.config import get_settings
 
+# bcrypt only reads the first 72 bytes and the library raises on anything longer.
+MAX_PASSWORD_BYTES = 72
+
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode(), hashed.encode())
+    encoded = password.encode()
+    if len(encoded) > MAX_PASSWORD_BYTES:  # can never match a stored hash, since new passwords are capped
+        return False
+    return bcrypt.checkpw(encoded, hashed.encode())
 
 
 def create_access_token(user_id: int) -> str:
