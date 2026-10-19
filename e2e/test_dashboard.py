@@ -53,7 +53,8 @@ def test_history_profile_password_and_delete(page: Page, citizen, console_errors
     delete.get_by_role("button", name="Delete my account").click()
     expect(delete.get_by_role("checkbox")).to_have_attribute("aria-invalid", "true")  # consequence not confirmed
 
-    delete.get_by_role("checkbox").check()
+    delete.locator("label.auth-check").click(position={"x": 9, "y": 9})  # the tick box, as a user clicks it
+    expect(delete.get_by_role("checkbox")).to_be_checked()
     delete.get_by_role("button", name="Delete my account").click()
     expect(page.locator("#dashGreeting")).to_have_text("Account deleted")
     assert api("POST", "/auth/login", {"email": citizen.email, "password": "newsecret1"})[0] == 401

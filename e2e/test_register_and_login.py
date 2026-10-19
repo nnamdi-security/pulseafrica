@@ -21,7 +21,8 @@ def test_register_with_errors_then_succeed(page: Page, citizen, console_errors):
     form.get_by_label("Age range").select_option("35–44")
     form.get_by_label("Password", exact=True).fill("secret123")
     form.get_by_label("Confirm password").fill("secret124")
-    form.get_by_role("checkbox").check()
+    form.locator("label.auth-check").click(position={"x": 9, "y": 9})  # the tick box, as a user clicks it
+    expect(form.get_by_role("checkbox")).to_be_checked()
     form.get_by_role("button", name="Create account").click()
     expect(form.get_by_label("Confirm password")).to_have_attribute("aria-invalid", "true")
 
