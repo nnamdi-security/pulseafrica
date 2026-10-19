@@ -10,4 +10,4 @@ bcrypt>=4.3,<6
 
 # Testing
 pytest>=8,<10
-httpx>=0.28,<1
+httpx2>=2.14,<3

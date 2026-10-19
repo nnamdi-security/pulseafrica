@@ -6,7 +6,7 @@
 |---|---|
 | **Revision** | `main` @ `7119fa7` |
 | **Environment** | Python 3.13.16 in `backend/.venv`; PostgreSQL 16 (local) |
-| **Key versions** | fastapi 0.146.0, SQLAlchemy 2.1.5, pydantic 2.14.1, alembic 1.20.0, bcrypt 5.0.0, PyJWT 2.15.1, pytest 9.1.1, httpx 0.28.1 |
+| **Key versions** | fastapi 0.146.0, SQLAlchemy 2.1.5, pydantic 2.14.1, alembic 1.20.0, bcrypt 5.0.0, PyJWT 2.15.1, pytest 9.1.1, httpx2 2.14.0 |
 | **Import check** | `python -c "import app.main"`: OK |
 | **Migrations** | `alembic current` = `alembic heads` = `9a1a4b1d975d` (migration 0003); up/down/up on Postgres clean; `alembic check`: "No new upgrade operations detected" (models match migrations) |
 
@@ -18,7 +18,7 @@
 
 The counts above were updated in Milestone 2 (results released in steps, decision 0006; the browser suite, decision 0005). The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 
-- **One warning in both runs:** `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead` (AUDIT [TEST-02](AUDIT.md#test-02)). It comes from the test client, not from app code.
+- **One expected warning in both runs:** PyJWT's `InsecureKeyLengthWarning` from `test_token_signed_with_the_old_default_is_rejected`, which signs a token with the old 9-byte default key on purpose (SEC-01). The Starlette test-client warning is gone since the move to `httpx2` ([TEST-02](AUDIT.md#test-02) fixed).
 - **No environment-related failures or missing dependencies.**
 - **Frontend:** the browser suite in `e2e/` covers every journey below ([TEST-01](AUDIT.md#test-01) fixed in Milestone 2).
 - **CI:** `.github/workflows/backend-tests.yml` runs pytest on SQLite and Postgres 16 and the migration cycle (`upgrade head`, `check`, `downgrade base`, `upgrade head`, `check`); `.github/workflows/browser-tests.yml` runs the browser suite and keeps Playwright traces of failures.
@@ -85,7 +85,6 @@ The counts above were updated in Milestone 2 (results released in steps, decisio
 |---|---|---|
 | CI isn't yet required for merging | A red PR can still be merged | Owner sets branch protection ([decision 0008](decisions/0008-required-ci-checks.md)) |
 | Contrast excluded from the axe checks | FE-03 regressions go unnoticed | Decision D7 |
-| Starlette test-client deprecation warning | Breaks when Starlette drops httpx support | [TEST-02](AUDIT.md#test-02): moving to `httpx2` needs the owner's approval of the dependency swap |
 | Chromium only | Safari- or Firefox-only regressions | Not planned |
 
 ## Proposed frontend testing strategy
