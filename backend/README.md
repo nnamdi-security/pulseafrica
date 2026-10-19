@@ -47,7 +47,7 @@ Register through `POST /api/auth/register` (or `/docs`), then:
 python -m app.create_admin you@example.com
 ```
 
-Admins can create polls and see drafts.
+Admins can see drafts and use the admin dashboard (`admin.html`) to manage polls and users, including making other users admins. `create_admin` is only needed for the first one.
 
 ### Load demo data
 
@@ -56,7 +56,7 @@ python -m app.seed                  # 10 polls + 300 demo voters' responses
 python -m app.seed --responses 0    # polls only
 ```
 
-This creates the polls that the original static `polls.html` showed. Each demo voter's answers are random, weighted towards the percentages the static cards displayed, so the pages have realistic numbers. Responses are spread over the time each poll has been open, and opinion drifts a little over that time, so the results trend charts aren't flat. Demo voters are inactive accounts with unusable passwords, so nobody can sign in as them. The seed runs only on a database with no polls.
+This creates the polls that the original static `polls.html` showed. Each demo voter's answers are random, weighted towards the percentages the static cards displayed, so the pages have realistic numbers. Responses are spread over the time each poll has been open, and opinion drifts a little over that time, so the results trend charts aren't flat. Demo voters have random, unknown passwords, so nobody can sign in as them. The seed runs only on a database with no polls.
 
 To start again from scratch: `alembic downgrade base && alembic upgrade head && python -m app.seed`.
 
@@ -152,6 +152,11 @@ JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript fronten
 | GET | `/api/polls/{id}` | — | One poll with its questions and options, plus `hasResponded` (`true` / `false` when signed in, `null` when not) |
 | POST | `/api/polls` | Admin | Create a poll with questions and options |
 | POST | `/api/responses` | User | Submit answers to an active poll (once per user) |
+| PATCH | `/api/polls/{id}` | Admin | Edit a poll: any of `title`, `description`, `category`, `status`, `closesAt` (send `null` to clear), `questions`. Questions only while the poll has no responses (`409` otherwise); a poll with responses can't go back to draft; opening needs a future closing date (`422`) |
+| DELETE | `/api/polls/{id}` | Admin | Delete a poll with every response to it |
+| GET | `/api/admin/overview` | Admin | User, poll and response totals, responses per day for 14 days, and each poll's participation |
+| GET | `/api/admin/users` | Admin | Users with their response counts, newest first. Query: `search` (name or email), `role`, `status` (`active` / `suspended`), `limit`, `offset` → `{ total, items }` |
+| PATCH | `/api/admin/users/{id}` | Admin | Suspend / reactivate (`isActive`) or change `role`. A suspended user's token stops working immediately. You can't suspend or demote yourself, and the last active admin can't be removed (`409`) |
 | GET | `/api/stats` | — | Site-wide figures: active / closed polls, total responses, registered users, states covered, responses in the last 7 days, trending poll |
 | GET | `/api/results/{pollId}` | — | Counts and percentages per question: overall, by state / age range / gender / education / occupation, and per day (`trend`) |
 
@@ -266,6 +271,8 @@ Every page also loads [`../nav-auth.js`](../nav-auth.js) after `api.js`. It repl
 `polls.html` loads every poll once with `GET /api/polls`, then filters, sorts and paginates in the browser. `poll.html?id=…` builds one screen per question from `GET /api/polls/{id}`, pre-fills age range and state from the account, and submits to `POST /api/responses`. People who aren't signed in, who have already responded, or who open a closed poll see a message instead of the questions.
 
 Every page loads [`../ticker.js`](../ticker.js) after `api.js`. It calls `GET /api/stats` and `GET /api/polls` once, fills the ticker with each category's headline result and the platform figures, and shares both requests with the home page through `window.PulseLive`. The home page also loads `GET /api/results/{id}` for its featured poll: the biggest live presidency poll, or the biggest live poll if there isn't one.
+
+`admin.html` checks the signed-in user is an admin, then loads `GET /api/admin/overview` and `GET /api/polls` (which includes drafts for admins). The Users tab loads `GET /api/admin/users` 25 at a time when it's first opened. Deleting a poll, suspending a user and changing a role all ask for confirmation first.
 
 `dashboard.html` loads `GET /api/auth/me`, `GET /api/auth/me/responses` and `GET /api/polls`. It shows the profile, the live polls the user hasn't answered yet, and their history, plus forms for the three account endpoints above. Deleting an account removes its responses from every result.
 

@@ -208,6 +208,43 @@
     //     statesCovered, responsesLast7Days, trendingPollId }
     getStats: function () {
       return request('GET', '/stats');
+    },
+
+    /* ── Admin only (403 for everyone else) ── */
+
+    // → user/poll/response totals, dailyResponses (last 14 days) and every poll's participation
+    adminOverview: function () {
+      return request('GET', '/admin/overview');
+    },
+
+    // query: { search, role, status ('active' | 'suspended'), limit, offset } → { total, items }
+    adminUsers: function (query) {
+      const params = new URLSearchParams();
+      Object.keys(query || {}).forEach(function (k) {
+        if (query[k] !== undefined && query[k] !== '' && query[k] !== null) params.set(k, query[k]);
+      });
+      const qs = params.toString();
+      return request('GET', '/admin/users' + (qs ? '?' + qs : ''));
+    },
+
+    // changes: any of { isActive, role }
+    adminUpdateUser: function (id, changes) {
+      return request('PATCH', '/admin/users/' + encodeURIComponent(id), changes);
+    },
+
+    // payload: { title, description, category, status, closesAt, questions: [{ text, options: [{ text, description }] }] }
+    createPoll: function (payload) {
+      return request('POST', '/polls', payload);
+    },
+
+    // changes: any of the createPoll fields; questions only while the poll has no responses
+    updatePoll: function (id, changes) {
+      return request('PATCH', '/polls/' + encodeURIComponent(id), changes);
+    },
+
+    // Deletes the poll and every response to it
+    deletePoll: function (id) {
+      return request('DELETE', '/polls/' + encodeURIComponent(id));
     }
   };
 })();

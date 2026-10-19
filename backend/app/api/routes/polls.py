@@ -1,10 +1,12 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import AdminUser, DbSession, OptionalUser
 from app.models import Answer, Option, Poll, PollStatus, Question, Response, User, UserRole
-from app.schemas.poll import PollCreate, PollOut, PollSummary, PreviewOption
+from app.schemas.poll import PollCreate, PollOut, PollSummary, PollUpdate, PreviewOption, QuestionIn
 
 router = APIRouter(prefix="/polls", tags=["polls"])
 
@@ -95,8 +97,40 @@ def get_poll(poll_id: int, db: DbSession, user: OptionalUser) -> PollOut:
     )
 
 
+def _build_questions(questions: list[QuestionIn]) -> list[Question]:
+    return [
+        Question(
+            text=question.text,
+            position=q_index,
+            options=[
+                Option(text=option.text, description=option.description, position=o_index)
+                for o_index, option in enumerate(question.options)
+            ],
+        )
+        for q_index, question in enumerate(questions)
+    ]
+
+
+def _check_can_open(closes_at: datetime | None) -> None:
+    if closes_at is None:
+        return
+    if closes_at.tzinfo is None:  # SQLite hands back naive UTC datetimes
+        closes_at = closes_at.replace(tzinfo=timezone.utc)
+    if closes_at <= datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The closing date has passed. Set a later closing date (or clear it) to open this poll.",
+        )
+
+
+def _poll_out(db, poll: Poll) -> PollOut:
+    return PollOut.model_validate(poll).model_copy(update=_stats(db, [poll])[poll.id])
+
+
 @router.post("", response_model=PollOut, status_code=status.HTTP_201_CREATED)
 def create_poll(payload: PollCreate, db: DbSession, admin: AdminUser) -> PollOut:
+    if payload.status == PollStatus.active:
+        _check_can_open(payload.closes_at)
     poll = Poll(
         title=payload.title,
         description=payload.description,
@@ -104,19 +138,61 @@ def create_poll(payload: PollCreate, db: DbSession, admin: AdminUser) -> PollOut
         status=payload.status,
         closes_at=payload.closes_at,
         created_by_id=admin.id,
-        questions=[
-            Question(
-                text=question.text,
-                position=q_index,
-                options=[
-                    Option(text=option.text, description=option.description, position=o_index)
-                    for o_index, option in enumerate(question.options)
-                ],
-            )
-            for q_index, question in enumerate(payload.questions)
-        ],
+        questions=_build_questions(payload.questions),
     )
     db.add(poll)
     db.commit()
     db.refresh(poll)
-    return PollOut.model_validate(poll).model_copy(update=_stats(db, [poll])[poll.id])
+    return _poll_out(db, poll)
+
+
+@router.patch("/{poll_id}", response_model=PollOut)
+def update_poll(poll_id: int, payload: PollUpdate, db: DbSession, admin: AdminUser) -> PollOut:
+    poll = db.scalar(select(Poll).where(Poll.id == poll_id).options(WITH_QUESTIONS))
+    if poll is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
+    responses = db.scalar(select(func.count()).where(Response.poll_id == poll.id)) or 0
+
+    if payload.questions is not None and responses:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Questions can't be changed once people have responded. Create a new poll instead.",
+        )
+    if payload.status == PollStatus.draft and poll.status != PollStatus.draft and responses:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="A poll with responses can't go back to draft. Close it instead.",
+        )
+
+    if payload.title is not None:
+        poll.title = payload.title
+    if payload.description is not None:
+        poll.description = payload.description
+    if payload.category is not None:
+        poll.category = payload.category
+    if "closes_at" in payload.model_fields_set:
+        poll.closes_at = payload.closes_at
+    if payload.status is not None:
+        poll.status = payload.status
+    if poll.status == PollStatus.active and ("closes_at" in payload.model_fields_set or payload.status is not None):
+        _check_can_open(poll.closes_at)
+    if payload.questions is not None:
+        poll.questions = _build_questions(payload.questions)
+
+    db.commit()
+    db.refresh(poll)
+    return _poll_out(db, poll)
+
+
+@router.delete("/{poll_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_poll(poll_id: int, db: DbSession, admin: AdminUser) -> None:
+    """Deletes the poll with its questions, options and every response to it."""
+    poll = db.get(Poll, poll_id)
+    if poll is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
+    # Explicit deletes so SQLite (no enforced foreign keys) behaves like Postgres
+    response_ids = select(Response.id).where(Response.poll_id == poll.id)
+    db.execute(delete(Answer).where(Answer.response_id.in_(response_ids)))
+    db.execute(delete(Response).where(Response.poll_id == poll.id))
+    db.delete(poll)  # questions and options go with it (cascade on the relationships)
+    db.commit()

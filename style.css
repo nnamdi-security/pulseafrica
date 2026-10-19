@@ -217,6 +217,23 @@ a.nav-user.active {
   color: #C8973A;
 }
 
+/* Admins also get an "Admin" link (nav-auth.js) */
+.nav-admin {
+  color: rgba(245, 240, 232, 0.65);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.nav-admin:hover,
+.nav-admin:focus-visible {
+  color: #F5F0E8;
+}
+
+.nav-admin.active {
+  color: #C8973A;
+}
+
 .nav-signout {
   background: none;
   border: 0;
@@ -5693,5 +5710,669 @@ footer {
 @media (max-width: 600px) {
   .dash-profile {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   ADMIN DASHBOARD — admin.html
+   Builds on the user dashboard styles (.dash-*), .results-*
+   cards and tabs, and the .auth-* form styles.
+   ============================================================ */
+
+/* Buttons */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0A1628;
+  background: #fff;
+  border: 1px solid rgba(10, 22, 40, 0.18);
+  border-radius: 5px;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.admin-btn:hover:not(:disabled) {
+  border-color: #C8973A;
+  color: #7a4c08;
+}
+
+.admin-btn:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: 2px;
+}
+
+.admin-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-btn[hidden] {
+  display: none;
+}
+
+.admin-btn-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.admin-btn-icon {
+  padding: 5px 8px;
+}
+
+.admin-btn-primary {
+  background: #0A1628;
+  border-color: #0A1628;
+  color: #F5F0E8;
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: #1a2a42;
+  color: #F5F0E8;
+}
+
+.admin-btn-danger {
+  background: #A32D2D;
+  border-color: #A32D2D;
+  color: #fff;
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  background: #842323;
+  border-color: #842323;
+  color: #fff;
+}
+
+.admin-btn-danger-ghost {
+  color: #A32D2D;
+}
+
+.admin-btn-danger-ghost:hover:not(:disabled) {
+  border-color: #A32D2D;
+  color: #842323;
+}
+
+/* Toolbar: filters, search, "New poll" */
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-input {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #0A1628;
+  background: #fff;
+  border: 1px solid rgba(10, 22, 40, 0.18);
+  border-radius: 5px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #C8973A;
+  box-shadow: 0 0 0 3px rgba(200, 151, 58, 0.15);
+}
+
+.admin-input.is-invalid {
+  border-color: #A32D2D;
+}
+
+input[type="search"].admin-input {
+  width: 220px;
+}
+
+/* Tables */
+.admin-table-wrap {
+  /* position: relative so absolutely positioned children (the .sr-only
+     labels) are clipped by the scroll box instead of widening the page */
+  position: relative;
+  overflow-x: auto;
+  margin-top: 14px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin-table th {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B7280;
+  text-align: left;
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.1);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.06);
+  color: #374151;
+  vertical-align: middle;
+}
+
+.admin-table .num {
+  text-align: right;
+  font-family: 'Space Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table-compact td,
+.admin-table-compact th {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.admin-empty {
+  text-align: center;
+  color: #6B7280;
+  padding: 28px 0 !important;
+}
+
+.admin-muted {
+  color: #9CA3AF;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.admin-poll-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 220px;
+}
+
+.admin-poll-title,
+.admin-poll-link {
+  font-weight: 500;
+  color: #0A1628;
+}
+
+.admin-poll-link:hover {
+  color: #7a4c08;
+}
+
+.admin-poll-link[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+/* Status and role badges (always a label, never colour alone) */
+.admin-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.admin-status .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.admin-status.is-active { color: #2D6A4F; }
+.admin-status.is-draft  { color: #7a4c08; }
+.admin-status.is-closed { color: #6B7280; }
+.admin-status.is-suspended { color: #A32D2D; }
+
+.admin-role {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(10, 22, 40, 0.06);
+  color: #374151;
+}
+
+.admin-role.is-admin {
+  background: rgba(200, 151, 58, 0.14);
+  color: #7a4c08;
+}
+
+.admin-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 200px;
+}
+
+.admin-user-name {
+  font-weight: 500;
+  color: #0A1628;
+}
+
+.admin-user-email {
+  font-size: 12px;
+  color: #6B7280;
+  overflow-wrap: anywhere;
+}
+
+.admin-you {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2D6A4F;
+  margin-left: 4px;
+}
+
+.admin-table tr.is-suspended td {
+  background: rgba(163, 45, 45, 0.03);
+}
+
+/* Share of all responses */
+.admin-share {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.admin-share-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(10, 22, 40, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.admin-share-fill {
+  height: 100%;
+  background: #C8973A;
+  border-radius: 0 3px 3px 0;
+}
+
+.admin-share span {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+  width: 32px;
+  text-align: right;
+}
+
+/* Platform totals */
+.admin-totals {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.admin-totals-group dd {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.06);
+}
+
+.admin-totals-group dd span {
+  color: #6B7280;
+}
+
+.admin-totals-group dd strong {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: #0A1628;
+}
+
+/* Responses-per-day column chart: one series, rounded data ends on the
+   baseline, a 2px gap between columns, tooltip on hover and focus */
+.admin-columns {
+  margin-top: 14px;
+}
+
+.admin-columns-plot {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 2px;
+  align-items: end;
+  height: 150px;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.25);
+  background-image: linear-gradient(rgba(10, 22, 40, 0.05) 1px, transparent 1px);
+  background-size: 100% 50%;
+}
+
+.admin-col {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  cursor: default;
+}
+
+.admin-col:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: 2px;
+}
+
+.admin-col-bar {
+  width: 100%;
+  min-height: 2px;
+  background: #C8973A;
+  border-radius: 4px 4px 0 0;
+  transition: background 0.15s;
+}
+
+.admin-col-bar.is-zero {
+  background: rgba(10, 22, 40, 0.12);
+}
+
+.admin-col:hover .admin-col-bar,
+.admin-col:focus-visible .admin-col-bar {
+  background: #a87a28;
+}
+
+.admin-col-label {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #6B7280;
+}
+
+.admin-col::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0A1628;
+  color: #F5F0E8;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  white-space: nowrap;
+  padding: 5px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  z-index: 2;
+}
+
+.admin-col:first-child::after { left: 0; transform: none; }
+.admin-col:last-child::after { left: auto; right: 0; transform: none; }
+
+.admin-col:hover::after,
+.admin-col:focus-visible::after {
+  opacity: 1;
+}
+
+.admin-columns-plot .admin-col {
+  height: 150px;
+}
+
+.admin-columns-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: #9CA3AF;
+}
+
+.admin-details {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.admin-details summary {
+  cursor: pointer;
+  color: #2D6A4F;
+  font-weight: 500;
+}
+
+.admin-details[open] summary {
+  margin-bottom: 6px;
+}
+
+/* Poll editor */
+.admin-back {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-editor-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #0A1628;
+  margin: 10px 0 18px;
+}
+
+.admin-editor-title:focus {
+  outline: none;
+}
+
+.admin-editor {
+  max-width: 860px;
+}
+
+.admin-textarea {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #0A1628;
+  background: #f9f7f4;
+  border: 1px solid rgba(10, 22, 40, 0.14);
+  border-radius: 5px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.admin-textarea:focus {
+  outline: none;
+  border-color: #C8973A;
+  background: #fff;
+}
+
+.admin-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.admin-questions {
+  border: 1px solid rgba(10, 22, 40, 0.1);
+  border-radius: 8px;
+  padding: 16px 18px 18px;
+  margin: 0;
+  min-width: 0;
+}
+
+.admin-questions legend {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B7280;
+  padding: 0 6px;
+}
+
+.admin-questions.has-error {
+  border-color: rgba(163, 45, 45, 0.4);
+}
+
+.admin-questions.has-error .admin-questions-error {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.admin-questions:disabled .admin-question {
+  opacity: 0.65;
+}
+
+.admin-locked {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: #7a4c08;
+  background: rgba(200, 151, 58, 0.08);
+  border-radius: 5px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
+}
+
+.admin-locked[hidden] {
+  display: none;
+}
+
+.admin-question-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-question {
+  background: #f9f7f4;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.admin-question-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.admin-question-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #C8973A;
+}
+
+.admin-question-text {
+  width: 100%;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.admin-option-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-option {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr auto;
+  gap: 6px;
+}
+
+.admin-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-editor-actions .auth-submit {
+  margin-top: 0;
+}
+
+/* Users pager */
+.admin-pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #6B7280;
+}
+
+/* Confirmation dialog */
+.admin-dialog {
+  border: none;
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 440px;
+  width: calc(100% - 32px);
+  box-shadow: 0 20px 60px rgba(10, 22, 40, 0.3);
+}
+
+.admin-dialog::backdrop {
+  background: rgba(10, 22, 40, 0.55);
+}
+
+.admin-dialog h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 10px;
+}
+
+.admin-dialog p {
+  font-size: 13px;
+  color: #4a4a4a;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.admin-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .admin-row-3,
+  .admin-totals {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-option {
+    grid-template-columns: 1fr auto;
+  }
+
+  .admin-option-desc {
+    grid-column: 1 / 2;
+  }
+
+  input[type="search"].admin-input {
+    width: 100%;
   }
 }

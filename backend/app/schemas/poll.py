@@ -33,6 +33,25 @@ class PollCreate(CamelModel):
         return value
 
 
+class PollUpdate(CamelModel):
+    """Fields left out are not changed; send "closesAt": null to clear the date.
+    Questions can only be replaced while the poll has no responses."""
+
+    title: str | None = Field(default=None, min_length=3, max_length=200)
+    description: str | None = None
+    category: str | None = None
+    status: PollStatus | None = None
+    closes_at: datetime | None = None
+    questions: list[QuestionIn] | None = Field(default=None, min_length=1)
+
+    @field_validator("category")
+    @classmethod
+    def valid_category(cls, value: str | None) -> str | None:
+        if value is not None and value not in CATEGORIES:
+            raise ValueError(f"Category must be one of: {', '.join(CATEGORIES)}")
+        return value
+
+
 class OptionOut(CamelModel):
     id: int
     text: str

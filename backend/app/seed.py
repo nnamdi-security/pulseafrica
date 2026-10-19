@@ -202,7 +202,8 @@ def main() -> None:
                 hashed_password=unusable,
                 state=rng.choice(STATES),
                 age_range=rng.choice(AGE_RANGES),
-                is_active=False,  # can never sign in
+                # Active, so the admin user list doesn't show them as suspended; the
+                # random, unknown password means nobody can sign in as them
             )
             db.add(voter)
             db.flush()

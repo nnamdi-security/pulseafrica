@@ -17,6 +17,7 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 - **`poll.html`**: taking a poll (`poll.html?id=1`), from sign-in through to the thank-you screen
 - **`results.html`**: the results dashboard (`results.html?id=1`), with overview, demographic, state and trend tabs
 - **`dashboard.html`**: the signed-in user's dashboard: profile, participation history and account settings (reached from the user's name in the nav)
+- **`admin.html`**: the admin dashboard: platform totals and participation, poll management and user management (an "Admin" link appears in the nav for admins)
 - **`index.html`**: the home page's featured result, platform stats, featured polls and results by category
 - **The ticker** on every page shows live headline results and platform figures. Until they load, or if the API is down, it shows a neutral line about the platform instead of numbers.
 - **The nav** on every page shows the signed-in user's name and a Sign out button
@@ -37,10 +38,10 @@ No page shows hard-coded poll numbers any more.
 | 6 | About | `about.html` | Mission, vision, values, founding story timeline, team, and platform goals |
 | 7 | Login / Register | `login.html` | Sign in, create account, and reset password views with inline validation, error and success states (`login.html#register` opens registration) |
 | 8 | User dashboard | `dashboard.html` | Profile, live polls still to answer, participation history, and account settings: edit profile, change password, delete account (`#history` / `#settings` open those tabs) |
+| 9 | Admin dashboard | `admin.html` | Admins only. Totals and responses per day; create, edit, publish, close, reopen and delete polls; search users, suspend / reactivate them and grant or remove admin access (`#polls` / `#users` open those tabs) |
 
 ### Not yet built
-- Admin dashboard (poll management, user management)
-- Connecting the remaining pages (polls, single poll, results) to the backend API
+Every page in the original brief now exists and runs on the API. See the roadmap below for what's left.
 
 ---
 
@@ -56,6 +57,7 @@ pulseafrica/
 ├── about.html          About page
 ├── login.html          Login / Register / reset password
 ├── dashboard.html      User dashboard: profile, history, settings
+├── admin.html          Admin dashboard: overview, polls, users
 ├── style.css           Single shared stylesheet for all pages
 ├── api.js              Shared API client: fetch helper, token storage, auth calls
 ├── nav-auth.js         Shows the signed-in user's name + Sign out in the nav
@@ -143,7 +145,7 @@ The connected pages need the backend running. Open the page through Live Server 
 - [x] About
 - [x] Login / Register
 - [x] User dashboard
-- [ ] Admin dashboard
+- [x] Admin dashboard
 
 **Phase 2 — Backend** (Python + FastAPI + PostgreSQL)
 - [x] FastAPI project scaffold with SQLAlchemy 2.0 + Alembic migrations

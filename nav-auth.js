@@ -4,7 +4,7 @@
      <script src="nav-auth.js"></script>
    Turns the nav's <li data-nav-auth> "Sign in" link into the
    user's first name (a link to dashboard.html) + a Sign out button
-   while signed in. Signing out fires a "pulse:signedout" event on
+   while signed in, plus an "Admin" link (admin.html) for admins. Signing out fires a "pulse:signedout" event on
    document so the current page can react.
    ============================================================ */
 (function () {
@@ -23,6 +23,7 @@
     const firstName = user.fullName.trim().split(/\s+/)[0];
     slot.classList.add('nav-auth-in');
     slot.innerHTML =
+      (user.role === 'admin' ? '<a class="nav-admin" href="admin.html">Admin</a>' : '') +
       '<a class="nav-user" href="dashboard.html"></a>' +
       '<button type="button" class="nav-signout">Sign out</button>';
 
@@ -33,6 +34,11 @@
     if (/(^|\/)dashboard\.html$/.test(location.pathname)) {
       name.classList.add('active');
       name.setAttribute('aria-current', 'page');
+    }
+    const adminLink = slot.querySelector('.nav-admin');
+    if (adminLink && /(^|\/)admin\.html$/.test(location.pathname)) {
+      adminLink.classList.add('active');
+      adminLink.setAttribute('aria-current', 'page');
     }
 
     slot.querySelector('.nav-signout').addEventListener('click', function () {
