@@ -65,17 +65,26 @@ def test_user_access(page: Page, admin, citizen, console_errors):
 
     act("Suspend", f"Suspend {citizen.full_name}?", "Suspend", "has been suspended.")
     expect(row).to_contain_text("Suspended")
-    assert api("GET", "/auth/me", token=citizen.token)[0] in (401, 403)
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 401
+
+    def fresh_token() -> str:
+        status, body = api("POST", "/auth/login", {"email": citizen.email, "password": citizen.password})
+        assert status == 200, body
+        return body["accessToken"]
 
     act("Reactivate", f"Reactivate {citizen.full_name}?", "Reactivate", "has been reactivated.")
-    assert api("GET", "/auth/me", token=citizen.token)[0] == 200
+    # Suspension revoked the old token for good (decision 0010); signing in again works.
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 401
+    token = fresh_token()
+    assert api("GET", "/auth/me", token=token)[0] == 200
 
     act("Make admin", f"Make {citizen.full_name} an admin?", "Make admin", "is now an admin.")
     expect(row).to_contain_text("Admin")
-    assert api("GET", "/admin/overview", token=citizen.token)[0] == 200
+    assert api("GET", "/admin/overview", token=token)[0] == 200
 
     act("Remove admin", f"Remove admin access from {citizen.full_name}?", "Remove admin", "is no longer an admin.")
-    assert api("GET", "/admin/overview", token=citizen.token)[0] == 403
+    assert api("GET", "/admin/overview", token=token)[0] == 401
+    assert api("GET", "/admin/overview", token=fresh_token())[0] == 403
 
 
 def test_citizens_are_kept_out(page: Page, citizen, console_errors):

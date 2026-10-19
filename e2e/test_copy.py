@@ -17,7 +17,8 @@ def test_all_nine_pages_are_checked():
 
 @pytest.mark.parametrize("page", PAGES, ids=lambda p: p.name)
 def test_no_page_claims_anonymity(page):
-    text = page.read_text()
+    # crossorigin="anonymous" on the CDN tags (decision 0012) is an HTML attribute, not copy.
+    text = page.read_text().replace('crossorigin="anonymous"', "")
     found = {m.group(0) for m in re.finditer(r"[^.<>]*\banonym[^.<>]*", text, re.IGNORECASE)}
     unexpected = [s.strip() for s in found if not any(page.name == f and a in s for f, a in ALLOWED)]
     assert unexpected == []
