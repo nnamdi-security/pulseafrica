@@ -59,7 +59,7 @@
       <li><a href="results.html">Results</a></li>
       <li><a href="methodology.html">Methodology</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="login.html">Sign in</a></li>
+      <li data-nav-auth><a href="login.html">Sign in</a></li>
     </ul>
 
     <button class="nav-cta" type="button">Share Your Voice</button>
@@ -671,6 +671,8 @@
   <!-- ============================================================
        JAVASCRIPT — filters, search, mobile nav
        ============================================================ -->
+  <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
   <script>
     /* ── Mobile nav toggle ── */
     const navToggle = document.getElementById('navToggle');

@@ -234,6 +234,8 @@ PulseAPI.login(email, password, remember)   // stores the token
 
 The token is kept in `localStorage` when "Keep me signed in" is ticked, otherwise in `sessionStorage`, and sent as `Authorization: Bearer …` on every request. The API address defaults to `http://localhost:8000/api`; set `window.PULSE_API_BASE` before loading `api.js` to point elsewhere (e.g. production).
 
+Every page also loads [`../nav-auth.js`](../nav-auth.js) after `api.js`. It replaces the nav's `<li data-nav-auth>` "Sign in" link with the user's first name and a Sign out button. The name comes from a cached copy of `/auth/me`, so it appears without a flicker, and is then re-checked against the API; an expired or invalid token signs the user out. Signing out just deletes the stored token (JWTs are stateless, so there is no logout endpoint).
+
 `login.html` is wired up: sign in, create account (which signs the new user straight in), duplicate-email and wrong-password errors, and a "server unreachable" message. The password reset form is still simulated because there's no reset endpoint yet.
 
 ---

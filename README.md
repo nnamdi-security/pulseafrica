@@ -10,7 +10,7 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 
 ## Status
 
-🚧 **In progress.** The frontend pages are built. The backend API (auth, polls, responses, results) is scaffolded in [`backend/`](backend/) and **sign in / create account on `login.html` now use the real API**. Every other page still shows static placeholder content (poll counts, response numbers, approval ratings) hard-coded into the HTML.
+🚧 **In progress.** The frontend pages are built. The backend API (auth, polls, responses, results) is scaffolded in [`backend/`](backend/) **sign in / create account on `login.html` now use the real API**, and every page's nav shows the signed-in user's name with a Sign out button. Every other page still shows static placeholder content (poll counts, response numbers, approval ratings) hard-coded into the HTML.
 
 ---
 
@@ -46,6 +46,7 @@ pulseafrica/
 ├── login.html          Login / Register / reset password
 ├── style.css           Single shared stylesheet for all pages
 ├── api.js              Shared API client: fetch helper, token storage, auth calls
+├── nav-auth.js         Shows the signed-in user's name + Sign out in the nav
 └── backend/            FastAPI + PostgreSQL API (see backend/README.md)
 ```
 
@@ -141,7 +142,7 @@ Sign in and Create account on `login.html` need the backend running. Open the pa
 **Phase 3 — Integration**
 - [x] Wire login / register to the auth API (`api.js`)
 - [ ] Wire polls, single poll and results pages to the API
-- [ ] Sign-in state in the nav (show the user's name, sign out)
+- [x] Sign-in state in the nav (user's name, sign out) via `nav-auth.js`
 - [ ] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates
 

@@ -9,6 +9,9 @@
   // window.PULSE_API_BASE before this file loads (e.g. for production).
   const API_BASE = window.PULSE_API_BASE || 'http://localhost:8000/api';
   const TOKEN_KEY = 'pulseafrica.token';
+  // The last /auth/me result, kept next to the token so pages can show
+  // the user's name immediately while the token is re-checked
+  const USER_KEY = 'pulseafrica.user';
 
   /* ---------- Token storage ----------
      "Keep me signed in" → localStorage (survives closing the browser).
@@ -19,6 +22,31 @@
     } catch (e) {
       return null;
     }
+  }
+
+  // Whichever storage holds the token (null when signed out)
+  function tokenStore() {
+    try {
+      if (localStorage.getItem(TOKEN_KEY)) return localStorage;
+      if (sessionStorage.getItem(TOKEN_KEY)) return sessionStorage;
+    } catch (e) { /* storage blocked */ }
+    return null;
+  }
+
+  function getCachedUser() {
+    const store = tokenStore();
+    try {
+      return store ? JSON.parse(store.getItem(USER_KEY)) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function cacheUser(user) {
+    const store = tokenStore();
+    try {
+      if (store) store.setItem(USER_KEY, JSON.stringify(user));
+    } catch (e) { /* storage blocked */ }
   }
 
   function saveToken(token, remember) {
@@ -32,8 +60,10 @@
 
   function clearToken() {
     try {
-      localStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(TOKEN_KEY);
+      [localStorage, sessionStorage].forEach(function (store) {
+        store.removeItem(TOKEN_KEY);
+        store.removeItem(USER_KEY);
+      });
     } catch (e) { /* nothing to clear */ }
   }
 
@@ -91,6 +121,7 @@
     ApiError: ApiError,
     getToken: getToken,
     clearToken: clearToken,
+    getCachedUser: getCachedUser,
 
     // → { accessToken, tokenType }; stores the token
     login: function (email, password, remember) {
@@ -105,9 +136,16 @@
       return request('POST', '/auth/register', payload);
     },
 
-    // → the signed-in user, or rejects with status 401
+    // → the signed-in user, or rejects with status 401.
+    // Caches the user on success; signs out locally if the token was rejected.
     me: function () {
-      return request('GET', '/auth/me');
+      return request('GET', '/auth/me').then(function (user) {
+        cacheUser(user);
+        return user;
+      }, function (err) {
+        if (err.status === 401) clearToken();
+        throw err;
+      });
     },
 
     logout: clearToken,

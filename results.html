@@ -56,7 +56,7 @@
       <li><a href="results.html" class="active">Results</a></li>
       <li><a href="methodology.html">Methodology</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="login.html">Sign in</a></li>
+      <li data-nav-auth><a href="login.html">Sign in</a></li>
     </ul>
     <button class="nav-cta" type="button">Share Your Voice</button>
     <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
@@ -549,6 +549,8 @@
   <!-- ============================================================
        JAVASCRIPT
        ============================================================ -->
+  <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
   <script>
     /* ── Mobile nav ── */
     const navToggle = document.getElementById('navToggle');

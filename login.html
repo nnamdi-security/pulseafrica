@@ -53,7 +53,7 @@
       <li><a href="results.html">Results</a></li>
       <li><a href="methodology.html">Methodology</a></li>
       <li><a href="about.html">About</a></li>
-      <li><a href="login.html" class="active">Sign in</a></li>
+      <li data-nav-auth><a href="login.html" class="active">Sign in</a></li>
     </ul>
     <button class="nav-cta" type="button">Share Your Voice</button>
     <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
@@ -435,6 +435,7 @@
        JAVASCRIPT
        ============================================================ -->
   <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
   <script>
     /* ---------- Mobile nav ---------- */
     const navToggle = document.getElementById('navToggle');
@@ -824,6 +825,7 @@
         .then(function () { return Promise.all([PulseAPI.me(), livePollsText()]); })
         .then(function (results) {
           const user = results[0];
+          PulseNav.showUser(user);
           showSuccess({
             title: 'You’re signed in',
             text: 'Welcome back, ' + firstNameOf(user.fullName) + '. ' + results[1],
@@ -862,6 +864,7 @@
           return PulseAPI.login(payload.email, payload.password, false).then(function () { return user; });
         })
         .then(function (user) {
+          PulseNav.refresh();
           showSuccess({
             title: 'Account created',
             text: 'Thank you, ' + firstNameOf(user.fullName) + '. You’re signed in and can respond to every live poll.',
