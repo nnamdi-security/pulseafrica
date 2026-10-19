@@ -65,7 +65,7 @@ Clients should show `detail` strings: they're written to be user-safe.
 | PATCH | `/polls/{id}` | admin | any of the POST fields | 200 `PollOut` | 404 · 409 questions locked / back to draft with responses · 422 |
 | DELETE | `/polls/{id}` | admin | — | 204: deletes the poll, its questions and options, **and every response to it** | 404 |
 
-- **`PollSummary`:** `{id, title, description, category, status, closesAt, createdAt, responseCount, questionCount, preview: [{text, count, percent}]}`. `preview` covers the **first question's** options.
+- **`PollSummary`:** `{id, title, description, category, status, closesAt, createdAt, responseCount, questionCount, preview: [{text, count, percent}]}`. `preview` covers the **first question's** options, and is `[]` until the poll has at least 10 responses (the minimum group size, [decision 0001](decisions/0001-minimum-public-group-size.md)).
 - **`PollOut`:** `PollSummary` plus `questions: [{id, text, options: [{id, text, description}]}]` (ordered by position) and `hasResponded`: `true`/`false` when signed in, `null` when not.
 
 **Business rules** (enforced in `routes/polls.py`):
@@ -89,18 +89,24 @@ Demographics are **self-reported for each response**. They can differ from the p
 |---|---|---|---|
 | GET | `/results/{pollId}` | — | 200 `PollResults` for active and closed polls; 404 for drafts, even for admins ([BE-04](AUDIT.md#be-04)) |
 
-- **`PollResults`:** `{pollId, title, totalResponses, questions: [QuestionResult]}`.
-- **`QuestionResult`:** `{questionId, text, total, options: [OptionResult], byState, byAgeRange, byGender, byEducation, byOccupation: [GroupResult], trend: [{date, total, options}]}`.
-- **`OptionResult`:** `{optionId, text, count, percent}`; `percent` is rounded to one decimal place.
+- **`PollResults`:** `{pollId, title, totalResponses, minGroupSize, resultsWithheld, statesCovered, trendInterval, questions: [QuestionResult]}`.
+  - `minGroupSize`: the smallest group shown (10). Clients use this value rather than their own.
+  - `resultsWithheld`: `true` when `totalResponses < minGroupSize`. Every option's `count` and `percent` are then `null`, and every breakdown and the trend are empty; only the totals are shown.
+  - `statesCovered`: distinct states among the respondents, including states whose group is withheld.
+  - `trendInterval`: `"day"`, `"week"` or `"month"`, the length of each `trend` period.
+- **`QuestionResult`:** `{questionId, text, total, options: [OptionResult], byState, byAgeRange, byGender, byEducation, byOccupation: [GroupResult], trend: [{date, total, options}], withheld}`.
+- **`OptionResult`:** `{optionId, text, count, percent}`; `percent` is rounded to one decimal place. Both are `null` only when `resultsWithheld`.
 - **`GroupResult`:** `{group, total, options}`.
+- **`withheld`:** `{byState, byAgeRange, byGender, byEducation, byOccupation, trend}`, each `{groups, responses}`: how many groups (or periods) are left out, and how many of the question's responses aren't in a shown group, including people who skipped an optional question.
 
 The groups follow these rules:
 
+- **Minimum group size ([PRIV-01](AUDIT.md#priv-01), [decision 0001](decisions/0001-minimum-public-group-size.md)):** groups and trend periods with fewer than `minGroupSize` responses are left out. If what's left out would add up to between 1 and `minGroupSize − 1` responses, the smallest shown group is left out too, repeatedly, so the hidden answers can't be worked out by subtracting the shown groups from the overall counts. `withheld.*.responses` is therefore 0 or at least `minGroupSize`. Everyone answers every question, so the same groups are shown for each question.
 - **Group order:** groups are sorted by name; clients reorder them, e.g. ages in `AGE_ORDER`.
 - **Optional demographics:** `byEducation` and `byOccupation` include only respondents who answered those questions.
-- **Trend:** one entry per UTC day that has responses, oldest first.
+- **Trend:** one entry per UTC period, oldest first; `date` is the first day of the period (a Monday for weeks). Polls whose responses span up to 21 days are grouped by day, up to 182 days by week, and longer by month; if fewer than two periods would be shown, the next coarser interval that shows two is used.
 - **Unweighted:** all figures are raw counts.
-- **Privacy:** cells of size 1 are returned as-is ([PRIV-01](AUDIT.md#priv-01)). **Any client must treat small groups as sensitive.**
+- **Breaking change (Milestone 1):** `count` and `percent` can be `null`, and `trend[].date` can be the start of a week or month rather than a day. Every page that reads results was updated in the same change.
 
 ### Platform stats
 

@@ -31,3 +31,7 @@ OCCUPATIONS = [
     "Private sector employee", "Self-employed / entrepreneur", "Student",
     "Unemployed", "Retired", "Prefer not to say",
 ]
+
+# Smallest group shown in public results; smaller groups, and polls with fewer
+# responses than this, are withheld (docs/decisions/0001-minimum-public-group-size.md)
+MIN_GROUP_SIZE = 10

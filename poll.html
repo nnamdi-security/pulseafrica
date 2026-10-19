@@ -588,6 +588,9 @@
       const preview = document.getElementById('pollPreview');
       if (!poll.responseCount) {
         preview.innerHTML = '<p class="poll-sb-about">No responses yet.</p>';
+      } else if (!poll.preview.length) {
+        /* The API holds back percentages until enough people have answered */
+        preview.innerHTML = '<p class="poll-sb-about">Results appear once enough people have answered, to protect respondents’ privacy.</p>';
       } else {
         preview.innerHTML = poll.preview.map(function (o, i) {
           const pct = Math.round(o.percent);
@@ -666,7 +669,7 @@
       return Promise.all([PulseAPI.getPoll(poll.id), PulseAPI.getResults(poll.id)]).then(function (data) {
         const updated = data[0];
         const results = data[1];
-        const states = results.questions.length ? results.questions[0].byState.length : 0;
+        const states = results.statesCovered;
         document.getElementById('thanksText').textContent =
           'Your voice has been added to the national data record. You are one of ' +
           plural(updated.responseCount, 'citizen') + ' who have taken part in this poll, from ' +

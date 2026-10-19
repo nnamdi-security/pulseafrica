@@ -27,5 +27,5 @@
 ## Consequences
 
 - New and small polls show no percentages until 10 people have answered.
-- Long-running polls with few responses per day have their trend grouped by week or month on the server so periods reach 10 (`trendInterval`).
+- The trend is grouped on the server (`trendInterval`): by day for polls up to three weeks long, by week up to six months, then by month, and coarser still when fewer than two periods would reach 10.
 - Live results can still leak through timing (someone watching as a known person answers). Cell suppression can't fix that; it needs a separate decision on delayed or batched results.

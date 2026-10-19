@@ -485,14 +485,18 @@
       document.getElementById('heroRingLabel').textContent = h ? percent + '%' : '–';
 
       const question = results.questions[0];
+      /* Below the minimum group size the API withholds percentages */
+      const waiting = !h && results.resultsWithheld && results.totalResponses > 0;
       document.getElementById('heroMetaTitle').textContent = h
         ? (h.approval ? 'Overall approval' : shareName(h).charAt(0).toUpperCase() + shareName(h).slice(1))
-        : 'No responses yet';
+        : waiting ? plural(results.totalResponses, 'response') + ' so far' : 'No responses yet';
       document.getElementById('heroMetaSub').innerHTML = h
-        ? 'Based on ' + plural(results.totalResponses, 'response') + '<br>From ' + question.byState.length + ' of 40 states'
-        : '<a href="poll.html?id=' + poll.id + '">Be the first to respond</a>';
+        ? 'Based on ' + plural(results.totalResponses, 'response') + '<br>From ' + results.statesCovered + ' of 40 states'
+        : waiting
+          ? 'Results appear once ' + results.minGroupSize + ' people have answered. <a href="poll.html?id=' + poll.id + '">Take the poll</a>'
+          : '<a href="poll.html?id=' + poll.id + '">Be the first to respond</a>';
 
-      document.getElementById('heroBars').innerHTML = question.options.map(function (o, i) {
+      document.getElementById('heroBars').innerHTML = (results.resultsWithheld ? [] : question.options).map(function (o, i) {
         const pct = Math.round(o.percent);
         return '<div class="mini-bar-row" title="' + escapeHtml(o.text + ': ' + pct + '% (' + plural(o.count, 'response') + ')') + '">' +
           '<span class="mini-bar-label">' + escapeHtml(o.text) + '</span>' +

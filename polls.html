@@ -420,9 +420,14 @@
     }
 
     function sentimentHTML(poll) {
-      if (!poll.responseCount || !poll.preview.length) {
+      if (!poll.responseCount) {
         return '<p class="poll-card-empty-preview">No responses yet' +
                (poll.status === 'active' ? ' — be the first to share your view.' : '.') + '</p>';
+      }
+      if (!poll.preview.length) {
+        /* The API holds back percentages until enough people have answered */
+        return '<p class="poll-card-empty-preview">' + plural(poll.responseCount, 'response') +
+               ' so far. Results appear once enough people have answered.</p>';
       }
       const buckets = sentimentBuckets(poll.preview);
       const summary = buckets.map(function (b) { return b.percent + '% ' + b.label.toLowerCase(); }).join(', ');

@@ -8,7 +8,7 @@ from sqlalchemy import event
 from app.db.session import get_db
 from app.main import app
 from app.models import Poll
-from tests.conftest import TestingSession, engine, register_and_login
+from tests.conftest import TestingSession, engine, make_citizens, register_and_login
 
 POLL_PAYLOAD = {
     "title": "Presidential approval — Q4",
@@ -111,47 +111,47 @@ def test_closed_poll_rejects_responses(client, admin_headers, citizen_headers):
     assert submit(client, citizen_headers, poll).status_code == 409
 
 
-def test_results_breakdowns(client, admin_headers, citizen_headers):
-    from tests.conftest import register_and_login
-
+def test_results_breakdowns(client, db, admin_headers):
     poll = create_poll(client, admin_headers)
-    submit(client, citizen_headers, poll, choice=0)
-    other = register_and_login(client, email="emeka@example.com")
-    submit(client, other, poll, choice=1, gender="Male", state="ORLU STATE")
-    submit(client, admin_headers, poll, choice=0, gender="Male", state="ENUGU STATE")
+    people = iter(make_citizens(db, 30))
+    for _ in range(10):
+        submit(client, next(people), poll, choice=0)
+        submit(client, next(people), poll, choice=1, gender="Male", state="ORLU STATE")
+        submit(client, next(people), poll, choice=0, gender="Male", state="ENUGU STATE")
 
     res = client.get(f"/api/results/{poll['id']}")
     assert res.status_code == 200
     body = res.json()
-    assert body["totalResponses"] == 3
+    assert body["totalResponses"] == 30
 
     economy = body["questions"][0]
     assert [(o["text"], o["count"], o["percent"]) for o in economy["options"]] == [
-        ("Approve", 2, 66.7), ("Neutral", 1, 33.3), ("Disapprove", 0, 0.0),
+        ("Approve", 20, 66.7), ("Neutral", 10, 33.3), ("Disapprove", 0, 0.0),
     ]
     by_state = {g["group"]: [o["count"] for o in g["options"]] for g in economy["byState"]}
-    assert by_state == {"ENUGU STATE": [2, 0, 0], "ORLU STATE": [0, 1, 0]}
+    assert by_state == {"ENUGU STATE": [20, 0, 0], "ORLU STATE": [0, 10, 0]}
     by_gender = {g["group"]: g["total"] for g in economy["byGender"]}
-    assert by_gender == {"Female": 1, "Male": 2}
+    assert by_gender == {"Female": 10, "Male": 20}
 
 
 def test_results_for_poll_with_no_responses(client, admin_headers):
     poll = create_poll(client, admin_headers)
     body = client.get(f"/api/results/{poll['id']}").json()
     assert body["totalResponses"] == 0
-    assert all(o["percent"] == 0.0 for o in body["questions"][0]["options"])
+    assert body["resultsWithheld"] is True
+    assert all(o["percent"] is None for o in body["questions"][0]["options"])
 
 
-def test_list_includes_counts_and_preview(client, admin_headers, citizen_headers):
+def test_list_includes_counts_and_preview(client, db, admin_headers):
     poll = create_poll(client, admin_headers)
-    submit(client, citizen_headers, poll, choice=0)
-    submit(client, admin_headers, poll, choice=1)
+    for i, headers in enumerate(make_citizens(db, 10)):
+        submit(client, headers, poll, choice=i % 2)
 
     [card] = client.get("/api/polls").json()
-    assert card["responseCount"] == 2
+    assert card["responseCount"] == 10
     assert card["questionCount"] == 2
     assert [(o["text"], o["count"], o["percent"]) for o in card["preview"]] == [
-        ("Approve", 1, 50.0), ("Neutral", 1, 50.0), ("Disapprove", 0, 0.0),
+        ("Approve", 5, 50.0), ("Neutral", 5, 50.0), ("Disapprove", 0, 0.0),
     ]
 
 
@@ -159,7 +159,7 @@ def test_preview_with_no_responses(client, admin_headers):
     create_poll(client, admin_headers)
     [card] = client.get("/api/polls").json()
     assert card["responseCount"] == 0
-    assert [o["percent"] for o in card["preview"]] == [0.0, 0.0, 0.0]
+    assert card["preview"] == []
 
 
 def test_has_responded(client, admin_headers, citizen_headers):
@@ -184,19 +184,23 @@ def test_optional_demographics(client, admin_headers, citizen_headers):
     assert submit(client, citizen_headers, poll, education="Bachelor's degree", occupation="Student").status_code == 201
 
 
-def test_results_optional_demographics_and_trend(client, admin_headers, citizen_headers):
+def test_results_optional_demographics_and_trend(client, db, admin_headers):
     poll = create_poll(client, admin_headers)
-    submit(client, citizen_headers, poll, choice=0, education="Postgraduate", occupation="Student")
-    submit(client, admin_headers, poll, choice=1)  # no education / occupation
+    people = iter(make_citizens(db, 20))
+    for _ in range(10):
+        submit(client, next(people), poll, choice=0, education="Postgraduate", occupation="Student")
+        submit(client, next(people), poll, choice=1)  # no education / occupation
 
-    economy = client.get(f"/api/results/{poll['id']}").json()["questions"][0]
-    assert [(g["group"], g["total"]) for g in economy["byEducation"]] == [("Postgraduate", 1)]
-    assert [(g["group"], g["total"]) for g in economy["byOccupation"]] == [("Student", 1)]
+    body = client.get(f"/api/results/{poll['id']}").json()
+    economy = body["questions"][0]
+    assert [(g["group"], g["total"]) for g in economy["byEducation"]] == [("Postgraduate", 10)]
+    assert [(g["group"], g["total"]) for g in economy["byOccupation"]] == [("Student", 10)]
 
+    assert body["trendInterval"] == "day"
     [today] = economy["trend"]
     assert len(today["date"]) == 10 and today["date"][4] == "-"
-    assert today["total"] == 2
-    assert [o["count"] for o in today["options"]] == [1, 1, 0]
+    assert today["total"] == 20
+    assert [o["count"] for o in today["options"]] == [10, 10, 0]
 
 
 def _move_closing_date(db, poll, delta):
