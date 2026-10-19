@@ -1,0 +1,6 @@
+# Settings for pnpm (this is a single package, not a workspace).
+# Neither package needs its install script: msw copies a browser worker we don't use,
+# and unrs-resolver ships prebuilt binaries.
+ignoredBuiltDependencies:
+  - msw
+  - unrs-resolver
