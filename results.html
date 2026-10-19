@@ -153,6 +153,12 @@
       <span><strong>Demonstration data.</strong> These results come from simulated respondents created to demonstrate PulseAfrica. They are not real opinion research.</span>
     </p>
 
+    <!-- Results released in steps; breakdowns held until the poll closes (decision 0006) -->
+    <p class="demo-notice results-card-full" id="resHeldNotice" role="note" hidden>
+      <i class="ti ti-clock" aria-hidden="true"></i>
+      <span id="resHeldText"></span>
+    </p>
+
     <!-- Loading / error / not found / no responses yet -->
     <div class="results-card results-card-full results-notice" id="resNotice" role="status">
       <i class="ti ti-loader-2" aria-hidden="true"></i>
@@ -524,6 +530,25 @@
       return '<p class="results-empty">' + escapeHtml(message) + '</p>';
     }
 
+    /* Figures count whole steps of minGroup responses, so no single response moves them, and
+       breakdowns and the trend are published only once the poll closes (decision 0006). */
+    const HELD = 'Published when this poll closes, to protect respondents’ privacy.';
+
+    function renderHeldNotice() {
+      const notice = document.getElementById('resHeldNotice');
+      const partial = results.publishedResponses < results.totalResponses;
+      notice.hidden = results.resultsWithheld || (!results.breakdownsHeld && !partial);
+      if (notice.hidden) return;
+      const counted = partial
+        ? 'The figures count ' + results.publishedResponses.toLocaleString() + ' of ' +
+          plural(results.totalResponses, 'response') + ', because they are updated in steps of ' + minGroup + '.'
+        : 'The figures are updated in steps of ' + minGroup + ' responses.';
+      document.getElementById('resHeldText').textContent = results.breakdownsHeld
+        ? 'While this poll is open, results by state, age, gender, education and occupation, and the trend over time, ' +
+          'are held back until it closes, so no one can tell how a particular person answered. ' + counted
+        : counted + ' No single response can then be picked out.';
+    }
+
     /* The server leaves out groups too small to publish (and, when needed, the next
        smallest, so they can't be worked out by subtraction). Say how many. */
     function withheldNote(withheld, noun) {
@@ -534,6 +559,7 @@
 
     /* Positive share for each demographic group, coloured against the overall figure */
     function groupBars(groups, withheld, order) {
+      if (results.breakdownsHeld) return emptyBars(HELD);
       const question = currentQuestion();
       const overall = shareOf(question.options, 'approve');
       let rows = groups.slice();
@@ -607,6 +633,7 @@
         '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>' +
         (results.isSynthetic ? '<span class="results-badge results-badge-cat">Demo data</span>' : '');
       document.getElementById('resDemoNotice').hidden = !results.isSynthetic;
+      renderHeldNotice();
 
       const picker = document.getElementById('questionPicker');
       document.getElementById('questionPickerWrap').hidden = results.questions.length < 2;
@@ -795,14 +822,14 @@
               '<div class="state-heat-pct">' + pct(share) + '</div>' +
             '</div>';
           }).join('')
-        : emptyBars(question.withheld.byState.groups
+        : emptyBars(results.breakdownsHeld ? HELD : question.withheld.byState.groups
             ? 'No state has enough responses to show yet (each needs at least ' + minGroup + ').'
             : 'No responses yet.');
 
       const ranked = question.byState
         .map(function (g) { return { group: g.group, total: g.total, share: shareOf(g.options, 'approve') }; })
         .sort(function (a, b) { return b.share - a.share || b.total - a.total; });
-      document.getElementById('rankSub').textContent = 'Ranked by ' + shareName(question) + '. To protect respondents’ privacy, ' +
+      document.getElementById('rankSub').textContent = results.breakdownsHeld ? 'Results by state are ' + HELD.charAt(0).toLowerCase() + HELD.slice(1) : 'Ranked by ' + shareName(question) + '. To protect respondents’ privacy, ' +
         'only states with at least ' + minGroup + ' responses are shown (' + ranked.length + ' of ' +
         plural(results.statesCovered, 'state') + ' with responses).';
       document.getElementById('topHeading').textContent = 'Top 5 — highest ' + shareName(question);
@@ -814,7 +841,7 @@
         }).join('');
       }
       if (ranked.length < 2) {
-        document.getElementById('topStates').innerHTML = emptyBars('Not enough responses per state to rank yet.');
+        document.getElementById('topStates').innerHTML = emptyBars(results.breakdownsHeld ? HELD : 'Not enough responses per state to rank yet.');
         document.getElementById('bottomStates').innerHTML = '';
         return;
       }
@@ -868,7 +895,7 @@
       const hidden = question.withheld.trend.groups;
 
       document.getElementById('trendLabel').textContent = { day: 'Daily', week: 'Weekly', month: 'Monthly' }[unit] + ' trend';
-      document.getElementById('trendSub').textContent = (series.length
+      document.getElementById('trendSub').textContent = results.breakdownsHeld ? 'The trend over time is ' + HELD.charAt(0).toLowerCase() + HELD.slice(1) : (series.length
         ? '“' + posLabel + '” vs “' + negLabel + '” share among the responses received each ' + unit +
           ' · ' + periodLabel(series[0]) + ' – ' + periodLabel(series[series.length - 1])
         : hidden ? 'No ' + unit + ' has enough responses to show yet.' : 'No responses yet.') +
@@ -915,7 +942,7 @@
       /* Change between the earlier and later half of responses, for every question */
       document.getElementById('changeSub').textContent =
         'Positive share in the later half of responses, and its change from the earlier half';
-      document.getElementById('changeBars').innerHTML = results.questions.map(function (q, i) {
+      document.getElementById('changeBars').innerHTML = results.breakdownsHeld ? emptyBars(HELD) : results.questions.map(function (q, i) {
         const h = halves(q);
         const delta = Math.round(h.late - h.early);
         const label = results.questions.length > 1 ? 'Q' + (i + 1) + ' · ' + q.text : q.text;
@@ -963,7 +990,7 @@
               '<div class="results-tl-date">' + m.date + '</div>' +
               '<div class="results-tl-event">' + escapeHtml(m.text) + '</div></div></div>';
           }).join('')
-        : emptyBars('No responses yet.');
+        : emptyBars(results.breakdownsHeld ? HELD : 'No responses yet.');
     }
 
     function renderQuestion() {

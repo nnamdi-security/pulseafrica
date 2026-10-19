@@ -59,7 +59,7 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 1. **Fail closed on secrets:** refuse to start without a strong `JWT_SECRET_KEY`, and resolve `.env` from `backend/` (SEC-01).
 2. **Byte-length password validation, with a safe verify** (SEC-02).
 3. **Rate limiting:** about 5 per minute per IP and per account on login; tighter on register, password change and delete (SEC-03).
-4. **Small-cell suppression** in public results (PRIV-01) and **honest privacy copy** (PRIV-02): done in M1 ([decisions 0001 and 0003](decisions/README.md)). Live results can still leak through timing, which needs a separate decision.
+4. **Small-cell suppression** in public results (PRIV-01) and **honest privacy copy** (PRIV-02): done in M1 ([decisions 0001 and 0003](decisions/README.md)). Live results no longer leak through timing: figures move in steps of 10, and breakdowns wait for the poll to close (M2, [decision 0006](decisions/0006-results-released-in-steps.md)).
 5. **`iat` claim plus `password_changed_at`**, so a password change revokes older tokens (SEC-05).
 6. **Last-admin guard on account deletion** (SEC-06).
 7. **Security-header middleware** on the API. **CSP, SRI or self-hosted assets** on the frontend (SEC-07, SEC-08).

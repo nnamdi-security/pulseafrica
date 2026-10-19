@@ -3,10 +3,11 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
-from sqlalchemy import ColumnElement, and_, func, or_, select
+from sqlalchemy import ColumnElement, Select, and_, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.models import Poll, PollStatus, User, UserRole
+from app.core.constants import MIN_GROUP_SIZE
+from app.models import Poll, PollStatus, Response, User, UserRole
 
 
 def ensure_another_active_admin(db: Session, user: User) -> None:
@@ -49,3 +50,19 @@ def has_effective_status(status: PollStatus) -> ColumnElement[bool]:
     if status == PollStatus.closed:
         return or_(Poll.status == PollStatus.closed, and_(Poll.status == PollStatus.active, ~open_by_date))
     return Poll.status == status
+
+
+def published_responses(poll_ids: list[int]) -> Select:
+    """Ids of the responses that published figures count: for each poll, the first whole multiple
+    of MIN_GROUP_SIZE in the order they arrived. One response can then never move the figures on
+    its own, so watching them can't reveal a known person's answers (decision 0006)."""
+    ranked = (
+        select(
+            Response.id,
+            func.row_number().over(partition_by=Response.poll_id, order_by=Response.id).label("position"),
+            func.count().over(partition_by=Response.poll_id).label("received"),
+        )
+        .where(Response.poll_id.in_(poll_ids))
+        .subquery()
+    )
+    return select(ranked.c.id).where(ranked.c.position <= ranked.c.received // MIN_GROUP_SIZE * MIN_GROUP_SIZE)

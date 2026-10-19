@@ -5,7 +5,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import AdminUser, DbSession, OptionalUser
-from app.api.rules import closing_date_passed, effective_status, has_effective_status
+from app.api.rules import closing_date_passed, effective_status, has_effective_status, published_responses
 from app.core.constants import MIN_GROUP_SIZE
 from app.models import Answer, Option, Poll, PollStatus, Question, Response, User, UserRole
 from app.schemas.poll import PollCreate, PollOut, PollSummary, PollUpdate, PreviewOption, QuestionIn
@@ -36,7 +36,10 @@ def _stats(db: Session, polls: list[Poll]) -> dict[int, dict]:
     option_counts = dict(
         db.execute(
             select(Answer.option_id, func.count())
-            .where(Answer.question_id.in_([q.id for q in first_questions.values()]))
+            .where(
+                Answer.question_id.in_([q.id for q in first_questions.values()]),
+                Answer.response_id.in_(published_responses(poll_ids)),  # whole steps only (decision 0006)
+            )
             .group_by(Answer.option_id)
         ).all()
     )

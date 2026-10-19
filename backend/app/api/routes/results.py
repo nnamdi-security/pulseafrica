@@ -2,10 +2,11 @@ from collections import defaultdict
 from datetime import date, timedelta
 
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, true
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import DbSession
+from app.api.rules import effective_status, published_responses
 from app.core.constants import MIN_GROUP_SIZE
 from app.models import Answer, Poll, PollStatus, Question, Response
 from app.schemas.results import (
@@ -91,12 +92,21 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
         select(func.count(func.distinct(Response.state))).where(Response.poll_id == poll_id)
     ) or 0
 
+    # Every figure below counts whole steps of MIN_GROUP_SIZE responses only, and breakdowns and the
+    # trend wait until the poll closes (decision 0006).
+    # Below MIN_GROUP_SIZE only totals are shown (decision 0001), so nothing needs the filter.
+    withheld_all = total_responses < MIN_GROUP_SIZE
+    published = published_responses([poll_id])
+    published_count = db.scalar(select(func.count()).select_from(published.subquery())) or 0
+    counted = true() if withheld_all else Response.id.in_(published)
+    breakdowns_held = effective_status(poll) != PollStatus.closed
+
     # Overall answer counts per option: overall[question_id][option_id] = count
     overall: dict[int, dict[int, int]] = defaultdict(dict)
     rows = db.execute(
         select(Answer.question_id, Answer.option_id, func.count())
         .join(Response, Answer.response_id == Response.id)
-        .where(Response.poll_id == poll_id)
+        .where(Response.poll_id == poll_id, counted)
         .group_by(Answer.question_id, Answer.option_id)
     )
     for question_id, option_id, count in rows:
@@ -108,7 +118,7 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
         rows = db.execute(
             select(Answer.question_id, column, Answer.option_id, func.count())
             .join(Response, Answer.response_id == Response.id)
-            .where(Response.poll_id == poll_id)
+            .where(Response.poll_id == poll_id, counted)
             .group_by(Answer.question_id, column, Answer.option_id)
         )
         for question_id, group, option_id, count in rows:
@@ -150,12 +160,13 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
                 interval, by_period = coarser, candidate
                 break
 
-    withheld_all = total_responses < MIN_GROUP_SIZE
 
     def groups(by_group: dict, question: Question) -> tuple[list[GroupResult], Withheld]:
         counts = by_group[question.id]
         if withheld_all:
             return [], Withheld(groups=len(counts), responses=sum(overall[question.id].values()))
+        if breakdowns_held:
+            return [], Withheld(groups=0, responses=0)
         shown, withheld = _shown_groups(counts, sum(overall[question.id].values()))
         return [
             GroupResult(group=group, total=sum(counts[group].values()), options=_option_results(question, counts[group]))
@@ -200,6 +211,8 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
         total_responses=total_responses,
         min_group_size=MIN_GROUP_SIZE,
         results_withheld=withheld_all,
+        published_responses=published_count,
+        breakdowns_held=breakdowns_held,
         states_covered=states_covered,
         trend_interval=interval,
         questions=[question_result(question) for question in poll.questions],

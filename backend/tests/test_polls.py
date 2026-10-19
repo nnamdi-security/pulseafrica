@@ -34,6 +34,12 @@ def create_poll(client, admin_headers, **overrides):
     return res.json()
 
 
+def close(client, admin_headers, poll):
+    """Close the poll, which releases its breakdowns and trend (decision 0006)."""
+    res = client.patch(f"/api/polls/{poll['id']}", json={"status": "closed"}, headers=admin_headers)
+    assert res.status_code == 200, res.text
+
+
 def answers_for(poll, choice=0):
     return [{"questionId": q["id"], "optionId": q["options"][choice]["id"]} for q in poll["questions"]]
 
@@ -118,6 +124,7 @@ def test_results_breakdowns(client, db, admin_headers):
         submit(client, next(people), poll, choice=0)
         submit(client, next(people), poll, choice=1, gender="Male", state="ORLU STATE")
         submit(client, next(people), poll, choice=0, gender="Male", state="ENUGU STATE")
+    close(client, admin_headers, poll)
 
     res = client.get(f"/api/results/{poll['id']}")
     assert res.status_code == 200
@@ -190,6 +197,7 @@ def test_results_optional_demographics_and_trend(client, db, admin_headers):
     for _ in range(10):
         submit(client, next(people), poll, choice=0, education="Postgraduate", occupation="Student")
         submit(client, next(people), poll, choice=1)  # no education / occupation
+    close(client, admin_headers, poll)
 
     body = client.get(f"/api/results/{poll['id']}").json()
     economy = body["questions"][0]
@@ -220,7 +228,9 @@ def test_responses_refused_once_the_closing_date_has_passed(client, db, admin_he
     res = submit(client, citizen_headers, poll)
     assert res.status_code == 409
     assert res.json() == {"detail": "This poll is closed"}
-    assert client.get(f"/api/results/{poll['id']}").json() == before
+    after = client.get(f"/api/results/{poll['id']}").json()
+    assert after["breakdownsHeld"] is False  # closed, so breakdowns are released (decision 0006)
+    assert {**after, "breakdownsHeld": True} == before
 
 
 def test_responses_accepted_before_the_closing_date(client, db, admin_headers, citizen_headers):
