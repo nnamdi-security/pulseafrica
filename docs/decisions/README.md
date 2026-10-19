@@ -16,7 +16,7 @@ There's no need for one for routine features or bug fixes that follow the existi
 ## Process
 
 1. **Copy the template** below into `docs/decisions/NNNN-short-title.md`, using the next free number with four digits.
-2. Set **Status: Proposed** and open a PR. Pending owner decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner) (D1–D7).
+2. Set **Status: Proposed** and open a PR. Pending owner decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner) (D1–D11).
 3. **The project owner approves**, and the status becomes **Accepted** with the date. Implementation PRs link to the record.
 4. **Never edit an accepted record's decision.** To change course, write a new record with **Status: Accepted, supersedes NNNN**, and mark the old one **Superseded by NNNN**.
 
@@ -50,6 +50,10 @@ What becomes easier, what becomes harder, what must now be done.
 | [0002](0002-effective-poll-status.md) | Polls past their closing date show as Closed (INT-01a) | Accepted (2026-10-19) |
 | [0003](0003-privacy-and-methodology-copy.md) | Correct the privacy copy and relabel weighting as planned (D1, D2) | Accepted (2026-10-19) |
 | [0004](0004-demonstration-data-disclosure.md) | Flag and disclose demonstration data (D3) | Accepted (2026-10-19) |
+| [0005](0005-browser-tests-in-python.md) | Browser tests with Python Playwright (D8) | Accepted (2026-10-19) |
+| [0006](0006-results-released-in-steps.md) | Results released in steps of 10; breakdowns after close (D10) | Accepted (2026-10-19) |
+| [0007](0007-totals-only-wording.md) | "Totals Only" replaces the "Anonymous" badge and ticker (D9) | Accepted (2026-10-19) |
+| [0008](0008-required-ci-checks.md) | CI checks required for merging (D11) | Accepted (2026-10-19) |
 
 The remaining pending decisions (D5–D7) are in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 

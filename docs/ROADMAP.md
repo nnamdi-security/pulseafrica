@@ -176,5 +176,9 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D5 | Frontend: Option A (Next.js, recommended), Option B (modernise in place), or defer ([FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md)) | M5–M8 |
 | D6 | Icons if migrating: `@tabler/icons-react` (recommended for parity) or Lucide | M5 |
 | D7 | Contrast fix FE-03 (a visible design change: darker gold for small text) | M1 or M6 |
+| D8 | ~~Browser-test tooling~~ **Decided 2026-10-19:** Python Playwright ([0005](decisions/0005-browser-tests-in-python.md)) | M2 |
+| D9 | ~~"Anonymous" badge and ticker wording~~ **Decided 2026-10-19:** "Totals Only" ([0007](decisions/0007-totals-only-wording.md)) | M2 |
+| D10 | ~~Live-results timing leak~~ **Decided 2026-10-19:** steps of 10, breakdowns after close ([0006](decisions/0006-results-released-in-steps.md)) | M2 |
+| D11 | ~~CI required for merging~~ **Decided 2026-10-19:** yes, once the browser suite is green ([0008](decisions/0008-required-ci-checks.md)); the owner sets branch protection | M2 |
 
 Record each decision in [`docs/decisions/`](decisions/README.md) when it's made.
