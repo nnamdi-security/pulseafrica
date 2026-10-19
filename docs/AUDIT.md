@@ -18,16 +18,16 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 
 | ID | Priority | Area | Finding | Status |
 |---|---|---|---|---|
-| [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Reproduced |
-| [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Reproduced |
+| [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Fixed (M1) |
+| [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Fixed (M1) |
 | [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Confirmed (inspection) |
-| [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Reproduced |
+| [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Partly fixed (M1): responses refused; effective status awaits INT-01a |
 | [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Reproduced |
 | [PRIV-02](#priv-02) | HIGH | Privacy / honesty | Pages promise answers are "never linked to your identity", but the schema links them | Confirmed (inspection) |
 | [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Confirmed (inspection) |
 | [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Potential risk |
 | [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Reproduced |
-| [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Reproduced |
+| [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
 | [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Reproduced (API) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Confirmed (inspection) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Confirmed (inspection) |
@@ -46,7 +46,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [FE-04](#fe-04) | LOW | Accessibility | Poll answer tiles (`role="radio"`) have no arrow-key navigation | Confirmed (inspection) |
 | [FE-05](#fe-05) | LOW | Frontend | 83 placeholder `href="#"` links and several buttons that do nothing | Confirmed (inspection) |
 | [FE-06](#fe-06) | LOW | Security | XSS safety depends on hand-escaping at 70 `innerHTML` sites | Potential risk |
-| [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Confirmed (inspection) |
+| [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Fixed (M1) |
 | [BE-04](#be-04) | IMPROVEMENT | Backend | Admins can't preview results of a draft poll | Reproduced |
 | [BE-05](#be-05) | IMPROVEMENT | Operations | `/api/health` doesn't check the database | Confirmed (inspection) |
 | [METH-03](#meth-03) | IMPROVEMENT | Research integrity | No sample-size warnings or uncertainty estimates in results | Confirmed (inspection) |
@@ -85,6 +85,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - Resolve `.env` relative to the `backend/` directory.
   - Add a startup test for the guard.
 - **Verification status:** Reproduced.
+- **Resolution (M1, commit `da8fe54`):** fixed. `jwt_secret_key` has no default; settings refuse a missing key, `change-me`, or one under 32 bytes, with an error naming the generate command. `.env` is read from `backend/` regardless of the working directory. Tests: `tests/test_config.py`.
 
 <a id="sec-02"></a>
 ### SEC-02: Passwords over 72 bytes crash with a 500 (HIGH)
@@ -100,6 +101,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - In `verify_password`, treat over-length input as a failed match.
   - Add tests for 72/73-byte and multi-byte passwords.
 - **Verification status:** Reproduced.
+- **Resolution (M1, commit `0592cb9`):** fixed. `NewPassword` rejects more than 72 UTF-8 bytes with a 422 that says so (the old 128-character cap is replaced by the byte cap). `verify_password` treats over-length input as a failed match, so login gives 401 and the password re-checks give 403. The register and change-password placeholders now read "8 to 72 characters". Tests in `test_auth.py` and `test_account.py`.
 
 <a id="sec-03"></a>
 ### SEC-03: No rate limiting or lockout (HIGH)
@@ -120,6 +122,8 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** results keep changing after the published close, which undermines "final results" and the "Closed" labels.
 - **Recommended fix:** reject responses when `closes_at <= now` (409, "This poll has closed"). Either derive an *effective status* in the API, or close polls with a scheduled job. Add tests.
 - **Verification status:** Reproduced.
+- **Resolution (M1, part 1, commit `63fe6c1`):** `POST /api/responses` now answers 409 "This poll is closed" once `closes_at` has passed, and the results don't change (tests in `test_polls.py`, run on SQLite and Postgres). The date check is shared with `_check_can_open` through `closing_date_passed` in `app/api/rules.py`.
+- **Still open (part 2):** lists, detail, stats, the admin overview and `/auth/me/responses` still report such a poll as `active`. Deriving an effective status waits on owner decision INT-01a.
 
 <a id="priv-01"></a>
 ### PRIV-01: Public results expose groups of one (HIGH)
@@ -197,6 +201,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** nobody can manage polls or users until someone runs `python -m app.create_admin` on the server.
 - **Recommended fix:** apply the same last-active-admin guard (409) in `delete_account`, and add a test.
 - **Verification status:** Reproduced.
+- **Resolution (M1, commit `89b28a3`):** fixed. `DELETE /api/auth/me` now answers 409 "There must always be at least one active admin." for the last active admin, after the password check. The guard lives in `app/api/rules.py` and is shared with `PATCH /api/admin/users/{id}`. **Known remaining race:** two admins deleting or demoting each other at the same instant could both pass the count; the PATCH path had the same race before this fix, and it's accepted for now.
 
 <a id="sec-07"></a>
 ### SEC-07: No security headers (MEDIUM)
@@ -383,6 +388,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - **`.gitignore`:** only `backend/.gitignore` exists, so files like `__pycache__` or a root-level `.env` could be committed by mistake.
 - **Recommended fix:** correct the README statements (done in this branch, see below). Add a root `.gitignore` in Milestone 1, since it's a repository-hygiene change rather than documentation.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M1, commit `db7322d`):** fixed. The README was corrected in Milestone 0; a root `.gitignore` now covers `.env` files, Python caches and virtualenvs, `node_modules/`, and editor and OS files. No tracked file became ignored.
 
 <a id="be-04"></a>
 ### BE-04: Admins can't preview draft results (IMPROVEMENT)

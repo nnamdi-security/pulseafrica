@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 
 from app.api.deps import AdminUser, DbSession
+from app.api.rules import ensure_another_active_admin
 from app.models import Poll, PollStatus, Response, User, UserRole
 from app.schemas.admin import (
     AdminOverview,
@@ -142,14 +143,8 @@ def update_user(user_id: int, payload: AdminUserUpdate, db: DbSession, admin: Ad
             status_code=status.HTTP_409_CONFLICT,
             detail="You can't suspend yourself or remove your own admin access. Ask another admin.",
         )
-    if removes_admin and user.is_active:
-        other_admins = db.scalar(
-            select(func.count()).where(User.role == UserRole.admin, User.is_active.is_(True), User.id != user.id)
-        )
-        if not other_admins:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="There must always be at least one active admin."
-            )
+    if removes_admin:
+        ensure_another_active_admin(db, user)
 
     if payload.is_active is not None:
         user.is_active = payload.is_active

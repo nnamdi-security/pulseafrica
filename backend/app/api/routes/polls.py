@@ -1,10 +1,11 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import AdminUser, DbSession, OptionalUser
+from app.api.rules import closing_date_passed
 from app.models import Answer, Option, Poll, PollStatus, Question, Response, User, UserRole
 from app.schemas.poll import PollCreate, PollOut, PollSummary, PollUpdate, PreviewOption, QuestionIn
 
@@ -112,11 +113,7 @@ def _build_questions(questions: list[QuestionIn]) -> list[Question]:
 
 
 def _check_can_open(closes_at: datetime | None) -> None:
-    if closes_at is None:
-        return
-    if closes_at.tzinfo is None:  # SQLite hands back naive UTC datetimes
-        closes_at = closes_at.replace(tzinfo=timezone.utc)
-    if closes_at <= datetime.now(timezone.utc):
+    if closing_date_passed(closes_at):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="The closing date has passed. Set a later closing date (or clear it) to open this poll.",

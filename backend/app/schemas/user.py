@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from pydantic import AfterValidator, EmailStr, Field, model_validator
 
 from app.core.constants import AGE_RANGES, STATES
+from app.core.security import MAX_PASSWORD_BYTES
 from app.models.user import UserRole
 from app.schemas.base import CamelModel
 
@@ -28,10 +29,19 @@ def _strong_password(value: str) -> str:
     return value
 
 
+def _fits_bcrypt(value: str) -> str:
+    # Bytes, not characters: accented letters and symbols take 2–4 bytes each in UTF-8.
+    if len(value.encode()) > MAX_PASSWORD_BYTES:
+        raise ValueError(
+            f"Password must be at most {MAX_PASSWORD_BYTES} bytes (fewer characters if it uses accents or symbols)"
+        )
+    return value
+
+
 FullName = Annotated[str, Field(min_length=2, max_length=120)]
 StateName = Annotated[str, AfterValidator(_known_state)]
 AgeRange = Annotated[str, AfterValidator(_known_age_range)]
-NewPassword = Annotated[str, Field(min_length=8, max_length=128), AfterValidator(_strong_password)]
+NewPassword = Annotated[str, Field(min_length=8), AfterValidator(_fits_bcrypt), AfterValidator(_strong_password)]
 
 
 class UserRegister(CamelModel):

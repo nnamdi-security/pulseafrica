@@ -29,7 +29,9 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance:** every document is consistent with the code at `7119fa7`; the test baseline was recorded from real runs (43/43 on SQLite and on Postgres).
 - **Completion condition:** this PR is reviewed and merged.
 
-## M1: Critical stabilisation (NOT STARTED)
+## M1: Critical stabilisation (IN PROGRESS)
+
+- **Progress:** Batch A is done on its branch (DOC-01, SEC-01, SEC-02, SEC-06, INT-01 part 1, and the Postgres concurrency test). Showing past-date polls as closed (INT-01 part 2) waits on decision INT-01a; Batch B (PRIV-01) on D4 and D4a; Batch C (METH-01, PRIV-02, FE-01) on D1–D3.
 
 - **Objective:** remove the defects that make the current application unsafe or misleading.
 - **Dependencies:** M0. Product decisions D1–D3 (below) for the copy-related items.

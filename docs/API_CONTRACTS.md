@@ -27,7 +27,7 @@ The FastAPI backend is the single source of truth for authentication, authorizat
 | 409 | `{"detail": "…"}` | Business-rule conflict (duplicate email or response, closed poll, locked questions, last admin) |
 | 422 | `{"detail": [{"loc": ["body","email"], "msg": "…", "type": "…"}]}` | Validation error. `api.js` turns these into `err.fields[<field>]`, with "Value error, " stripped |
 | 422 | `{"detail": "The closing date has passed…"}` | Raised manually for an invalid poll state transition |
-| 500 | Text | Unhandled error. **Known trigger:** passwords over 72 bytes ([SEC-02](AUDIT.md#sec-02)) |
+| 500 | Text | Unhandled error. No known trigger (over-72-byte passwords were fixed under [SEC-02](AUDIT.md#sec-02)) |
 
 Clients should show `detail` strings: they're written to be user-safe.
 
@@ -45,12 +45,12 @@ Clients should show `detail` strings: they're written to be user-safe.
 
 | Method | Path | Auth | Request | Success | Errors |
 |---|---|---|---|---|---|
-| POST | `/auth/register` | — | `{fullName (2–120), email, state, ageRange, password (8–128, a letter + a digit), confirmPassword, terms: true}` | 201 `UserOut` | 409 email exists · 422 |
+| POST | `/auth/register` | — | `{fullName (2–120), email, state, ageRange, password (8+ characters and at most 72 UTF-8 bytes, a letter + a digit), confirmPassword, terms: true}` | 201 `UserOut` | 409 email exists · 422 |
 | POST | `/auth/login` | — | `{email, password}` | 200 `{accessToken, tokenType:"bearer"}` | 401 (also for suspended users) |
 | GET | `/auth/me` | user | — | 200 `UserOut` | 401 |
 | PATCH | `/auth/me` | user | any of `{fullName, state, ageRange}`. Email can't be changed | 200 `UserOut` | 401 · 422 |
-| POST | `/auth/me/password` | user | `{currentPassword, newPassword, confirmPassword}` | 204 | 403 wrong current · 422 |
-| DELETE | `/auth/me` | user | `{password}` | 204: deletes the account **and all its responses**; polls it created are kept, with `created_by_id = null` | 403 · 401 |
+| POST | `/auth/me/password` | user | `{currentPassword, newPassword, confirmPassword}` (`newPassword` as for register) | 204 | 403 wrong current (also for an over-72-byte one) · 422 |
+| DELETE | `/auth/me` | user | `{password}` | 204: deletes the account **and all its responses**; polls it created are kept, with `created_by_id = null` | 403 · 401 · 409 if this is the last active admin |
 | GET | `/auth/me/responses` | user | — | 200 `[{pollId, pollTitle, category, pollStatus, closesAt, respondedAt}]`, newest first. **Never includes answers** | 401 |
 
 `UserOut` is `{id, fullName, email, state, ageRange, role, createdAt}`.
@@ -73,13 +73,13 @@ Clients should show `detail` strings: they're written to be user-safe.
 - **Questions:** can only be replaced while a poll has **zero responses**. Replacing them creates new question and option ids.
 - **Back to draft:** a poll with responses can't return to `draft`.
 - **Opening:** setting `active` (on create or update), or changing `closesAt` on an active poll, requires `closesAt` to be in the future or `null`.
-- **Not enforced:** responses after `closesAt` on an `active` poll are still accepted ([INT-01](AUDIT.md#int-01)).
+- **Closing date:** `POST /responses` refuses an `active` poll whose `closesAt` has passed with 409 `"This poll is closed"`. The poll's `status` field is **not** derived from the date yet, so it can still read `active` ([INT-01](AUDIT.md#int-01), decision INT-01a).
 
 ### Responses
 
 | Method | Path | Auth | Request | Success | Errors |
 |---|---|---|---|---|---|
-| POST | `/responses` | user | `{pollId, ageRange, gender, state, education?, occupation?, answers: [{questionId, optionId}]}` | 201 `{id, pollId, createdAt}` | 404 unknown or draft poll · 409 `"This poll is closed"` · 409 `"You have already responded to this poll"` · 422 every question must be answered exactly once, with an option that belongs to it |
+| POST | `/responses` | user | `{pollId, ageRange, gender, state, education?, occupation?, answers: [{questionId, optionId}]}` | 201 `{id, pollId, createdAt}` | 404 unknown or draft poll · 409 `"This poll is closed"` (status `closed`, or `closesAt` has passed) · 409 `"You have already responded to this poll"` · 422 every question must be answered exactly once, with an option that belongs to it |
 
 Demographics are **self-reported for each response**. They can differ from the profile, which only pre-fills them in `poll.html`.
 

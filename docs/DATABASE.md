@@ -38,7 +38,7 @@ polls.created_by_id ──> users.id   (nullable; SET NULL when that user is del
 | `description` | text | |
 | `category` | varchar(64), **indexed** | one of `CATEGORIES` (app only) |
 | `status` | enum `poll_status` (`draft`, `active`, `closed`), **indexed** | default `draft` |
-| `closes_at` | timestamptz, nullable | informational; **not enforced** on submission ([INT-01](AUDIT.md#int-01)) |
+| `closes_at` | timestamptz, nullable | enforced on submission: no responses once it has passed ([INT-01](AUDIT.md#int-01)); `status` isn't changed automatically |
 | `created_by_id` | FK → `users.id`, `ON DELETE SET NULL` | |
 | `created_at` | timestamptz | `server_default now()` |
 

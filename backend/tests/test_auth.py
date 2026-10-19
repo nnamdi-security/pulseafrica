@@ -44,3 +44,32 @@ def test_login_wrong_password(client):
 def test_me_requires_valid_token(client):
     assert client.get("/api/auth/me").status_code == 401
     assert client.get("/api/auth/me", headers={"Authorization": "Bearer garbage"}).status_code == 401
+
+
+def _password(length: int) -> str:
+    """An ASCII password of exactly `length` bytes that meets the letter-and-number rule."""
+    return "a1" + "b" * (length - 2)
+
+
+def test_register_accepts_a_72_byte_password(client):
+    password = _password(72)
+    res = client.post("/api/auth/register", json={**REGISTER_PAYLOAD, "password": password, "confirmPassword": password})
+    assert res.status_code == 201
+    login = client.post("/api/auth/login", json={"email": REGISTER_PAYLOAD["email"], "password": password})
+    assert login.status_code == 200
+
+
+def test_register_rejects_passwords_over_72_bytes(client):
+    multibyte = "é1" * 25  # 50 characters but 75 bytes in UTF-8
+    for password in (_password(73), _password(80), multibyte):
+        res = client.post("/api/auth/register", json={**REGISTER_PAYLOAD, "password": password, "confirmPassword": password})
+        assert res.status_code == 422, password
+        assert "72 bytes" in res.text
+
+
+def test_login_with_an_over_long_password_is_a_normal_failure(client):
+    client.post("/api/auth/register", json=REGISTER_PAYLOAD)
+    for password in (_password(80), "é" * 60):
+        res = client.post("/api/auth/login", json={"email": REGISTER_PAYLOAD["email"], "password": password})
+        assert res.status_code == 401, password
+        assert res.json() == {"detail": "Incorrect email or password"}

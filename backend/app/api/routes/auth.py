@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import delete, select, update
 
 from app.api.deps import CurrentUser, DbSession
+from app.api.rules import ensure_another_active_admin
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import Answer, Poll, Response, User
 from app.schemas.user import (
@@ -80,6 +81,7 @@ def change_password(payload: PasswordChange, db: DbSession, user: CurrentUser) -
 def delete_account(payload: AccountDelete, db: DbSession, user: CurrentUser) -> None:
     """Deletes the account and every response it made. Polls an admin created are kept."""
     _check_password(user, payload.password)
+    ensure_another_active_admin(db, user)
     # Explicit deletes rather than relying on ON DELETE CASCADE, which SQLite
     # (used by the tests) only enforces when foreign keys are switched on.
     response_ids = select(Response.id).where(Response.user_id == user.id)

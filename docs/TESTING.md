@@ -12,8 +12,10 @@
 
 | Command (run from `backend/`) | Collected | Passed | Failed | Skipped | Errors | Time |
 |---|---|---|---|---|---|---|
-| `pytest` (in-memory SQLite, the default) | 43 | **43** | 0 | 0 | 0 | ~39 s |
-| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 43 | **43** | 0 | 0 | 0 | ~43 s |
+| `pytest` (in-memory SQLite, the default) | 62 | **61** | 0 | 1 | 0 | ~51 s |
+| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 62 | **62** | 0 | 0 | 0 | ~59 s |
+
+The counts above were updated after Milestone 1 Batch A (SEC-01, SEC-02, SEC-06, INT-01 part 1, and the concurrency test). The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 
 - **One warning in both runs:** `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead` (AUDIT [TEST-02](AUDIT.md#test-02)). It comes from the test client, not from app code.
 - **No environment-related failures or missing dependencies.**
@@ -23,9 +25,10 @@
 
 | File | Tests | Covers |
 |---|---|---|
-| `tests/test_auth.py` | 6 | Register (success, duplicate, validation rules), login, `/me`, invalid tokens |
-| `tests/test_account.py` | 5 | Profile update and validation, password change, my-responses (no answers leaked), account deletion removes responses |
-| `tests/test_polls.py` | 16 | Admin-only creation, drafts hidden, filters, one response per user, answer validation, closed polls, results breakdowns, counts, preview, `hasResponded`, categories, optional demographics, trend |
+| `tests/test_config.py` | 9 | The JWT secret guard (missing, example, short, multi-byte, 32 bytes), `.env` read from `backend/`, startup refusal, tokens signed with the old default (SEC-01) |
+| `tests/test_auth.py` | 9 | Register (success, duplicate, validation rules), login, `/me`, invalid tokens, 72/73-byte and multi-byte passwords, over-long login (SEC-02) |
+| `tests/test_account.py` | 9 | Profile update and validation, password change, my-responses (no answers leaked), account deletion removes responses, over-long passwords (SEC-02), last-admin deletion guard (SEC-06) |
+| `tests/test_polls.py` | 19 | Admin-only creation, drafts hidden, filters, one response per user, answer validation, closed polls, results breakdowns, counts, preview, `hasResponded`, categories, optional demographics, trend, past closing date (INT-01), simultaneous duplicate submissions (Postgres only) |
 | `tests/test_admin.py` | 11 | Admin-only access, overview, edit, open/close, past closing date, questions locked once answered, delete, user list and filters, suspend/reactivate, permissions, last-active-admin protection |
 | `tests/test_stats.py` | 2 | Empty platform, counts exclude drafts |
 | `tests/test_seed.py` | 3 | Seed polls are valid payloads, turnout table, drift helper |
@@ -35,6 +38,7 @@
 - **Database:** `backend/tests/conftest.py` builds the schema with `Base.metadata.create_all` on in-memory SQLite (a `StaticPool`), or on `TEST_DATABASE_URL`. It drops everything after **each test**, so **never point `TEST_DATABASE_URL` at a database you care about.**
 - **Wiring:** the `client` fixture overrides `get_db`. `citizen_headers` and `admin_headers` register users through the real API, and promote the admin directly in the session.
 - **No migrations in tests:** tests use `create_all`, not Alembic, so migrations are checked separately by `alembic upgrade head` / `downgrade` cycles and `alembic check` (see [DATABASE.md](DATABASE.md#migrations)).
+- **Postgres-only tests:** `test_simultaneous_duplicate_submissions_store_one_response` sends two submissions for the same user and poll at once, each with its own session, held at a barrier until both are about to insert. Exactly one gets 201 and the other 409. It is skipped on SQLite, which serialises everything through one connection.
 - **SQLite vs Postgres:** the main difference is that **SQLite doesn't enforce foreign keys**. That's why deletes are explicit in `delete_account` and `delete_poll`. Run the suite against Postgres before merging anything that touches deletes, constraints, dates or `func.date`/timezone handling.
 
 ## Standards for new work
@@ -52,8 +56,7 @@
 |---|---|---|
 | No end-to-end tests of the 9 pages | Frontend regressions go unnoticed; no parity check for a migration | Milestone 2 |
 | No CI | Tests depend on someone remembering to run them | Milestone 2 |
-| No tests for SEC-01, SEC-02, INT-01, PRIV-01, SEC-06 | These defects are currently untested | Milestone 1 |
-| No concurrency test for simultaneous duplicate submissions | The unique constraint should hold, but it's unproven under load | Milestone 1 (Postgres-only test) |
+| No tests for PRIV-01 | The defect is untested until suppression is built | Milestone 1, Batch B |
 | No migration up/down test in the suite | A broken downgrade would only be found by hand | Milestone 2 |
 | No accessibility checks | FE-03 and FE-04 regressions | Milestone 2 (axe in Playwright) |
 

@@ -28,7 +28,8 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 # 3. Configure environment variables
-cp .env.example .env               # then set JWT_SECRET_KEY to a long random string
+cp .env.example .env               # then set JWT_SECRET_KEY (required, 32+ bytes):
+python -c "import secrets; print(secrets.token_urlsafe(48))"
 
 # 4. Create the database tables
 alembic upgrade head

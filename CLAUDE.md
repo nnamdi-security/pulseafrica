@@ -20,7 +20,7 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 | Frontend | Static HTML5 + one CSS file + vanilla JS (no build). Chart.js 4.4.1 (results only), Tabler Icons, Google Fonts via CDN | repo root: 9 `*.html`, `style.css`, `api.js`, `nav-auth.js`, `ticker.js`, `images/` |
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
-| Tests | pytest + FastAPI `TestClient` (43 tests) | `backend/tests/` |
+| Tests | pytest + FastAPI `TestClient` (62 tests) | `backend/tests/` |
 
 **A Next.js frontend is PROPOSED, not implemented.** Don't create `frontend/`, add Node tooling, or write React/Next.js code unless the user has approved a migration milestone (M5–M8 in [docs/ROADMAP.md](docs/ROADMAP.md)). Use the `frontend-migration` skill only then.
 
@@ -55,7 +55,7 @@ docs/                  product, architecture, audit, API, DB, security, testing,
    - Breaking changes need every consumer (all pages and `api.js`) updated in the same PR. See [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md).
 5. **Escape all API text** before `innerHTML` (`escapeHtml`), or use `textContent`.
 6. **Privacy:** never expose an individual's answers; treat small demographic groups as sensitive.
-7. **No secrets in git:** no `.env`, tokens or credentials. Start the API **from `backend/`** (settings read `.env` from the current directory).
+7. **No secrets in git:** no `.env`, tokens or credentials. Settings read `backend/.env` from any directory, and the API refuses to start without a strong `JWT_SECRET_KEY`.
 8. **Never run destructive commands against a database you didn't create for the purpose:** `alembic downgrade`, `app.seed`, a `TEST_DATABASE_URL` pointing at real data, or `DROP`.
 
 Rules by area: [frontend](.claude/rules/frontend.md) · [backend](.claude/rules/backend.md) · [security](.claude/rules/security.md) · [testing](.claude/rules/testing.md) · [workflow](.claude/rules/workflow.md).
@@ -68,7 +68,7 @@ docker compose up -d                       # Postgres 16 (dev)
 source .venv/bin/activate                  # after: python -m venv .venv && pip install -r requirements.txt
 alembic upgrade head                       # apply migrations
 uvicorn app.main:app --reload              # API on :8000, docs at /docs
-pytest                                     # 43 tests on in-memory SQLite
+pytest                                     # 62 tests on in-memory SQLite (1 Postgres-only test skipped)
 TEST_DATABASE_URL=postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica_test pytest   # throwaway DB only
 alembic check                              # models match migrations?
 python -m app.create_admin you@example.com
@@ -80,11 +80,9 @@ python -m http.server 5500 --bind 127.0.0.1
 
 Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them **only** when a task covers them.
 
-- **CRITICAL:** SEC-01 (default JWT secret fallback).
 - **HIGH:**
-  - SEC-02 (over-72-byte passwords → 500);
   - SEC-03 (no rate limiting);
-  - INT-01 (responses accepted after the closing date);
+  - INT-01 part 2 (a poll past its closing date still *shows* as active; responses are refused; waits on decision INT-01a);
   - PRIV-01 (groups of one in public results);
   - PRIV-02 (privacy copy contradicts the schema);
   - METH-01 (synthetic data undisclosed).

@@ -1,3 +1,4 @@
+from app.models import User, UserRole
 from tests.conftest import REGISTER_PAYLOAD, register_and_login
 from tests.test_polls import create_poll, submit
 
@@ -66,3 +67,49 @@ def test_delete_account_removes_responses(client, admin_headers, citizen_headers
 
     # The email can be registered again
     register_and_login(client)
+
+
+def test_over_long_passwords_on_account_actions(client, citizen_headers):
+    too_long = "a1" + "b" * 78  # 80 bytes
+    wrong = {"currentPassword": too_long, "newPassword": "newsecret1", "confirmPassword": "newsecret1"}
+    res = client.post("/api/auth/me/password", json=wrong, headers=citizen_headers)
+    assert res.status_code == 403
+    assert res.json() == {"detail": "Your current password is incorrect"}
+
+    new_too_long = {"currentPassword": "secret123", "newPassword": too_long, "confirmPassword": too_long}
+    assert client.post("/api/auth/me/password", json=new_too_long, headers=citizen_headers).status_code == 422
+
+    res = client.request("DELETE", "/api/auth/me", json={"password": too_long}, headers=citizen_headers)
+    assert res.status_code == 403
+    assert client.get("/api/auth/me", headers=citizen_headers).status_code == 200
+
+
+def _delete_me(client, headers, password="secret123"):
+    return client.request("DELETE", "/api/auth/me", json={"password": password}, headers=headers)
+
+
+def test_sole_admin_cannot_delete_their_account(client, admin_headers, db):
+    assert _delete_me(client, admin_headers, password="wrong1234").status_code == 403  # password checked first
+    res = _delete_me(client, admin_headers)
+    assert res.status_code == 409
+    assert res.json() == {"detail": "There must always be at least one active admin."}
+    assert client.get("/api/admin/overview", headers=admin_headers).status_code == 200
+
+
+def test_suspended_admin_does_not_count_as_another_admin(client, admin_headers, db):
+    register_and_login(client, email="second@example.com")
+    second = db.query(User).filter_by(email="second@example.com").one()
+    second.role, second.is_active = UserRole.admin, False
+    db.commit()
+    assert _delete_me(client, admin_headers).status_code == 409
+
+
+def test_admin_can_delete_their_account_when_another_admin_remains(client, admin_headers, db):
+    second_headers = register_and_login(client, email="second@example.com")
+    second = db.query(User).filter_by(email="second@example.com").one()
+    second.role = UserRole.admin
+    db.commit()
+    assert _delete_me(client, admin_headers).status_code == 204
+    assert client.get("/api/admin/overview", headers=second_headers).json()["totalUsers"] == 1
+    # The remaining admin is now the last one
+    assert _delete_me(client, second_headers).status_code == 409

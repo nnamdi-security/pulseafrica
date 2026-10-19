@@ -1,3 +1,15 @@
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
+
+import pytest
+from sqlalchemy import event
+
+from app.db.session import get_db
+from app.main import app
+from app.models import Poll
+from tests.conftest import TestingSession, engine, register_and_login
+
 POLL_PAYLOAD = {
     "title": "Presidential approval — Q4",
     "description": "How is President Okonkwo doing?",
@@ -185,3 +197,57 @@ def test_results_optional_demographics_and_trend(client, admin_headers, citizen_
     assert len(today["date"]) == 10 and today["date"][4] == "-"
     assert today["total"] == 2
     assert [o["count"] for o in today["options"]] == [1, 1, 0]
+
+
+def _move_closing_date(db, poll, delta):
+    # The API won't set a past closing date on an active poll, so move it directly.
+    row = db.get(Poll, poll["id"])
+    row.closes_at = datetime.now(timezone.utc) + delta
+    db.commit()
+
+
+def test_responses_refused_once_the_closing_date_has_passed(client, db, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    other = register_and_login(client, email="other@example.com")
+    assert submit(client, other, poll).status_code == 201
+    before = client.get(f"/api/results/{poll['id']}").json()
+
+    _move_closing_date(db, poll, timedelta(seconds=-1))
+    res = submit(client, citizen_headers, poll)
+    assert res.status_code == 409
+    assert res.json() == {"detail": "This poll is closed"}
+    assert client.get(f"/api/results/{poll['id']}").json() == before
+
+
+def test_responses_accepted_before_the_closing_date(client, db, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    _move_closing_date(db, poll, timedelta(minutes=1))
+    assert submit(client, citizen_headers, poll).status_code == 201
+    assert client.get(f"/api/results/{poll['id']}").json()["totalResponses"] == 1
+
+
+@pytest.mark.skipif(engine.dialect.name == "sqlite", reason="needs a real database with concurrent sessions")
+def test_simultaneous_duplicate_submissions_store_one_response(client, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+
+    # Each request gets its own session, and both wait at the barrier until they have passed every
+    # check and are about to insert, so only the unique constraint can stop the second one.
+    barrier = threading.Barrier(2, timeout=10)
+    sessions = []
+
+    def own_session():
+        session = TestingSession()
+        sessions.append(session)
+        event.listen(session, "before_flush", lambda *_: barrier.wait())
+        try:
+            yield session
+        finally:
+            session.close()
+
+    app.dependency_overrides[get_db] = own_session
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        codes = sorted(pool.map(lambda _: submit(client, citizen_headers, poll).status_code, range(2)))
+
+    assert codes == [201, 409]
+    assert len(sessions) == 2
+    assert client.get(f"/api/results/{poll['id']}").json()["totalResponses"] == 1

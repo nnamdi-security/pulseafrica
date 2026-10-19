@@ -10,7 +10,7 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 |---|---|---|
 | **Passwords** | bcrypt (default cost 12) via the `bcrypt` package. Rules: 8–128 characters, a letter and a digit (frontend and backend agree) | `core/security.py`, `schemas/user.py` |
 | **Tokens** | HS256 JWT, claims `sub` (user id) and `exp` (default 60 min, `JWT_EXPIRE_MINUTES`). The algorithm is pinned on decode | `core/security.py` |
-| **Secret** | `JWT_SECRET_KEY` from the environment or `backend/.env`, **with an unsafe default** ([SEC-01](AUDIT.md#sec-01)) | `core/config.py` |
+| **Secret** | `JWT_SECRET_KEY` from the environment or `backend/.env`; required, 32+ bytes, and the API refuses to start otherwise ([SEC-01](AUDIT.md#sec-01), fixed) | `core/config.py` |
 | **Transport** | `Authorization: Bearer` header; CORS allows the configured origins (`CORS_ORIGINS`, default the Live Server ports) | `main.py`, `api.js` |
 | **Browser storage** | `localStorage` ("Keep me signed in") or `sessionStorage`, plus a cached profile ([SEC-04](AUDIT.md#sec-04)) | `api.js` |
 | **Logout** | Client-side only: deletes the stored token. There's no server-side revocation | `api.js`, `nav-auth.js` |
@@ -26,7 +26,7 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 | Admin | `AdminUser` / `require_admin` → 403 |
 | Drafts | Hidden (404) from non-admins in list, detail, responses and results |
 | Own data only | `/auth/me*` act only on the token's user. Nothing takes another user's id |
-| Admin self-protection | No self-suspend or self-demote; always at least one active admin (`PATCH /admin/users`). **Not** applied to `DELETE /auth/me` ([SEC-06](AUDIT.md#sec-06)) |
+| Admin self-protection | No self-suspend or self-demote; always at least one active admin, on both `PATCH /admin/users/{id}` and `DELETE /auth/me` ([SEC-06](AUDIT.md#sec-06), fixed) |
 | Re-authentication | The current password is required to change the password or delete the account |
 
 ### Input handling
@@ -46,14 +46,11 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 
 | ID | Priority | Summary |
 |---|---|---|
-| SEC-01 | CRITICAL | Missing `JWT_SECRET_KEY` → public default secret → forgeable tokens |
-| SEC-02 | HIGH | Over-72-byte passwords → 500 on register, login and password change |
 | SEC-03 | HIGH | No rate limiting or lockout |
 | PRIV-01 | HIGH | Public results reveal groups of one |
 | PRIV-02 | HIGH | Privacy copy contradicts the data model |
 | SEC-04 | MEDIUM | Tokens readable by any script on the origin |
 | SEC-05 | MEDIUM | No token revocation on password change; no `iat` |
-| SEC-06 | MEDIUM | Sole admin can delete their own account |
 | SEC-07 | MEDIUM | No security headers or CSP |
 | SEC-08 | MEDIUM | CDN assets without SRI |
 | SEC-09 | LOW | Registration reveals existing emails |
