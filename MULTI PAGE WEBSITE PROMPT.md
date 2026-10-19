@@ -656,8 +656,8 @@ Routing structure
 
 BACKEND ARCHITECTURE
 Recommend:
-Node.js
-Express.js
+Python
+FastAPI
 
 
 
@@ -670,9 +670,7 @@ Middleware
 Authentication flow
 
 DATABASE
-Recommend either:
-MongoDB
-or
+Recommend:
 PostgreSQL
 
 
@@ -790,7 +788,7 @@ Render
 
 
 Database
-MongoDB Atlas
+Managed PostgreSQL (Render PostgreSQL, Neon or Supabase)
 
 
 

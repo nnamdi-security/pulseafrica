@@ -4,13 +4,13 @@
 
 PulseAfrica lets citizens participate in public opinion polls, rate the performance of public leaders, and view transparent, methodology-backed results — in the spirit of YouGov or Pew Research Center, scoped for a solo full-stack developer to build end to end.
 
-This repository currently contains the **Phase 1 frontend** (HTML, CSS, vanilla JS — no framework, no backend yet). It is a work in progress.
+This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no framework) and the start of the **Phase 2 backend** (Python, FastAPI, PostgreSQL) in [`backend/`](backend/). It is a work in progress.
 
 ---
 
 ## Status
 
-🚧 **In progress — frontend only.** No backend, database, or authentication has been built yet. All data on every page (poll counts, response numbers, approval ratings, state names) is static placeholder content hard-coded into the HTML, written to *look* like a live system.
+🚧 **In progress.** The frontend pages are built. The backend API (auth, polls, responses, results) is scaffolded in [`backend/`](backend/) but **not yet wired to the frontend**, so every page still shows static placeholder content (poll counts, response numbers, approval ratings) hard-coded into the HTML.
 
 ---
 
@@ -29,7 +29,7 @@ This repository currently contains the **Phase 1 frontend** (HTML, CSS, vanilla 
 ### Not yet built
 - User dashboard (profile, participation history, account settings)
 - Admin dashboard (poll management, user management)
-- Backend API, database, authentication
+- Connecting the frontend pages to the backend API
 
 ---
 
@@ -44,7 +44,8 @@ pulseafrica/
 ├── methodology.html     Methodology / trust document
 ├── about.html          About page
 ├── login.html          Login / Register / reset password
-└── style.css           Single shared stylesheet for all pages
+├── style.css           Single shared stylesheet for all pages
+└── backend/            FastAPI + PostgreSQL API (see backend/README.md)
 ```
 
 All pages share **one stylesheet** (`style.css`). Each page's styles live in a clearly labeled section inside that file, e.g.:
@@ -85,6 +86,8 @@ This three-typeface system is deliberate: serif for institutional voice, sans fo
 
 ## How to run this locally
 
+### Frontend
+
 No build step, no dependencies to install. It's static HTML/CSS/JS.
 
 1. Open the `pulseafrica/` folder in VS Code
@@ -93,6 +96,10 @@ No build step, no dependencies to install. It's static HTML/CSS/JS.
 4. It opens at `http://localhost:5500`
 
 Navigate between pages using the top nav — all internal links (`index.html`, `polls.html`, `poll.html`, `results.html`, `methodology.html`, `about.html`, `login.html`) are already wired up.
+
+### Backend
+
+The API is Python + FastAPI + PostgreSQL. Setup steps, the database schema, and every endpoint are documented in **[`backend/README.md`](backend/README.md)**. In short: `docker compose up -d`, install `requirements.txt`, `alembic upgrade head`, then `uvicorn app.main:app --reload`. Interactive API docs are then at `http://localhost:8000/docs`.
 
 ---
 
@@ -119,11 +126,14 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 - [ ] User dashboard
 - [ ] Admin dashboard
 
-**Phase 2 — Backend**
-- [ ] Node.js + Express API
-- [ ] MongoDB or PostgreSQL schema (Users, Polls, Questions, Responses)
-- [ ] JWT authentication + role-based access control
-- [ ] REST endpoints for auth, polls, responses, analytics
+**Phase 2 — Backend** (Python + FastAPI + PostgreSQL)
+- [x] FastAPI project scaffold with SQLAlchemy 2.0 + Alembic migrations
+- [x] PostgreSQL schema (Users, Polls, Questions, Options, Responses, Answers)
+- [x] JWT authentication + role-based access control (citizen / admin)
+- [x] REST endpoints for auth, polls, responses, results
+- [x] Test suite (pytest)
+- [ ] Rate limiting, email verification, password reset
+- [ ] Weighted results + margin of error
 
 **Phase 3 — Integration**
 - [ ] Wire frontend forms to live API
@@ -132,8 +142,8 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 
 **Phase 4 — Deployment**
 - [ ] Frontend → Vercel
-- [ ] Backend → Render
-- [ ] Database → MongoDB Atlas (or managed Postgres)
+- [ ] Backend → Render (FastAPI web service)
+- [ ] Database → Render PostgreSQL (or Neon / Supabase)
 
 ---
 
