@@ -76,7 +76,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** flaky end-to-end tests. Mitigation: deterministic seed data (the seed already uses a fixed random seed) and no fixed sleeps.
 - **Completion condition:** CI required on PRs.
 
-## M3: Security hardening and session contract (COMPLETED, pending merge)
+## M3: Security hardening and session contract (COMPLETED)
 
 - **Progress:** built in one PR following owner decisions D12–D18 ([0009–0012](decisions/README.md)), per the [Milestone 3 plan](https://claude.ai/code/artifact/551f38cc-6928-4497-b013-f9f102eb66e1). Fixed: SEC-03, SEC-05, SEC-10, BE-01, BE-02, BE-05; SEC-08 apart from Google Fonts; SEC-07 for the API; the backend half of SEC-04. SEC-09 accepted. TEST-02 was done in M2 (PR #8).
 - **Left for later:** the current pages moving to the cookie (SEC-04, M7); a CSP for the static pages (SEC-07, M9).
@@ -100,7 +100,10 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** a cookie-plus-bearer dual mode confusing the authorization code. Mitigation: one dependency (`get_optional_user`) remains the only token reader.
 - **Completion condition:** findings closed; [SECURITY.md](SECURITY.md) updated to "implemented".
 
-## M4: Research integrity and methodology (NOT STARTED, product decisions required)
+## M4: Research integrity and methodology (COMPLETED, pending merge)
+
+- **Progress:** built in one PR following owner decisions D19–D24 ([0013–0015](decisions/README.md)), per the [Milestone 4 plan](https://claude.ai/code/artifact/e812979a-a37f-4570-b130-3c46a243dc59). Fixed: METH-02, METH-03, DB-03, BE-04. Weighting was not implemented (D19): there are no population figures for a fictional nation, so it stays planned.
+- **Left for later:** About's team biographies, funding model and 2024–2025 timeline figures (M9 copy review, D23).
 
 - **Objective:** make the results and the methodology honest and more rigorous.
 - **Dependencies:** M1 (suppression and disclosure). Decision D2.
@@ -180,7 +183,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | ID | Decision | Blocks |
 |---|---|---|
 | D1 | ~~Privacy model~~ **Decided 2026-10-19:** correct the copy ([0003](decisions/0003-privacy-and-methodology-copy.md)) | M1 |
-| D2 | Methodology: ~~relabel claims as planned~~ **decided 2026-10-19 for the M1 copy** ([0003](decisions/0003-privacy-and-methodology-copy.md)); implementing weighting and margins of error still open ([METH-02](AUDIT.md#meth-02)) | M4 |
+| D2 | ~~Methodology~~ **Decided 2026-10-19:** the M1 copy ([0003](decisions/0003-privacy-and-methodology-copy.md)); no weighting or margins of error for now (D19, D20) | M4 |
 | D3 | Synthetic data: ~~disclosure wording~~ **decided 2026-10-19** ([0004](decisions/0004-demonstration-data-disclosure.md)); whether any deployment shows demo data still open ([METH-01](AUDIT.md#meth-01)) | M9 |
 | D4 | ~~Minimum public group size~~ **Decided 2026-10-19:** *k* = 10, and overall percentages hidden below it (D4a) ([0001](decisions/0001-minimum-public-group-size.md)) | M1 |
 | D5 | Frontend: Option A (Next.js, recommended), Option B (modernise in place), or defer ([FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md)) | M5–M8 |
@@ -197,5 +200,11 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D16 | ~~Current pages on the cookie in M3~~ **Decided 2026-10-19:** no, they keep bearer ([0011](decisions/0011-cookie-session-and-csrf.md)) | M3 |
 | D17 | ~~CDN protection~~ **Decided 2026-10-19:** SRI on Tabler Icons and Chart.js; fonts unchanged ([0012](decisions/0012-asset-integrity.md)) | M3 |
 | D18 | ~~SEC-09~~ **Decided 2026-10-19:** accepted with rate limiting ([0009](decisions/0009-rate-limiting.md)) | M3 |
+| D19 | ~~Weighting (the open half of D2)~~ **Decided 2026-10-19:** don't weight; describe it as planned ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)) | M4 |
+| D20 | ~~How to show uncertainty~~ **Decided 2026-10-19:** *n* beside every figure and a small-sample note; no margin of error ([0014](decisions/0014-sample-size-without-margin-of-error.md)) | M4 |
+| D21 | ~~Small-sample threshold~~ **Decided 2026-10-19:** under 100 responses ([0014](decisions/0014-sample-size-without-margin-of-error.md)) | M4 |
+| D22 | ~~Methodology rewrite~~ **Decided 2026-10-19:** describe current practice, with a "Planned" card ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)) | M4 |
+| D23 | ~~Other claims~~ **Decided 2026-10-19:** fix what the code contradicts; team and funding copy left for M9 ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)) | M4 |
+| D24 | ~~Draft results for admins~~ **Decided 2026-10-19:** admins can open them ([0015](decisions/0015-admin-draft-results.md)) | M4 |
 
 Record each decision in [`docs/decisions/`](decisions/README.md) when it's made.

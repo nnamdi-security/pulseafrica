@@ -30,7 +30,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
 | [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed for the API (M3) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Fixed (M3; fonts excepted) |
-| [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Confirmed (inspection) |
+| [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Fixed (M4) |
 | [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
 | [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Confirmed (inspection) |
 | [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Reproduced (computed) |
@@ -47,10 +47,10 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [FE-05](#fe-05) | LOW | Frontend | 83 placeholder `href="#"` links and several buttons that do nothing | Confirmed (inspection) |
 | [FE-06](#fe-06) | LOW | Security | XSS safety depends on hand-escaping at 70 `innerHTML` sites | Potential risk |
 | [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Fixed (M1) |
-| [BE-04](#be-04) | IMPROVEMENT | Backend | Admins can't preview results of a draft poll | Reproduced |
+| [BE-04](#be-04) | IMPROVEMENT | Backend | Admins can't preview results of a draft poll | Fixed (M4) |
 | [BE-05](#be-05) | IMPROVEMENT | Operations | `/api/health` doesn't check the database | Fixed (M3) |
-| [METH-03](#meth-03) | IMPROVEMENT | Research integrity | No sample-size warnings or uncertainty estimates in results | Confirmed (inspection) |
-| [DB-03](#db-03) | IMPROVEMENT | Database | Demographic value lists are duplicated in four places | Confirmed (inspection) |
+| [METH-03](#meth-03) | IMPROVEMENT | Research integrity | No sample-size warnings or uncertainty estimates in results | Fixed (M4) |
+| [DB-03](#db-03) | IMPROVEMENT | Database | Demographic value lists are duplicated in four places | Fixed (M4) |
 | [TEST-02](#test-02) | IMPROVEMENT | Testing | Test suite emits a Starlette `TestClient` deprecation warning | Fixed (M2) |
 
 **Totals:** 1 critical, 6 high, 11 medium, 11 low, 5 improvements.
@@ -247,6 +247,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** the site contradicts itself, and makes research claims it can't support.
 - **Recommended fix:** a product decision. Either rewrite those passages as *planned* methodology with a clear "not yet applied" status, or implement weighting and margins of error (Milestone 4). Don't touch the copy without approval.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M4, commit `a0119c3`):** decisions D19, D22 and D23 ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)). Results stay unweighted. `methodology.html` now describes the opt-in panel, one response per account, unverified registration, groups under 10 withheld, steps of 10, breakdowns after close, and *n* with small-sample notes instead of a margin of error; weighting sits in a "Planned" card. `index.html` and `about.html` no longer claim weighting, margins of error or real-time updates, and About's "Today" entry no longer quotes fixed figures. `e2e/test_copy.py` checks the retired phrases. **Not reviewed (left for M9):** About's team biographies, funding model and the 2024–2025 timeline figures.
 
 <a id="fe-01"></a>
 ### FE-01: Simulated password reset and promised verification email (MEDIUM)
@@ -409,6 +410,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 
 - **Evidence:** probe P9: an admin calling `GET /api/results/{draft_id}` gets 404.
 - **Recommended fix:** allow admins to see draft results, which are normally empty, or hide the Results action for drafts. The admin page already hides it.
+- **Resolution (M4, commit `3796888`):** decision D24 ([0015](decisions/0015-admin-draft-results.md)). Admins get 200 for a draft's results; everyone else, suspended admins included, still gets 404. The admin Polls tab links to them, and `results.html` labels the draft.
 
 <a id="be-05"></a>
 ### BE-05: Health check doesn't touch the database (IMPROVEMENT)
@@ -422,12 +424,14 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 
 - **Description:** results show percentages for groups as small as 1, with only visual fading below 5 and a general "raw, unweighted" note.
 - **Recommended fix:** show *n* beside every figure. Add an approximate margin of error for simple random sampling, clearly labelled as such, or a "small sample" badge. Combine with PRIV-01 suppression.
+- **Resolution (M4, commit `4e22122`):** decisions D20 and D21 ([0014](decisions/0014-sample-size-without-margin-of-error.md)). `results.html` shows *n* beside the distribution and every group, state and question, with a small-sample note under 100 responses (`smallSampleSize` from the API). No margin of error, because respondents opt in.
 
 <a id="db-03"></a>
 ### DB-03: Demographic lists duplicated (IMPROVEMENT)
 
 - **Description:** states, age ranges, genders, education levels, occupations and categories live in `backend/app/core/constants.py` *and* as hard-coded `<option>` lists or JS objects in up to five pages.
 - **Recommended fix:** serve them from a `GET /api/reference` endpoint. A migrated frontend can then generate types from it.
+- **Resolution (M4, commit `f05d054`):** `GET /api/reference` serves the six lists from `core/constants.py`; `ticker.js` fills each `<select data-reference>` and provides category names, so no page keeps a copy. The category filter buttons on `polls.html` still carry their keys and icons in the markup.
 
 <a id="test-02"></a>
 ### TEST-02: Test-client deprecation warning (IMPROVEMENT)
@@ -444,7 +448,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 |---|---|---|
 | "start of the Phase 2 backend" | `README.md:7` | Backend is feature-complete for the current scope (19 endpoints, 43 tests) |
 | "[ ] Replace placeholder data with real database queries" | `README.md` roadmap | Done: no page shows hard-coded poll figures |
-| Results are weighted, with margins of error, minimum sample 1,000, stratified sampling | `methodology.html`, `index.html` | Raw counts only (METH-02) |
+| Results are weighted, with margins of error, minimum sample 1,000, stratified sampling | `methodology.html`, `index.html` | Raw counts only (METH-02); copy corrected in M4 |
 | Answers never linked to identity | 5 pages | Linked by `responses.user_id` (PRIV-02); copy corrected in M1 |
 | Verification link / reset email | `login.html` | Not implemented (FE-01); the promises were removed in M1 |
 | Brief: About page includes an FAQ | `MULTI PAGE WEBSITE PROMPT.md` §6 | The FAQ lives on `methodology.html`; `about.html` only links to "FAQ" (`href="#"`) |

@@ -3280,6 +3280,28 @@ footer {
   text-align: right;
 }
 
+.results-hbar-n {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+  flex-shrink: 0;
+}
+
+/* Sample size under the answer distribution, and small-sample notes under breakdowns (METH-03) */
+.results-sample-note {
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+.results-small-note {
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
 .results-hbar-val.trend-up   { color: #2D6A4F; }
 .results-hbar-val.trend-down { color: #A32D2D; }
 
@@ -3317,6 +3339,13 @@ footer {
   font-size: 16px;
   font-weight: 700;
   color: #F5F0E8;
+}
+
+.state-heat-n {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(245, 240, 232, 0.75);
+  margin-top: 2px;
 }
 
 .state-legend {
@@ -3897,71 +3926,6 @@ footer {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-
-/* ── Weighting visual ── */
-.meth-weight-visual {
-  background: #0A1628;
-  border-radius: 8px;
-  padding: 24px;
-  margin: 20px 0;
-}
-
-.meth-weight-title {
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #C8973A;
-  margin-bottom: 18px;
-}
-
-.meth-weight-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.meth-weight-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.meth-weight-factor {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  color: rgba(245, 240, 232, 0.6);
-  width: 120px;
-  flex-shrink: 0;
-}
-
-.meth-weight-track {
-  flex: 1;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.meth-weight-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.meth-weight-badge {
-  font-family: 'Space Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-
-.meth-weight-badge.high   { background: rgba(200,151,58,0.18); color: #C8973A; }
-.meth-weight-badge.medium { background: rgba(45,106,79,0.18);  color: #6fcf97; }
-.meth-weight-badge.low    { background: rgba(107,114,128,0.18);color: #9ca3af; }
 
 /* ── What we don't do grid ── */
 .meth-dont-grid {
@@ -5911,10 +5875,6 @@ input[type="search"].admin-input {
 
 .admin-poll-link:hover {
   color: #7a4c08;
-}
-
-.admin-poll-link[aria-disabled="true"] {
-  pointer-events: none;
 }
 
 /* Status and role badges (always a label, never colour alone) */

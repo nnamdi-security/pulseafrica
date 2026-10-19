@@ -226,15 +226,8 @@
             <div class="auth-field">
               <label for="ed-category">Category</label>
               <div class="auth-select-wrap">
-                <select id="ed-category" aria-describedby="ed-category-error" required>
+                <select id="ed-category" aria-describedby="ed-category-error" required data-reference="categories">
                   <option value="">Select…</option>
-                  <option value="presidency">Presidency</option>
-                  <option value="governors">Governors</option>
-                  <option value="economy">Economy</option>
-                  <option value="security">Security</option>
-                  <option value="education">Education</option>
-                  <option value="healthcare">Healthcare</option>
-                  <option value="governance">Governance</option>
                 </select>
               </div>
               <p class="auth-error" id="ed-category-error"></p>
@@ -433,10 +426,6 @@
        Needs an admin account. Loads GET /api/admin/overview and GET /api/polls
        (which includes drafts for admins); the Users tab loads GET /api/admin/users
        when first opened. */
-    const CATEGORY_NAMES = {
-      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
-      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
-    };
     const TABS = ['overview', 'polls', 'users'];
     const USERS_PER_PAGE = 25;
 
@@ -474,8 +463,8 @@
     }
 
     function categoryTag(key) {
-      const k = CATEGORY_NAMES[key] ? key : 'governance';
-      return '<span class="poll-cat-label cat-' + k + '">' + CATEGORY_NAMES[k] + '</span>';
+      return '<span class="poll-cat-label cat-' + PulseLive.categoryKey(key) + '">' +
+        escapeHtml(PulseLive.categoryName(key)) + '</span>';
     }
 
     /* ── Notices ── */
@@ -642,7 +631,7 @@
         ? o.polls.map(function (p) {
             const share = Math.round(100 * p.responseCount / all);
             return '<tr>' +
-              '<td><a class="admin-poll-link" href="results.html?id=' + p.id + '"' + (p.status === 'draft' ? ' aria-disabled="true" tabindex="-1"' : '') + '>' +
+              '<td><a class="admin-poll-link" href="results.html?id=' + p.id + '">' +
                 escapeHtml(p.title) + '</a></td>' +
               '<td>' + statusBadge(p.status) + '</td>' +
               '<td class="num">' + p.responseCount.toLocaleString() + '</td>' +
@@ -678,7 +667,7 @@
               '<td><div class="admin-actions">' +
                 '<button type="button" class="admin-btn admin-btn-sm" data-action="edit" data-id="' + p.id + '">Edit</button>' +
                 toggle +
-                (p.status !== 'draft' ? '<a class="admin-btn admin-btn-sm" href="results.html?id=' + p.id + '">Results</a>' : '') +
+                '<a class="admin-btn admin-btn-sm" href="results.html?id=' + p.id + '">Results</a>' +
                 '<button type="button" class="admin-btn admin-btn-sm admin-btn-danger-ghost" data-action="delete" data-id="' + p.id + '"' +
                   ' aria-label="Delete ' + escapeHtml(p.title) + '"><i class="ti ti-trash" aria-hidden="true"></i></button>' +
               '</div></td>' +
@@ -700,7 +689,7 @@
 
     /* Reload both the poll list and the overview figures after any change */
     function refreshData() {
-      return Promise.all([PulseAPI.adminOverview(), PulseAPI.listPolls()]).then(function (data) {
+      return Promise.all([PulseAPI.adminOverview(), PulseAPI.listPolls(), PulseLive.ready]).then(function (data) {
         overview = data[0];
         polls = data[1];
         renderOverview();

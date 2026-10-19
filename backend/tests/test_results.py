@@ -5,7 +5,7 @@ import random
 from datetime import datetime, timedelta, timezone
 
 from app.core.constants import AGE_RANGES, EDUCATION_LEVELS, GENDERS, OCCUPATIONS, STATES
-from app.models import Response
+from app.models import Response, User, UserRole
 from tests.conftest import make_citizens
 from tests.test_polls import _move_closing_date, close, create_poll, submit
 
@@ -320,3 +320,32 @@ def test_the_list_preview_moves_in_steps_too(client, db, admin_headers):
     assert card["responseCount"] == K + 3
     assert [o["count"] for o in card["preview"]] == [K // 2, K // 2, 0]
     assert [o["count"] for o in client.get(f"/api/polls/{poll['id']}").json()["preview"]] == [K // 2, K // 2, 0]
+
+
+def test_results_report_the_small_sample_size(client, admin_headers):
+    # METH-03 (decision 0014): pages flag figures from fewer responses than this.
+    poll = create_poll(client, admin_headers)
+    assert results(client, poll)["smallSampleSize"] == 100
+
+
+def test_only_admins_see_draft_results(client, admin_headers, citizen_headers):
+    # BE-04 (decision 0015): admins can preview a draft's results; for everyone else it doesn't exist.
+    draft = create_poll(client, admin_headers, status="draft")
+    assert client.get(f"/api/results/{draft['id']}").status_code == 404
+    assert client.get(f"/api/results/{draft['id']}", headers=citizen_headers).status_code == 404
+
+    res = client.get(f"/api/results/{draft['id']}", headers=admin_headers)
+    assert res.status_code == 200
+    body = res.json()
+    assert body["totalResponses"] == 0
+    assert body["resultsWithheld"] is True
+    assert body["breakdownsHeld"] is True
+    assert [q["text"] for q in body["questions"]] == [q["text"] for q in draft["questions"]]
+
+
+def test_a_suspended_admin_gets_404_for_draft_results(client, db, admin_headers):
+    draft = create_poll(client, admin_headers, status="draft")
+    admin = db.query(User).filter(User.role == UserRole.admin).one()
+    admin.is_active = False
+    db.commit()
+    assert client.get(f"/api/results/{draft['id']}", headers=admin_headers).status_code == 404

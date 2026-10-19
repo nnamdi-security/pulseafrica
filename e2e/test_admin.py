@@ -92,3 +92,22 @@ def test_citizens_are_kept_out(page: Page, citizen, console_errors):
     page.goto("/admin.html")
     expect(page.get_by_text("Admin access only")).to_be_visible()
     expect(page.get_by_role("tab", name="Polls")).to_be_hidden()
+
+
+def test_admins_can_preview_a_drafts_results(page: Page, admin, console_errors):
+    # BE-04 (decision 0015)
+    title = f"Draft preview {secrets.token_hex(3)}"
+    status, draft = api("POST", "/polls", {
+        "title": title, "description": "A draft to preview.", "category": "economy", "status": "draft",
+        "questions": [{"text": "How is the economy doing?", "options": [{"text": "Well"}, {"text": "Badly"}]}],
+    }, token=admin.token)
+    assert status == 201, draft
+    assert api("GET", f"/results/{draft['id']}")[0] == 404   # still hidden from everyone else
+
+    sign_in(page, admin)
+    page.goto("/admin.html#polls")
+    page.locator("#pollTable tr").filter(has_text=title).get_by_role("link", name="Results").click()
+    expect(page.locator("#resTitle")).to_have_text(title)
+    expect(page.locator("#resBadges")).to_contain_text("Draft · visible to admins only")
+    expect(page.locator("#resNotice")).to_contain_text("This draft isn’t published yet")
+    api("DELETE", f"/polls/{draft['id']}", token=admin.token)

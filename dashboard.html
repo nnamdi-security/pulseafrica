@@ -204,48 +204,8 @@
               <div class="auth-field">
                 <label for="set-state">State of residence</label>
                 <div class="auth-select-wrap">
-                  <select id="set-state" name="state" aria-describedby="set-state-error" required>
+                  <select id="set-state" name="state" aria-describedby="set-state-error" required data-reference="states">
                     <option value="">Select your state…</option>
-                    <option>ABA STATE</option>
-                    <option>ADOKA STATE</option>
-                    <option>AFEMI IGODOMIGODO STATE</option>
-                    <option>AHOADA STATE</option>
-                    <option>AKPAKIP ORO STATE</option>
-                    <option>ALANSO STATE</option>
-                    <option>ALAUDO STATE</option>
-                    <option>ANIOMA STATE</option>
-                    <option>BRANEM STATE</option>
-                    <option>CALABAR STATE</option>
-                    <option>EBONYI STATE</option>
-                    <option>EBUBE STATE</option>
-                    <option>EDDA STATE</option>
-                    <option>ENUGU STATE</option>
-                    <option>EPIE STATE</option>
-                    <option>ESAN IGODOMIGODO STATE</option>
-                    <option>EZEANI STATE</option>
-                    <option>IDEN IGODOMIGODO STATE</option>
-                    <option>IDUNG IBON STATE</option>
-                    <option>IGALA STATE</option>
-                    <option>IGBANI STATE</option>
-                    <option>IKA STATE</option>
-                    <option>IKEMBA STATE</option>
-                    <option>IKOM STATE</option>
-                    <option>IKWUMESIA STATE</option>
-                    <option>ITTAI STATE</option>
-                    <option>IWERE STATE</option>
-                    <option>IWHUNROHA STATE</option>
-                    <option>ODUMEGWU STATE</option>
-                    <option>OGBIA/IZON STATE</option>
-                    <option>OGOJA STATE</option>
-                    <option>OHABUEYI STATE</option>
-                    <option>OHAUKWU STATE</option>
-                    <option>OKIGWE STATE</option>
-                    <option>OMAMBALA STATE</option>
-                    <option>ORLU STATE</option>
-                    <option>OWERRI STATE</option>
-                    <option>QUA STATE</option>
-                    <option>SOUTH ATLANTIC STATE</option>
-                    <option>URHOBO/ISOKO STATE</option>
                   </select>
                 </div>
                 <p class="auth-error" id="set-state-error"></p>
@@ -254,14 +214,8 @@
               <div class="auth-field">
                 <label for="set-age">Age range</label>
                 <div class="auth-select-wrap">
-                  <select id="set-age" name="ageRange" aria-describedby="set-age-error" required>
+                  <select id="set-age" name="ageRange" aria-describedby="set-age-error" required data-reference="ageRanges">
                     <option value="">Select…</option>
-                    <option>18–24</option>
-                    <option>25–34</option>
-                    <option>35–44</option>
-                    <option>45–54</option>
-                    <option>55–64</option>
-                    <option>65+</option>
                   </select>
                 </div>
                 <p class="auth-error" id="set-age-error"></p>
@@ -448,10 +402,6 @@
     /* ── User dashboard ──
        Loads GET /api/auth/me, GET /api/auth/me/responses and GET /api/polls.
        Signed-out visitors (or an expired session) get a sign-in prompt. */
-    const CATEGORY_NAMES = {
-      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
-      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
-    };
     const TABS = ['overview', 'history', 'settings'];
 
     let user = null;
@@ -587,8 +537,8 @@
     }
 
     function categoryTag(key) {
-      const k = CATEGORY_NAMES[key] ? key : 'governance';
-      return '<span class="poll-cat-label cat-' + k + '">' + CATEGORY_NAMES[k] + '</span>';
+      return '<span class="poll-cat-label cat-' + PulseLive.categoryKey(key) + '">' +
+        escapeHtml(PulseLive.categoryName(key)) + '</span>';
     }
 
     function statusBadge(status) {
@@ -898,7 +848,7 @@
         return;
       }
       showNotice({ icon: 'loader-2', title: 'Loading your dashboard…' });
-      Promise.all([PulseAPI.me(), PulseAPI.myResponses(), PulseAPI.listPolls()]).then(function (data) {
+      Promise.all([PulseAPI.me(), PulseAPI.myResponses(), PulseAPI.listPolls(), PulseLive.ready]).then(function (data) {
         user = data[0];
         answered = data[1];
         polls = data[2];

@@ -69,6 +69,9 @@ class PollResults(CamelModel):
     total_responses: int
     # Groups and periods smaller than this are not shown
     min_group_size: int
+    # Figures from fewer responses than this are flagged as a small sample (no margin of error
+    # is published: respondents opt in, so the sample isn't random)
+    small_sample_size: int
     # True when the poll has fewer than min_group_size responses: only totals are shown
     results_withheld: bool
     # Responses the figures count: whole steps of min_group_size, so one response can't move them

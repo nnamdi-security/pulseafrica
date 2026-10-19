@@ -179,6 +179,7 @@
           <div class="sentiment-split-bar" role="img" id="distBar"></div>
           <div class="results-legend" id="distLegend"></div>
         </div>
+        <p class="results-sample-note" id="distSample"></p>
       </div>
 
       <div class="results-row-2col">
@@ -306,7 +307,7 @@
     <!-- Methodology note — visible on all panels -->
     <div class="results-meth-note" role="note">
       <i class="ti ti-info-circle" aria-hidden="true"></i>
-      <p>These are raw, unweighted counts of the responses received so far. Percentages are the share of respondents who answered each question. Weighting by age, gender and state population, and margins of error, are not applied yet, so small groups can swing a lot. <a href="methodology.html">How weighting will work</a></p>
+      <p>These are raw, unweighted counts of the responses received so far. Percentages are the share of respondents who answered each question. They aren’t weighted, and no margin of error is given because respondents choose to take part; instead each figure shows its number of responses (n), and small samples are marked. <a href="methodology.html#sec-error">How to read these figures</a></p>
     </div>
 
   </div><!-- /results-dashboard -->
@@ -404,14 +405,12 @@
     /* ── Results from the API ──
        results.html?id=3 shows poll 3; with no id it shows the poll with the most
        responses. Every figure is computed from GET /api/results/{id}. */
-    const CATEGORY_NAMES = {
-      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
-      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
-    };
-    const AGE_ORDER = ['18–24', '25–34', '35–44', '45–54', '55–64', '65+'];
-    const EDUCATION_ORDER = ['No formal education', 'Primary school', 'Secondary school',
-      'Vocational / technical', "Bachelor's degree", 'Postgraduate'];
+    /* Display order of the age and education groups, from GET /api/reference. Without it,
+       age ranges still sort correctly as text ('18–24' … '65+'). */
+    let ageOrder = null;
+    let educationOrder = null;
     let minGroup = 10;         /* the server's minimum group size (results.minGroupSize) */
+    let smallSample = 100;     /* figures from fewer responses are flagged (results.smallSampleSize) */
     const DAY_MS = 24 * 60 * 60 * 1000;
     const MONO = "'Space Mono', monospace";
 
@@ -521,9 +520,18 @@
         '<span class="results-hbar-label">' + escapeHtml(opts.label) + '</span>' +
         '<div class="results-hbar-track"><div class="results-hbar-fill" style="width:' + Math.max(0, Math.min(100, opts.width)) +
           '%;background:' + opts.color + ';"></div></div>' +
+        (opts.n !== undefined ? '<span class="results-hbar-n" aria-hidden="true">n=' + opts.n.toLocaleString() + '</span>' : '') +
         '<span class="results-hbar-val' + (opts.valueClass ? ' ' + opts.valueClass : '') + '">' + opts.valueText + '</span>' +
         '<span class="sr-only">' + (opts.n !== undefined ? ', ' + plural(opts.n, 'response') : '') + '</span>' +
       '</div>';
+    }
+
+    /* METH-03 (decision 0014): n sits beside each group's figure; groups under smallSample get a
+       note rather than a margin of error, because respondents opt in and the sample isn't random. */
+    function smallSampleNote(sizes, noun) {
+      if (!sizes.some(function (n) { return n < smallSample; })) return '';
+      return '<p class="results-small-note">Small samples: ' + noun + ' with fewer than ' + smallSample +
+        ' responses (n) can swing a lot, so read differences between them with care.</p>';
     }
 
     function emptyBars(message) {
@@ -572,7 +580,7 @@
       return rows.map(function (g) {
         const share = shareOf(g.options, 'approve');
         return barRow({ label: g.group, width: share, color: compareColor(share, overall), valueText: pct(share), n: g.total });
-      }).join('') + withheldNote(withheld, 'group');
+      }).join('') + smallSampleNote(rows.map(function (g) { return g.total; }), 'groups') + withheldNote(withheld, 'group');
     }
 
     /* ── Charts ── */
@@ -626,11 +634,13 @@
       document.getElementById('resTitle').textContent = poll.title;
       document.getElementById('resCrumb').textContent = poll.title.split(' — ')[0] + ' — results';
       document.getElementById('resBadges').innerHTML =
-        (live
+        (poll.status === 'draft'
+          ? '<span class="results-badge results-badge-closed">Draft &middot; visible to admins only</span>'
+          : live
           ? '<span class="results-badge results-badge-live"><span class="results-live-dot" aria-hidden="true"></span>Live &middot; ' +
               plural(results.totalResponses, 'response') + '</span>'
           : '<span class="results-badge results-badge-closed">Closed &middot; ' + plural(results.totalResponses, 'response') + '</span>') +
-        '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>' +
+        '<span class="results-badge results-badge-cat">' + escapeHtml(PulseLive.categoryName(poll.category)) + '</span>' +
         (results.isSynthetic ? '<span class="results-badge results-badge-cat">Demo data</span>' : '');
       document.getElementById('resDemoNotice').hidden = !results.isSynthetic;
       renderHeldNotice();
@@ -693,6 +703,10 @@
       const groups = buckets(question.options);
 
       document.getElementById('distQuestion').textContent = question.text;
+      document.getElementById('distSample').textContent = 'Based on ' + plural(question.total, 'response') + ' (n).' +
+        (question.total < smallSample
+          ? ' Small sample: with fewer than ' + smallSample + ' responses, these figures can change a lot as more people answer.'
+          : '');
       document.getElementById('distLabels').innerHTML = groups.map(function (b) {
         return '<span class="sent-lbl-' + b.tone + '">' + escapeHtml(b.label) +
           (b.members.length > 1 ? ' (combined)' : '') + ' &middot; ' + pct(b.percent) + '</span>';
@@ -763,12 +777,14 @@
         '. Groups with fewer than ' + minGroup + ' responses are not shown.';
       document.querySelectorAll('[data-share-sub]').forEach(function (el) { el.textContent = results.breakdownsHeld ? '' : shareSub; });
 
-      document.getElementById('ageBars').innerHTML = groupBars(question.byAgeRange, question.withheld.byAgeRange, AGE_ORDER);
+      const ageGroups = ageOrder || question.byAgeRange.map(function (g) { return g.group; }).sort();
+      const educationGroups = educationOrder || question.byEducation.map(function (g) { return g.group; }).sort();
+      document.getElementById('ageBars').innerHTML = groupBars(question.byAgeRange, question.withheld.byAgeRange, ageGroups);
       document.getElementById('genderBars').innerHTML = groupBars(question.byGender, question.withheld.byGender);
-      document.getElementById('educationBars').innerHTML = groupBars(question.byEducation, question.withheld.byEducation, EDUCATION_ORDER);
+      document.getElementById('educationBars').innerHTML = groupBars(question.byEducation, question.withheld.byEducation, educationGroups);
       document.getElementById('occupationBars').innerHTML = groupBars(question.byOccupation, question.withheld.byOccupation);
 
-      const ages = AGE_ORDER.map(function (age) {
+      const ages = ageGroups.map(function (age) {
         return question.byAgeRange.find(function (g) { return g.group === age; }) || { group: age, total: 0, options: [] };
       });
       const pos = ages.map(function (g) { return g.total ? Math.round(shareOf(g.options, 'approve')) : null; });
@@ -780,7 +796,7 @@
       drawChart('groupedBarChart', {
         type: 'bar',
         data: {
-          labels: AGE_ORDER,
+          labels: ageGroups,
           datasets: [
             { label: positiveLabel(question), data: pos, backgroundColor: '#2D6A4F', borderRadius: 3 },
             { label: negLabel, data: neg, backgroundColor: '#A32D2D', borderRadius: 3 }
@@ -798,7 +814,7 @@
                  ticks: Object.assign({ callback: function (v) { return v + '%'; } }, axisTicks), border: { display: false } }
           }
         }
-      }, results.breakdownsHeld ? HELD : 'Bar chart by age group. ' + AGE_ORDER.map(function (a, i) {
+      }, results.breakdownsHeld ? HELD : 'Bar chart by age group. ' + ageGroups.map(function (a, i) {
         return a + ': ' + (pos[i] === null ? 'no responses' : pos[i] + '% ' + positiveLabel(question).toLowerCase() + ', ' + neg[i] + '% ' + negLabel.toLowerCase());
       }).join('; ') + '.');
     }
@@ -821,6 +837,7 @@
               ' style="background:' + compareColor(share, overall) + ';" title="' + escapeHtml(label) + '" aria-label="' + escapeHtml(label) + '">' +
               '<div class="state-heat-name">' + escapeHtml(g.group.replace(/ STATE$/, '')) + '</div>' +
               '<div class="state-heat-pct">' + pct(share) + '</div>' +
+              '<div class="state-heat-n" aria-hidden="true">n=' + g.total.toLocaleString() + '</div>' +
             '</div>';
           }).join('')
         : emptyBars(results.breakdownsHeld ? HELD : question.withheld.byState.groups
@@ -847,8 +864,11 @@
         return;
       }
       const count = Math.min(5, Math.floor(ranked.length / 2));
-      document.getElementById('topStates').innerHTML = rows(ranked.slice(0, count));
-      document.getElementById('bottomStates').innerHTML = rows(ranked.slice(-count).reverse());
+      const top = ranked.slice(0, count);
+      const bottom = ranked.slice(-count).reverse();
+      document.getElementById('topStates').innerHTML = rows(top);
+      document.getElementById('bottomStates').innerHTML = rows(bottom) +
+        smallSampleNote(top.concat(bottom).map(function (g) { return g.total; }), 'states');
     }
 
     /* ── Trend ──
@@ -1019,7 +1039,8 @@
     function renderPollPicker(selectedId) {
       const picker = document.getElementById('pollPicker');
       picker.innerHTML = polls.map(function (p) {
-        return '<option value="' + p.id + '">' + escapeHtml(p.title) + (p.status === 'closed' ? ' (closed)' : '') + '</option>';
+        return '<option value="' + p.id + '">' + escapeHtml(p.title) +
+          (p.status === 'closed' ? ' (closed)' : p.status === 'draft' ? ' (draft)' : '') + '</option>';
       }).join('');
       picker.value = String(selectedId);
       picker.disabled = polls.length < 2;
@@ -1027,17 +1048,24 @@
 
     function loadResults(id) {
       showNotice({ icon: 'loader-2', title: 'Loading results…' });
-      return Promise.all([PulseAPI.getPoll(id), PulseAPI.getResults(id)]).then(function (data) {
+      return Promise.all([PulseAPI.getPoll(id), PulseAPI.getResults(id), PulseLive.ready]).then(function (data) {
         poll = data[0];
         results = data[1];
+        if (data[2]) {
+          ageOrder = data[2].ageRanges;
+          educationOrder = data[2].educationLevels;
+        }
         minGroup = results.minGroupSize;
+        smallSample = results.smallSampleSize;
         questionIndex = 0;
         renderHeader();
         renderStats();
         if (!results.totalResponses) {
           showNotice({
             icon: 'mood-empty', title: 'No responses yet',
-            html: poll.status === 'active'
+            html: poll.status === 'draft'
+              ? 'This draft isn’t published yet. Its results appear here once it’s live and people respond.'
+              : poll.status === 'active'
               ? 'Results appear here as soon as people respond. <a href="poll.html?id=' + poll.id + '">Be the first to take this poll</a>.'
               : 'This poll closed without any responses.'
           });

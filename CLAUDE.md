@@ -20,7 +20,7 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 | Frontend | Static HTML5 + one CSS file + vanilla JS (no build). Chart.js 4.4.1 (results only), Tabler Icons, Google Fonts via CDN | repo root: 9 `*.html`, `style.css`, `api.js`, `nav-auth.js`, `ticker.js`, `images/` |
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
-| Tests | pytest + FastAPI `TestClient` (137 tests); Python Playwright browser suite (74 tests) | `backend/tests/`, `e2e/` |
+| Tests | pytest + FastAPI `TestClient` (143 tests); Python Playwright browser suite (82 tests) | `backend/tests/`, `e2e/` |
 
 **A Next.js frontend is PROPOSED, not implemented.** Don't create `frontend/`, add Node tooling, or write React/Next.js code unless the user has approved a migration milestone (M5–M8 in [docs/ROADMAP.md](docs/ROADMAP.md)). Use the `frontend-migration` skill only then.
 
@@ -33,7 +33,7 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 style.css              all styles, one labelled section per page
 api.js                 window.PulseAPI — fetch wrapper, ApiError, token storage, endpoints
 nav-auth.js            window.PulseNav — signed-in nav (name, Admin link, Sign out)
-ticker.js              window.PulseLive — ticker + shared stats/polls requests
+ticker.js              window.PulseLive — ticker, shared stats/polls requests, fixed lists (GET /api/reference)
 backend/app/main.py    FastAPI app, CORS, routers under /api
 backend/app/api/       routes/{auth,polls,responses,results,stats,admin}.py, deps.py
 backend/app/schemas/   Pydantic contracts (CamelModel → camelCase JSON)
@@ -68,7 +68,7 @@ docker compose up -d                       # Postgres 16 (dev)
 source .venv/bin/activate                  # after: python -m venv .venv && pip install -r requirements.txt
 alembic upgrade head                       # apply migrations
 uvicorn app.main:app --reload              # API on :8000, docs at /docs
-pytest                                     # 137 tests on in-memory SQLite (1 Postgres-only test skipped)
+pytest                                     # 143 tests on in-memory SQLite (1 Postgres-only test skipped)
 TEST_DATABASE_URL=postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica_test pytest   # throwaway DB only
 alembic check                              # models match migrations?
 python -m app.create_admin you@example.com
@@ -84,7 +84,7 @@ Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them
 
 - **HIGH:** none open (SEC-03, rate limiting, fixed in M3).
 - **MEDIUM:** SEC-04 for the current pages (the token stays in Web Storage until a frontend uses the M3 session cookie); SEC-07 for the static pages (their CSP is set by the host, M9).
-- **MEDIUM** that touch the M1 fixes: METH-02 (weighting, margins of error and verification claims remain in methodology, index and about copy, waiting on Milestone 4).
+- METH-02 was fixed in M4. About's team biographies, funding model and 2024–2025 timeline figures are unreviewed copy, left for M9 ([decision 0013](docs/decisions/0013-unweighted-results-and-methodology-copy.md)).
 
 ## Workflow and definition of done
 

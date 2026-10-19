@@ -43,19 +43,19 @@ PulseAfrica **is** an opinion-research platform. It is **not**:
 | | Live ticker on every page | `ticker.js` | Neutral placeholder when the API is down |
 | **Participation** | Multi-step poll: one screen per question, then demographics, then a thank-you screen | `poll.html`, `GET /polls/{id}`, `POST /responses` | Sign-in required; one response per account |
 | | States: sign-in gate, already responded, closed, not found | `poll.html` | |
-| **Results** | Overview (distribution, per-question comparison, donut); by demographic (age, gender, education, occupation); by state (heatmap, top/bottom 5); trend (daily/weekly line, change, key moments) | `results.html`, `GET /results/{id}` | **Raw, unweighted**; groups under 5 are faded in the browser only |
+| **Results** | Overview (distribution, per-question comparison, donut); by demographic (age, gender, education, occupation); by state (heatmap, top/bottom 5); trend (daily/weekly line, change, key moments) | `results.html`, `GET /results/{id}` | **Raw, unweighted**; *n* beside every figure and a small-sample note under 100 responses ([decision 0014](decisions/0014-sample-size-without-margin-of-error.md)); admins can open a draft's (empty) results |
 | **Accounts** | Register, sign in (with "keep me signed in"), sign out, `?next=` return | `login.html`, `/auth/*` | Password reset is **simulated** ([FE-01](AUDIT.md#fe-01)) |
 | | Dashboard: profile, live polls not yet answered, history (which polls and when, never answers), edit profile, change password, delete account | `dashboard.html`, `/auth/me*` | |
 | **Admin** | Overview (totals, 14-day responses chart, per-poll participation) | `admin.html`, `/admin/overview` | |
 | | Polls: create and edit with a question builder; publish, close, reopen, delete | `/polls` POST, PATCH, DELETE | Questions lock once answered |
 | | Users: search, filter, page; suspend and reactivate; grant and remove admin | `/admin/users` | Self-protection and last-admin rules |
-| **Content** | Methodology (long-form) and About (mission, values, story, team, goals) | `methodology.html`, `about.html` | Static; contains claims not yet true ([METH-02](AUDIT.md#meth-02)) |
+| **Content** | Methodology (long-form) and About (mission, values, story, team, goals) | `methodology.html`, `about.html` | Static; methodology describes what is implemented since M4 ([decision 0013](decisions/0013-unweighted-results-and-methodology-copy.md)); About's team and funding copy is unreviewed (M9) |
 | **Demo data** | 10 polls + 300 synthetic voters | `python -m app.seed` | Not disclosed in the UI |
 
 ### From the original brief, but not implemented
 
 - **Reset and verification:** password reset, and email verification.
-- **Rigour:** weighted results, margins of error, a minimum sample.
+- **Rigour:** weighted results, margins of error, a minimum sample. Decided against for now ([decision 0013](decisions/0013-unweighted-results-and-methodology-copy.md), [0014](decisions/0014-sample-size-without-margin-of-error.md)): results stay raw counts with *n* and small-sample notes.
 - **Optional extras:** testimonials (optional in the brief); a `questionType` beyond single choice.
 - **"Future features" in the brief:** real-time updates, forecasting, comparison tools, a mobile app.
 - **Legal pages:** Terms of Use and Privacy Policy pages. They're linked as `href="#"`, even though registration requires agreeing to them ([FE-05](AUDIT.md#fe-05)).
@@ -76,6 +76,5 @@ Owner approval is required for each; see [ROADMAP.md](ROADMAP.md).
 
 | Decision | Options |
 |---|---|
-| **Methodology** ([METH-02](AUDIT.md#meth-02)) | Rewrite the remaining claims as "planned", *or* implement weighting and margins of error (the M1 copy is decided: [0003](decisions/0003-privacy-and-methodology-copy.md)) |
 | **Synthetic data by environment** ([METH-01](AUDIT.md#meth-01)) | Whether the demo deployment is the only deployment (disclosure decided: [0004](decisions/0004-demonstration-data-disclosure.md)) |
 | **Frontend migration to Next.js** | See [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md) |

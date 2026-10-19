@@ -362,10 +362,6 @@
        GET /api/polls returns every non-draft poll in one go, so filtering,
        sorting and pagination all happen here in the browser. */
     const PAGE_SIZE = 12;
-    const CATEGORY_NAMES = {
-      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
-      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
-    };
 
     const grid         = document.getElementById('pollsGrid');
     const pagination   = document.getElementById('pollsPagination');
@@ -453,7 +449,7 @@
 
     function cardHTML(poll, featured) {
       const live = poll.status === 'active';
-      const category = CATEGORY_NAMES[poll.category] ? poll.category : 'governance';
+      const category = PulseLive.categoryKey(poll.category);
       const titleTag = featured ? 'h2' : 'h3';
 
       const badge = live
@@ -474,7 +470,7 @@
       return '<article class="poll-card-item' + (live ? '' : ' is-closed') + (featured ? ' poll-card-featured' : '') + '">' +
         '<div class="poll-card-head">' +
           '<div class="poll-card-meta-row">' +
-            '<span class="poll-card-tags"><span class="poll-cat-label cat-' + category + '">' + CATEGORY_NAMES[category] +
+            '<span class="poll-card-tags"><span class="poll-cat-label cat-' + category + '">' + escapeHtml(PulseLive.categoryName(poll.category)) +
               (featured ? ' &middot; Featured' : '') + '</span>' +
               (poll.isSynthetic ? '<span class="demo-tag">Demo data</span>' : '') + '</span>' +
             badge +
@@ -547,7 +543,7 @@
         : '<p class="polls-state"><i class="ti ti-mood-empty" aria-hidden="true"></i>' +
           (allPolls.length ? 'No polls match these filters.' : 'There are no polls yet — check back soon.') + '</p>';
 
-      const catLabel = activeCategory === 'all' ? 'all categories' : CATEGORY_NAMES[activeCategory].toLowerCase();
+      const catLabel = activeCategory === 'all' ? 'all categories' : PulseLive.categoryName(activeCategory).toLowerCase();
       resultsCount.textContent = polls.length > PAGE_SIZE
         ? 'Showing ' + (first + 1) + '–' + (first + pagePolls.length) + ' of ' + polls.length + ' polls — ' + catLabel
         : 'Showing ' + plural(polls.length, 'poll') + ' — ' + catLabel;
@@ -576,8 +572,8 @@
 
     function loadPolls() {
       grid.setAttribute('aria-busy', 'true');
-      PulseAPI.listPolls().then(function (polls) {
-        allPolls = polls;
+      Promise.all([PulseAPI.listPolls(), PulseLive.ready]).then(function (data) {
+        allPolls = data[0];
         renderStats();
         render();
       }).catch(function (err) {

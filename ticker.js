@@ -7,16 +7,19 @@
    API can't be reached, the placeholder stays: the ticker never
    shows numbers it didn't get from the server.
 
-   Also exposes window.PulseLive so a page (index.html) can reuse
-   the same requests and headline maths.
+   Also exposes window.PulseLive so pages can reuse the same
+   requests, the headline maths and the fixed lists.
+
+   Fixed lists (DB-03) come from GET /api/reference. A select
+   marked <select data-reference="states"> keeps its first, empty
+   option and is filled from the list of that name (states,
+   ageRanges, genders, educationLevels, occupations, categories).
+   Pages that set a select's value, or show category names,
+   wait for PulseLive.ready first.
    ============================================================ */
 (function () {
-  const CATEGORIES = [
-    ['presidency', 'Presidency'], ['governors', 'Governors'], ['economy', 'Economy'],
-    ['security', 'Security'], ['education', 'Education'], ['healthcare', 'Healthcare'],
-    ['governance', 'Governance']
-  ];
   const SCROLL_PX_PER_SECOND = 45;
+  let categories = [];   /* [{ key, name }], once GET /api/reference answers */
 
   /* Headline figure for a poll's first question, from the preview in GET /api/polls.
      Options are grouped by position as on the other pages: the first half lean
@@ -38,12 +41,12 @@
 
   /* The live poll with the most responses in each category that has one */
   function leadersByCategory(polls) {
-    return CATEGORIES.map(function (c) {
-      const live = polls.filter(function (p) { return p.status === 'active' && p.category === c[0] && p.responseCount; });
+    return categories.map(function (c) {
+      const live = polls.filter(function (p) { return p.status === 'active' && p.category === c.key && p.responseCount; });
       if (!live.length) return null;
       const poll = live.reduce(function (a, b) { return b.responseCount > a.responseCount ? b : a; });
       const h = headline(poll);
-      return h ? { key: c[0], name: c[1], poll: poll, headline: h } : null;
+      return h ? { key: c.key, name: c.name, poll: poll, headline: h } : null;
     }).filter(Boolean);
   }
 
@@ -51,18 +54,48 @@
     return title.split(' — ')[0];
   }
 
+  function fillSelect(select, ref) {
+    const list = ref[select.dataset.reference] || [];
+    while (select.options.length > 1) select.remove(1);
+    list.forEach(function (item) {
+      select.add(typeof item === 'string' ? new Option(item) : new Option(item.name, item.key));
+    });
+  }
+
   const stats = PulseAPI.getStats();
   const polls = PulseAPI.listPolls();
+  const reference = PulseAPI.getReference();
+  const selects = document.querySelectorAll('select[data-reference]');
+
+  /* Resolves once the lists are in place (with the reference, or null if it couldn't load) */
+  const ready = reference.then(function (ref) {
+    categories = ref.categories;
+    selects.forEach(function (select) { fillSelect(select, ref); });
+    return ref;
+  }, function () {
+    selects.forEach(function (select) {
+      if (select.options[0]) select.options[0].textContent = 'Couldn’t load the list. Refresh to try again.';
+    });
+    return null;
+  });
 
   window.PulseLive = {
     stats: stats,
     polls: polls,
+    reference: reference,
+    ready: ready,
     headline: headline,
     leadersByCategory: leadersByCategory,
     shortTitle: shortTitle,
+    // The category's display name; until (or unless) the reference loads, the key with a capital
     categoryName: function (key) {
-      const c = CATEGORIES.find(function (x) { return x[0] === key; });
-      return c ? c[1] : 'Poll';
+      const c = categories.find(function (x) { return x.key === key; });
+      if (c) return c.name;
+      return key ? key.charAt(0).toUpperCase() + key.slice(1) : 'Poll';
+    },
+    // A key that is safe in a class name such as cat-economy
+    categoryKey: function (key) {
+      return /^[a-z]+$/.test(key || '') ? key : 'governance';
     }
   };
 
@@ -109,7 +142,7 @@
   const fallback = placeholderItems();
   render(fallback);
 
-  Promise.all([stats, polls]).then(function (data) {
+  Promise.all([stats, polls, ready]).then(function (data) {
     const s = data[0];
     const list = data[1];
     const leaders = leadersByCategory(list);

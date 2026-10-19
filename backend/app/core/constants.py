@@ -1,4 +1,4 @@
-"""Fixed reference values shared with the frontend forms (login.html, poll.html)."""
+"""Fixed reference values. The pages read them from GET /api/reference (DB-03) rather than keeping copies."""
 
 STATES = [
     "ABA STATE", "ADOKA STATE", "AFEMI IGODOMIGODO STATE", "AHOADA STATE",
@@ -17,8 +17,17 @@ AGE_RANGES = ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"]
 
 GENDERS = ["Male", "Female"]
 
-# Poll categories — the filter buttons on polls.html use these exact keys
-CATEGORIES = ["presidency", "governors", "economy", "security", "education", "healthcare", "governance"]
+# Poll categories, with the names pages show for them. The filter buttons on polls.html use these exact keys.
+CATEGORY_NAMES = {
+    "presidency": "Presidency",
+    "governors": "Governors",
+    "economy": "Economy",
+    "security": "Security",
+    "education": "Education",
+    "healthcare": "Healthcare",
+    "governance": "Governance",
+}
+CATEGORIES = list(CATEGORY_NAMES)
 
 # Optional demographics asked on poll.html
 EDUCATION_LEVELS = [
@@ -35,3 +44,7 @@ OCCUPATIONS = [
 # Smallest group shown in public results; smaller groups, and polls with fewer
 # responses than this, are withheld (docs/decisions/0001-minimum-public-group-size.md)
 MIN_GROUP_SIZE = 10
+
+# Figures based on fewer responses than this carry a small-sample note on the results page
+# (METH-03, docs/decisions/0014-sample-size-without-margin-of-error.md)
+SMALL_SAMPLE_SIZE = 100

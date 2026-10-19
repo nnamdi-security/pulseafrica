@@ -37,7 +37,7 @@ There's no build step, framework or bundler on the frontend. The API is a single
 | **`style.css`** | One stylesheet (6,378 lines) with a labelled section per page. No custom properties; colours are literals ([DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)) |
 | **`api.js`** | `window.PulseAPI`: the fetch wrapper, error normalisation into `ApiError {status, message, fields}`, token and cached-user storage, and one method per endpoint |
 | **`nav-auth.js`** | `window.PulseNav`: swaps the nav's `[data-nav-auth]` "Sign in" item for the user's name (→ `dashboard.html`), an "Admin" link for admins, and "Sign out". Fires `pulse:signedout` |
-| **`ticker.js`** | `window.PulseLive`: starts `GET /api/stats` and `GET /api/polls` once, fills the ticker, and shares those promises and the headline maths with `index.html` |
+| **`ticker.js`** | `window.PulseLive`: starts `GET /api/stats`, `GET /api/polls` and `GET /api/reference` once, fills the ticker and every `<select data-reference="…">`, and shares those promises, `ready`, `categoryName` and the headline maths with the pages ([DB-03](AUDIT.md#db-03)) |
 | **Chart.js 4.4.1** | Donut, grouped-bar and line charts on `results.html`, drawn lazily when a tab becomes visible. `admin.html` uses a CSS column chart |
 
 **Load order on every page:** `api.js` → `nav-auth.js` → `ticker.js` → the page script. Each page is a plain IIFE-style script relying on these globals.

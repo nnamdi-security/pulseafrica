@@ -96,10 +96,11 @@ Demographics are **self-reported for each response**. They can differ from the p
 
 | Method | Path | Auth | Success |
 |---|---|---|---|
-| GET | `/results/{pollId}` | — | 200 `PollResults` for active and closed polls; 404 for drafts, even for admins ([BE-04](AUDIT.md#be-04)) |
+| GET | `/results/{pollId}` | opt | 200 `PollResults` for active and closed polls, and for drafts when the caller is an admin ([BE-04](AUDIT.md#be-04), [decision 0015](decisions/0015-admin-draft-results.md)); 404 for drafts to everyone else |
 
-- **`PollResults`:** `{pollId, title, isSynthetic, totalResponses, minGroupSize, resultsWithheld, publishedResponses, breakdownsHeld, statesCovered, trendInterval, questions: [QuestionResult]}`.
+- **`PollResults`:** `{pollId, title, isSynthetic, totalResponses, minGroupSize, smallSampleSize, resultsWithheld, publishedResponses, breakdownsHeld, statesCovered, trendInterval, questions: [QuestionResult]}`.
   - `minGroupSize`: the smallest group shown (10). Clients use this value rather than their own.
+  - `smallSampleSize`: figures based on fewer responses than this (100) are flagged as a small sample; no margin of error is published ([METH-03](AUDIT.md#meth-03), [decision 0014](decisions/0014-sample-size-without-margin-of-error.md)).
   - `resultsWithheld`: `true` when `totalResponses < minGroupSize`. Every option's `count` and `percent` are then `null`, and every breakdown and the trend are empty; only the totals are shown.
   - `publishedResponses`: how many responses the figures count, the largest multiple of `minGroupSize` not above `totalResponses` (the first ones received). `totalResponses` stays exact.
   - `breakdownsHeld`: `true` while the poll is open (its effective status is `active`). Every breakdown and the trend are then empty, with `withheld` all zeros.
@@ -124,6 +125,7 @@ The groups follow these rules:
 
 | Method | Path | Auth | Success |
 |---|---|---|---|
+| GET | `/reference` | — | 200 `{states, ageRanges, genders, educationLevels, occupations, categories: [{key, name}]}`, the lists the API validates against, in display order, with `Cache-Control: public, max-age=3600` ([DB-03](AUDIT.md#db-03)). Pages fill `<select data-reference="…">` from it through `ticker.js` |
 | GET | `/stats` | — | 200 `{activePolls, closedPolls, totalResponses, registeredUsers, statesCovered, responsesLast7Days, trendingPollId, syntheticPolls}` |
 
 - **Drafts:** excluded from every figure.

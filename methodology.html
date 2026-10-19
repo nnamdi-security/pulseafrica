@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="How PulseAfrica collects, weights, and publishes public opinion data — a full explanation of our polling methodology." />
+  <meta name="description" content="How PulseAfrica collects, protects and publishes public opinion data, and what its figures can and can’t tell you." />
   <title>Methodology — PulseAfrica</title>
 
   <!-- Tabler Icons -->
@@ -58,13 +58,13 @@
     <div class="meth-hero-eyebrow">How we work</div>
     <h1 class="meth-hero-h1">Polling methodology</h1>
     <p class="meth-hero-sub">
-      A full explanation of how PulseAfrica collects, weights, and publishes
-      public opinion data — so you can trust what you read here.
+      How PulseAfrica collects, protects and publishes public opinion data,
+      and what its figures can and can’t tell you.
     </p>
     <div class="meth-hero-chips" aria-label="Topics covered">
       <span class="meth-chip">Sample collection</span>
-      <span class="meth-chip">Data weighting</span>
-      <span class="meth-chip">Margin of error</span>
+      <span class="meth-chip">Weighting (planned)</span>
+      <span class="meth-chip">Sample size</span>
       <span class="meth-chip">Limitations</span>
       <span class="meth-chip">Independence</span>
     </div>
@@ -81,8 +81,8 @@
       <a class="meth-sidenav-link active" href="#sec-what">What is polling?</a>
       <a class="meth-sidenav-link" href="#sec-how">How polling works</a>
       <a class="meth-sidenav-link" href="#sec-sample">Sample collection</a>
-      <a class="meth-sidenav-link" href="#sec-weighting">Data weighting</a>
-      <a class="meth-sidenav-link" href="#sec-error">Margin of error</a>
+      <a class="meth-sidenav-link" href="#sec-weighting">Weighting (planned)</a>
+      <a class="meth-sidenav-link" href="#sec-error">Sample size</a>
       <a class="meth-sidenav-link" href="#sec-limitations">Limitations</a>
       <a class="meth-sidenav-link" href="#sec-dont">What we don't do</a>
       <a class="meth-sidenav-link" href="#sec-faq">FAQ</a>
@@ -99,8 +99,8 @@
           Public opinion polling is a systematic method of measuring the views, attitudes,
           and beliefs of a defined population by surveying a carefully selected sample of
           that population. Rather than asking every person in a country — which is both
-          impractical and unnecessary — polling uses statistical principles to draw accurate
-          conclusions from a smaller but representative group.
+          impractical — polling asks a smaller group and draws conclusions from their answers.
+          How far those conclusions hold depends on how that group was chosen.
         </p>
 
         <div class="meth-concept-card meth-concept-amber">
@@ -115,10 +115,9 @@
         <div class="meth-concept-card meth-concept-green">
           <div class="meth-concept-term">Sample</div>
           <div class="meth-concept-def">
-            A smaller subset of the population selected to participate in a poll.
-            A well-designed sample of 1,000–2,000 people can accurately represent the
-            views of millions, provided it reflects the demographic composition of the
-            wider population.
+            The smaller group who answer a poll. A random sample of 1,000–2,000 people
+            can represent the views of millions. PulseAfrica’s samples are not random:
+            they are the registered users who choose to answer each poll.
           </div>
         </div>
 
@@ -126,8 +125,9 @@
           <div class="meth-concept-term">Bias</div>
           <div class="meth-concept-def">
             Any systematic error that causes a sample to over-represent or under-represent
-            certain groups. PulseAfrica uses multiple techniques to detect and correct for
-            bias before publishing results.
+            certain groups. PulseAfrica doesn’t correct for bias yet: results are raw
+            counts, and the limitations below explain which groups are likely to be
+            over- or under-represented.
           </div>
         </div>
       </section>
@@ -137,9 +137,8 @@
         <div class="meth-eyebrow">Section 02</div>
         <h2 class="meth-section-h2" id="heading-how">How polling works</h2>
         <p class="meth-p">
-          Every poll on PulseAfrica follows a structured five-stage process from
-          question design through to publication. No results are published until all
-          stages are complete.
+          Every poll on PulseAfrica goes through five stages, from question design
+          to publication.
         </p>
 
         <div class="meth-steps" role="list">
@@ -159,11 +158,11 @@
           <div class="meth-step" role="listitem">
             <span class="meth-step-num" aria-hidden="true">02</span>
             <div>
-              <h3 class="meth-step-title">Sample recruitment</h3>
+              <h3 class="meth-step-title">Who answers</h3>
               <p class="meth-step-desc">
-                Participants are recruited through the platform's registered user base,
-                stratified to match the demographic profile of the United States of Africa
-                by age, gender, state, and education.
+                Any registered user can answer any live poll. Nobody is selected or
+                invited, so the people who answer choose themselves; they are not
+                matched to the population by age, gender, state or education.
               </p>
             </div>
           </div>
@@ -173,9 +172,9 @@
             <div>
               <h3 class="meth-step-title">Data collection</h3>
               <p class="meth-step-desc">
-                Responses are collected through the secure online poll interface. Each
-                registered user may submit one response per poll. Duplicate detection
-                is applied at account and IP level.
+                Responses are collected through the online poll page from signed-in
+                accounts. Each account can submit one response per poll, and the
+                database refuses a second one.
               </p>
             </div>
           </div>
@@ -183,11 +182,10 @@
           <div class="meth-step" role="listitem">
             <span class="meth-step-num" aria-hidden="true">04</span>
             <div>
-              <h3 class="meth-step-title">Weighting</h3>
+              <h3 class="meth-step-title">Counting</h3>
               <p class="meth-step-desc">
-                Raw responses are statistically weighted to correct for any demographic
-                imbalances in the sample relative to the known population. Weights are
-                capped to prevent outsized individual influence.
+                Responses are counted as they are, without weighting. Figures count whole
+                steps of 10 responses, so no single answer moves them.
               </p>
             </div>
           </div>
@@ -197,8 +195,10 @@
             <div>
               <h3 class="meth-step-title">Publication</h3>
               <p class="meth-step-desc">
-                Weighted results, margin of error, sample size, and field dates are
-                published simultaneously. No data is withheld or selectively released.
+                Overall results appear once 10 people have answered. Breakdowns by group,
+                and the trend over time, are published when the poll closes, leaving out
+                any group with fewer than 10 responses. Every figure shows how many
+                responses it is based on.
               </p>
             </div>
           </div>
@@ -211,138 +211,90 @@
         <div class="meth-eyebrow">Section 03</div>
         <h2 class="meth-section-h2" id="heading-sample">Sample collection</h2>
         <p class="meth-p">
-          PulseAfrica uses a voluntary opt-in panel of registered users. While this
-          differs from traditional probability sampling, we apply rigorous demographic
-          stratification and weighting to ensure results are broadly representative
-          of the national population.
+          PulseAfrica uses a voluntary opt-in panel of registered users. This differs
+          from probability sampling: people decide for themselves whether to answer, and
+          no stratification or weighting is applied, so results describe the people who
+          answered rather than the whole population.
         </p>
 
         <div class="meth-stat-chips" role="list" aria-label="Key sample statistics">
           <div class="meth-stat-chip" role="listitem">
-            <div class="meth-stat-num">1,000<span>+</span></div>
-            <div class="meth-stat-label">Min. sample per poll</div>
+            <div class="meth-stat-num">1</div>
+            <div class="meth-stat-label">Response per account</div>
+          </div>
+          <div class="meth-stat-chip" role="listitem">
+            <div class="meth-stat-num">10</div>
+            <div class="meth-stat-label">Min. group shown</div>
+          </div>
+          <div class="meth-stat-chip" role="listitem">
+            <div class="meth-stat-num">100</div>
+            <div class="meth-stat-label">Small-sample line</div>
           </div>
           <div class="meth-stat-chip" role="listitem">
             <div class="meth-stat-num">40</div>
-            <div class="meth-stat-label">States sampled</div>
-          </div>
-          <div class="meth-stat-chip" role="listitem">
-            <div class="meth-stat-num">95<span>%</span></div>
-            <div class="meth-stat-label">Confidence level</div>
-          </div>
-          <div class="meth-stat-chip" role="listitem">
-            <div class="meth-stat-num">&plusmn;2.4<span>%</span></div>
-            <div class="meth-stat-label">Typical margin of error</div>
+            <div class="meth-stat-label">States</div>
           </div>
         </div>
 
         <p class="meth-p">
-          Responses are only accepted from verified registered accounts. Each account
-          may respond to a given poll only once. IP-level and account-level duplicate
-          detection is applied to all submissions before data is included in results.
+          Responses are accepted only from signed-in, registered accounts, and each
+          account may respond to a given poll once. Registration doesn’t verify email
+          addresses, age or citizenship, so a person could create more than one account.
         </p>
         <p class="meth-p">
-          We aim for minimum representation from every state. Polls that fail to reach
-          a representative threshold in any state are clearly labelled as having limited
-          geographic coverage.
+          Coverage across states varies from poll to poll. Each results page shows how
+          many of the 40 states its respondents came from.
         </p>
       </section>
 
-      <!-- ── Section 04: Data weighting ── -->
+      <!-- ── Section 04: Weighting (planned) ── -->
       <section class="meth-section" id="sec-weighting" aria-labelledby="heading-weighting">
         <div class="meth-eyebrow">Section 04</div>
-        <h2 class="meth-section-h2" id="heading-weighting">Data weighting</h2>
+        <h2 class="meth-section-h2" id="heading-weighting">Weighting (planned)</h2>
         <p class="meth-p">
-          Because our voluntary panel does not perfectly mirror the national population,
-          we apply post-stratification weighting to bring the sample into alignment with
-          known demographic benchmarks from national census data.
+          PulseAfrica doesn’t weight its results yet. Every figure is a raw, unweighted
+          count of the responses received.
         </p>
-
-        <!-- Weighting factor visual -->
-        <div class="meth-weight-visual" aria-label="Weighting factors by importance">
-          <div class="meth-weight-title">Weighting factors applied to every poll</div>
-          <div class="meth-weight-rows" role="list">
-
-            <div class="meth-weight-row" role="listitem">
-              <span class="meth-weight-factor">State of residence</span>
-              <div class="meth-weight-track">
-                <div class="meth-weight-fill" style="width: 90%; background: #C8973A;"></div>
-              </div>
-              <span class="meth-weight-badge high">High</span>
-            </div>
-
-            <div class="meth-weight-row" role="listitem">
-              <span class="meth-weight-factor">Age group</span>
-              <div class="meth-weight-track">
-                <div class="meth-weight-fill" style="width: 85%; background: #C8973A;"></div>
-              </div>
-              <span class="meth-weight-badge high">High</span>
-            </div>
-
-            <div class="meth-weight-row" role="listitem">
-              <span class="meth-weight-factor">Gender</span>
-              <div class="meth-weight-track">
-                <div class="meth-weight-fill" style="width: 75%; background: #2D6A4F;"></div>
-              </div>
-              <span class="meth-weight-badge medium">Medium</span>
-            </div>
-
-            <div class="meth-weight-row" role="listitem">
-              <span class="meth-weight-factor">Education level</span>
-              <div class="meth-weight-track">
-                <div class="meth-weight-fill" style="width: 65%; background: #2D6A4F;"></div>
-              </div>
-              <span class="meth-weight-badge medium">Medium</span>
-            </div>
-
-            <div class="meth-weight-row" role="listitem">
-              <span class="meth-weight-factor">Occupation</span>
-              <div class="meth-weight-track">
-                <div class="meth-weight-fill" style="width: 45%; background: #6B7280;"></div>
-              </div>
-              <span class="meth-weight-badge low">Low</span>
-            </div>
-
-          </div>
-        </div>
-
         <p class="meth-p">
-          Weights are capped to prevent any single respondent from having
-          disproportionate influence on the final result. Any response assigned a
-          weight greater than 5&times; the mean is trimmed before publication.
-        </p>
-      </section>
-
-      <!-- ── Section 05: Margin of error ── -->
-      <section class="meth-section" id="sec-error" aria-labelledby="heading-error">
-        <div class="meth-eyebrow">Section 05</div>
-        <h2 class="meth-section-h2" id="heading-error">Margin of error</h2>
-        <p class="meth-p">
-          Every poll result published on PulseAfrica includes a margin of error —
-          the range within which the true population value is likely to fall, given
-          the sample size and confidence level used.
+          Weighting adjusts each response so that the people who answered match the
+          population’s make-up by state, age, gender and other characteristics. It needs
+          reliable population figures for each of those groups, which aren’t available yet.
         </p>
 
         <div class="meth-concept-card meth-concept-amber">
-          <div class="meth-concept-term">How to read it</div>
+          <div class="meth-concept-term">Planned</div>
           <div class="meth-concept-def">
-            A result of 52% approval with a margin of error of &plusmn;2.4% at 95%
-            confidence means: if the same poll were conducted 100 times, 95 of those
-            results would fall between 49.6% and 54.4%. It does not mean the result is
-            uncertain — it means we know precisely how certain it is.
+            Weighting will be introduced only once reliable population figures exist. It
+            will be labelled on every result it affects, and the raw figures will stay
+            available beside the weighted ones.
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Section 05: Sample size ── -->
+      <section class="meth-section" id="sec-error" aria-labelledby="heading-error">
+        <div class="meth-eyebrow">Section 05</div>
+        <h2 class="meth-section-h2" id="heading-error">Sample size and uncertainty</h2>
+        <p class="meth-p">
+          PulseAfrica doesn’t publish margins of error. A margin of error assumes a random
+          sample, and PulseAfrica’s respondents choose to take part, so a margin calculated
+          that way would make the results look more precise than they are.
+        </p>
+
+        <div class="meth-concept-card meth-concept-amber">
+          <div class="meth-concept-term">How to read our figures</div>
+          <div class="meth-concept-def">
+            Every figure shows n, the number of responses it is based on. Figures based on
+            fewer than 100 responses are marked as a small sample: at that size, a few
+            people answering differently move the percentage noticeably. Groups with fewer
+            than 10 responses aren’t published at all.
           </div>
         </div>
 
         <p class="meth-p">
-          Margins of error are calculated using the standard formula for proportions
-          at a 95% confidence interval. Larger samples produce smaller margins of error.
-          Our target minimum sample of 1,000 responses produces a margin of error of
-          approximately &plusmn;3.1%.
-        </p>
-        <p class="meth-p">
-          Sub-group results — such as approval ratings broken down by state or age group —
-          will have larger margins of error than overall figures, because the sub-group
-          sample is smaller. These are clearly indicated wherever sub-group data is published.
+          Breakdowns by state, age group or occupation rest on fewer responses than the
+          overall figures, so they swing more. Treat differences between small groups
+          with caution.
         </p>
       </section>
 
@@ -360,8 +312,7 @@
           <div class="meth-concept-def">
             Our polls are conducted online. Citizens without reliable internet access
             are less likely to participate, which may under-represent rural and lower-income
-            populations. We apply geographic and socioeconomic weighting to partially
-            correct for this.
+            populations. Results are not weighted, so this isn’t corrected.
           </div>
         </div>
 
@@ -369,8 +320,8 @@
           <div class="meth-concept-term">Voluntary response bias</div>
           <div class="meth-concept-def">
             People with strong opinions are more likely to seek out and complete opinion
-            polls. This is a known limitation of opt-in panels and is partially addressed
-            through demographic weighting and active outreach to under-represented groups.
+            polls. This is a known limitation of opt-in panels, and PulseAfrica doesn’t
+            correct for it yet.
           </div>
         </div>
 
@@ -378,8 +329,8 @@
           <div class="meth-concept-term">Social desirability bias</div>
           <div class="meth-concept-def">
             Respondents may answer in ways they believe are socially acceptable rather
-            than reflecting their true opinions. Anonymous response design and careful
-            question wording help mitigate this, but it cannot be fully eliminated.
+            than reflecting their true opinions. Careful question wording, and publishing
+            answers only as totals, help mitigate this, but it cannot be fully eliminated.
           </div>
         </div>
 
@@ -387,9 +338,9 @@
           <div class="meth-concept-term">Snapshot in time</div>
           <div class="meth-concept-def">
             Poll results reflect public opinion at a specific point in time. Opinions can
-            shift rapidly in response to events. PulseAfrica runs regular tracking polls
-            to capture trends over time, but a single poll result should not be treated
-            as a permanent measure.
+            shift rapidly in response to events. Each closed poll’s results page shows how
+            answers changed while it was open, but a single poll result should not be
+            treated as a permanent measure.
           </div>
         </div>
       </section>
@@ -417,7 +368,7 @@
             <i class="ti ti-check meth-dont-icon" aria-hidden="true"></i>
             <div>
               <div class="meth-dont-heading">We publish all results</div>
-              <p class="meth-dont-text">Results are published regardless of outcome. Unfavourable findings for any leader or party are never suppressed or delayed.</p>
+              <p class="meth-dont-text">Results are published regardless of outcome. Unfavourable findings for any leader or party are never suppressed. The only things held back protect respondents: groups under 10, and breakdowns until a poll closes.</p>
             </div>
           </div>
 
@@ -433,7 +384,7 @@
             <i class="ti ti-check meth-dont-icon" aria-hidden="true"></i>
             <div>
               <div class="meth-dont-heading">We publish our methodology</div>
-              <p class="meth-dont-text">Every poll includes the full methodology, sample size, field dates, and margin of error. Nothing is hidden from the public record.</p>
+              <p class="meth-dont-text">Every results page shows how many responses each figure is based on and links to this methodology, which describes how every figure is calculated.</p>
             </div>
           </div>
 
@@ -465,12 +416,12 @@
 
           <div class="meth-faq-item" role="listitem">
             <h3 class="meth-faq-q">Can anyone participate in a poll?</h3>
-            <p class="meth-faq-a">Any registered adult citizen of the United States of Africa may participate. Registration requires a verified email address and state of residence. Each person may submit one response per poll.</p>
+            <p class="meth-faq-a">Any registered adult citizen of the United States of Africa may participate. Registration asks for an email address, state of residence and age range; none of them is verified. Each account may submit one response per poll.</p>
           </div>
 
           <div class="meth-faq-item" role="listitem">
             <h3 class="meth-faq-q">Are results updated in real time?</h3>
-            <p class="meth-faq-a">Results are updated daily as new responses are received and weighted. Live response counts update continuously, but weighted percentage figures are recalculated and published once per day to ensure statistical stability.</p>
+            <p class="meth-faq-a">Response counts update as soon as people answer. Percentages move in steps of 10 responses, so no single answer changes them, and breakdowns by group are published when the poll closes. This protects respondents: nobody watching the results can tell how one person answered.</p>
           </div>
 
           <div class="meth-faq-item" role="listitem">
@@ -490,7 +441,7 @@
 
           <div class="meth-faq-item" role="listitem">
             <h3 class="meth-faq-q">How do I know results haven't been manipulated?</h3>
-            <p class="meth-faq-a">Every poll includes a full audit trail: sample size, field dates, demographic breakdown, weighting factors, and margin of error. Our source methodology is published openly. We also maintain a public correction log for any changes made post-publication.</p>
+            <p class="meth-faq-a">Every results page shows the number of responses behind each figure, and the breakdowns by group once the poll closes. This page explains exactly how the figures are calculated.</p>
           </div>
 
         </div>

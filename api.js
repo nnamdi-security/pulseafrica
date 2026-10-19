@@ -223,6 +223,12 @@
       return request('GET', '/results/' + encodeURIComponent(pollId));
     },
 
+    // → { states, ageRanges, genders, educationLevels, occupations, categories: [{ key, name }] }
+    //   (DB-03); ticker.js requests it once per page as PulseLive.reference
+    getReference: function () {
+      return request('GET', '/reference');
+    },
+
     // → { activePolls, closedPolls, totalResponses, registeredUsers,
     //     statesCovered, responsesLast7Days, trendingPollId, syntheticPolls }
     getStats: function () {
