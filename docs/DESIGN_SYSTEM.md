@@ -116,22 +116,17 @@ Loaded from Google Fonts in `style.css:13`.
 6. **Thin data marks with rounded ends.** No 3D, no drop shadows on charts, no animation beyond short transitions (≤ 0.5s) that respect reduced motion.
 7. **Small text on light surfaces uses `gold-ink`, never `gold`.**
 
-## Tailwind mapping (proposed; for the migration only)
+## Tailwind theme (implemented in `frontend/`, Milestone 5)
 
-If the migration is approved, these tokens become the Tailwind theme, and shadcn/ui components are restyled to them. Defaults are **not** used.
+The tokens above are the **whole** Tailwind theme in [`frontend/src/styles/globals.css`](../frontend/src/styles/globals.css) (Tailwind CSS 4, `@theme`). Tailwind's default palette, radii and breakpoints are cleared, so a class like `bg-blue-500` doesn't exist.
 
-```ts
-// tailwind theme.extend (sketch)
-colors: {
-  navy: '#0A1628', gold: { DEFAULT: '#C8973A', ink: '#7a4c08' },
-  green: { DEFAULT: '#2D6A4F', soft: '#5a9e7a', ink: '#1a4d33' },
-  red: { DEFAULT: '#A32D2D', soft: '#c86b6b' }, rust: '#8B3A1F',
-  parchment: '#F5F0E8', cream: '#F9F7F4', ink: '#1a1a1a',
-  muted: '#6B7280', faint: '#9CA3AF',
-},
-fontFamily: { serif: ['Fraunces', 'serif'], sans: ['Inter', 'sans-serif'], mono: ['Space Mono', 'monospace'] },
-borderRadius: { sm: '3px', DEFAULT: '4px', md: '5px', lg: '8px', xl: '10px' },
-screens: { /* desktop-first, matching style.css */ tablet: { max: '900px' }, mobile: { max: '600px' } },
-```
+| Group | Classes |
+|---|---|
+| **Colours** | `navy`, `gold`, `gold-ink`, `green`, `green-soft`, `green-ink`, `red`, `red-soft`, `rust`, `parchment`, `cream`, `white`, `ink`, `muted`, `faint`, plus `gold-hover` (`#d9a845`, the nav button's hover in `style.css`). Tints are opacity modifiers: `text-parchment/65`, `border-gold/18` |
+| **Fonts** | `font-serif` (Fraunces), `font-sans` (Inter), `font-mono` (Space Mono), self-hosted by `next/font` |
+| **Radii** | `rounded-xs` 3px (badges), `rounded-sm` 4px (controls), `rounded-md` 5px, `rounded-lg` 8px (cards), `rounded-xl` 10px (dialogs), `rounded-full` |
+| **Breakpoints** | Desktop-first, as `style.css`: `tablet:` is ≤ 900px, `mobile:` is ≤ 600px |
 
-shadcn/ui maps its CSS variables (`--primary`, `--ring` and so on) onto these values. See [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md#10-styling-strategy).
+shadcn/ui's CSS variables (`--primary`, `--ring` and so on) point at these tokens. A lint rule rejects raw hex and `rgb()` values in components.
+
+**FE-03 in the new frontend ([decision 0017](decisions/0017-icons-and-text-contrast.md)):** small text on light surfaces uses `gold-ink`; no text is under 10px; faint text on navy is at least `parchment/50` (4.77:1). The new shell therefore uses 10px for the ticker labels, footer headings and badges (9px in `style.css`) and `parchment/50` for the footer's faint text (28–45% in `style.css`). The browser suite runs axe's contrast rule on it.

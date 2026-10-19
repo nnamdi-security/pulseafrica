@@ -1,0 +1,105 @@
+/* PulseAfrica theme: the tokens in docs/DESIGN_SYSTEM.md, and nothing else.
+   Tailwind's default palette, radii and breakpoints are cleared so that only these exist. */
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+  --color-navy: #0a1628;
+  --color-gold: #c8973a;
+  --color-gold-ink: #7a4c08;
+  --color-green: #2d6a4f;
+  --color-green-soft: #5a9e7a;
+  --color-green-ink: #1a4d33;
+  --color-red: #a32d2d;
+  --color-red-soft: #c86b6b;
+  --color-rust: #8b3a1f;
+  --color-parchment: #f5f0e8;
+  --color-cream: #f9f7f4;
+  --color-white: #ffffff;
+  --color-ink: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-faint: #9ca3af;
+  /* The nav CTA's hover fill (style.css .nav-cta:hover) */
+  --color-gold-hover: #d9a845;
+
+  /* Set on <html> by next/font in src/app/fonts.ts */
+  --font-*: initial;
+  --font-serif: var(--font-fraunces), serif;
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-space-mono), monospace;
+
+  --radius-*: initial;
+  --radius-xs: 3px; /* badges */
+  --radius-sm: 4px; /* controls and buttons */
+  --radius-md: 5px;
+  --radius-lg: 8px; /* cards and panels */
+  --radius-xl: 10px; /* dialogs */
+
+  --breakpoint-*: initial;
+
+  --animate-ticker: ticker-scroll 28s linear infinite;
+  @keyframes ticker-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* Desktop-first, as style.css: `tablet:` is ≤ 900px and `mobile:` is ≤ 600px */
+@custom-variant tablet (@media (max-width: 900px));
+@custom-variant mobile (@media (max-width: 600px));
+
+/* shadcn/ui reads these names; each one is a PulseAfrica token (components.json) */
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+  --primary: var(--color-navy);
+  --primary-foreground: var(--color-parchment);
+  --secondary: var(--color-white);
+  --secondary-foreground: var(--color-navy);
+  --accent: var(--color-gold);
+  --accent-foreground: var(--color-navy);
+  --destructive: var(--color-red);
+  --border: color-mix(in srgb, var(--color-navy) 12%, transparent);
+  --input: color-mix(in srgb, var(--color-navy) 18%, transparent);
+  --ring: var(--color-gold);
+  --radius: var(--radius-sm);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-ink);
+    background: var(--color-cream);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}

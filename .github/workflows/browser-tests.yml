@@ -43,11 +43,41 @@ jobs:
           pip install -r requirements.txt
           python -m playwright install --with-deps chromium
 
+      # The new frontend (decision 0018): the suite starts the built app and checks its shell
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Build the frontend
+        working-directory: frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
       # The suite creates its own database on this server, seeds it, and drops it afterwards.
       - name: Run browser tests
         env:
           E2E_POSTGRES_URL: postgresql://pulseafrica:pulseafrica@localhost:5432/postgres
+          E2E_REQUIRE_FRONTEND: "1"
         run: pytest --tracing retain-on-failure --output test-results
+
+      # The current and new shell side by side, for review on the PR (Milestone 5)
+      - name: Keep the shell screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shell-screenshots
+          path: e2e/screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Keep traces of failed tests
         if: failure()

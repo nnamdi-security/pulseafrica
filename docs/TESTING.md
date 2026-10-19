@@ -12,16 +12,17 @@
 
 | Command (run from `backend/`) | Collected | Passed | Failed | Skipped | Errors | Time |
 |---|---|---|---|---|---|---|
-| `pytest` (in-memory SQLite, the default) | 143 | **142** | 0 | 1 | 0 | ~120 s |
-| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 143 | **143** | 0 | 0 | 0 | ~140 s |
-| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium) | 82 | **82** in CI | 0 | 0 | 0 | ~120 s |
+| `pytest` (in-memory SQLite, the default) | 145 | **144** | 0 | 1 | 0 | ~110 s |
+| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 145 | **145** | 0 | 0 | 0 | ~140 s |
+| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 108 | **108** in CI | 0 | 0 | 0 | ~150 s |
+| `pnpm test` (from `frontend/`, Vitest) | 50 | **50** | 0 | 0 | 0 | ~5 s |
 
-The counts above were updated in Milestone 4 (decisions 0013–0015). The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
+The counts above were updated in Milestone 5 (decisions 0016–0019). The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 
 - **One expected warning in both runs:** PyJWT's `InsecureKeyLengthWarning` from `test_token_signed_with_the_old_default_is_rejected`, which signs a token with the old 9-byte default key on purpose (SEC-01). The Starlette test-client warning is gone since the move to `httpx2` ([TEST-02](AUDIT.md#test-02) fixed).
 - **No environment-related failures or missing dependencies.**
 - **Frontend:** the browser suite in `e2e/` covers every journey below ([TEST-01](AUDIT.md#test-01) fixed in Milestone 2).
-- **CI:** `.github/workflows/backend-tests.yml` runs pytest on SQLite and Postgres 16 and the migration cycle (`upgrade head`, `check`, `downgrade base`, `upgrade head`, `check`); `.github/workflows/browser-tests.yml` runs the browser suite and keeps Playwright traces of failures.
+- **CI:** `.github/workflows/backend-tests.yml` runs pytest on SQLite and Postgres 16 and the migration cycle (`upgrade head`, `check`, `downgrade base`, `upgrade head`, `check`); `.github/workflows/browser-tests.yml` builds `frontend/`, runs the browser suite, keeps Playwright traces of failures and uploads the shell screenshots; `.github/workflows/frontend.yml` checks the API types are current, then lints, type-checks, unit-tests and builds `frontend/` and checks the JavaScript budget.
 
 ### Tests by file
 
@@ -38,6 +39,7 @@ The counts above were updated in Milestone 4 (decisions 0013–0015). The 10 `te
 | `tests/test_hardening.py` | 17 | Security headers on 200/404/422 and CORS preflights, no CSP on `/docs` (SEC-07); production hides the docs, adds HSTS and refuses http origins (SEC-10); readiness 200 and 503 (BE-05); JSON request logs with ids and no passwords, tokens, emails or query strings, forwarded ids, logged and hidden 500s (BE-02) |
 | `tests/test_rate_limits.py` | 14 | Every limit at its boundary with 429 and `Retry-After`, windows expiring, the per-account pause from another address, failed attempts counting, `X-Forwarded-For` only from trusted proxies, pruning, the off switch (SEC-03) |
 | `tests/test_sessions.py` | 23 | Token claims; logout, password change, suspension and demotion revoke tokens, promotion doesn't, unversioned tokens refused (SEC-05); the session cookie's attributes, cookie-only sign-in, the CSRF header on every write, bearer precedence, logout clearing the cookie, a citizen's cookie on admin routes (SEC-04) |
+| `tests/test_export_openapi.py` | 2 | `python -m app.export_openapi` prints the camelCase schema with no secret or database, and the same output every run (decision 0016) |
 | `tests/test_seed.py` | 4 | Seed polls are valid payloads, turnout table, drift helper, seeded polls flagged synthetic in polls, results and stats (METH-01) |
 
 ### Browser tests by file (`e2e/`)
@@ -55,7 +57,19 @@ The counts above were updated in Milestone 4 (decisions 0013–0015). The 10 `te
 | `test_mobile.py` | 14 | Journey 8: no sideways scroll at 390px on every page and tab, signed in where needed |
 | `test_accessibility.py` | 15 | axe on all 9 pages (and tabs), failing on serious or critical violations except the known FE-03 contrast ones |
 | `test_assets.py` | 10 | The icon stylesheet on all 9 pages and Chart.js carry `integrity` and still load (SEC-08) |
+| `test_frontend_shell.py` | 26 | The new frontend's shell (decisions 0016–0019): the ticker goes live with the API's figures and keeps its placeholder when the API is down; nav links, current page and keyboard order; footer links only to real pages; the mobile menu; no sideways scroll at 1280px and 390px; signed-in nav from the HttpOnly cookie, admin link, sign-out revoking the session; old `.html` URLs and hash tabs landing on the new routes; the not-found page; axe **including contrast** at both widths; current and new shell screenshots |
 | `test_copy.py` | 22 | No page claims anonymity or "never linked" (decisions 0003, 0007); all 9 pages carry the "Totals Only" badge and ticker; index, methodology and about make none of the retired METH-02 claims (decision 0013) |
+
+### Frontend unit and component tests (`frontend/`, Vitest)
+
+| File | Tests | Covers |
+|---|---|---|
+| `src/lib/api/client.test.ts` | 9 | `ApiError` semantics as in `api.js`: `{detail}` messages, 422 fields without "Value error, ", bodies without detail, unreachable server as status 0; the CSRF header on writes only, never a bearer token; same-origin `/api` and an absolute base |
+| `src/lib/live.test.ts` | 7 | The ticker's headline maths and item order, ported from `ticker.js`; the demonstration-data label (METH-01) |
+| `src/lib/redirects.test.ts` | 21 | Every old page redirected (temporarily), hash tabs, old `next` values, and `safeNext` refusing other sites |
+| `src/components/layout/Ticker.test.tsx` | 5 | Placeholder, live figures, the API down, no reference list, demonstration data, hidden copies and speed |
+| `src/components/layout/SiteHeader.test.tsx` | 7 | Signed out, signed in, admin, names shown as text, sign-out (server, cache, focus), API unreachable, the mobile menu |
+| `src/components/layout/SiteFooter.test.tsx` | 1 | Real links only (decision 0019) |
 
 ## How the browser tests work
 
@@ -91,7 +105,8 @@ The counts above were updated in Milestone 4 (decisions 0013–0015). The 10 `te
 | Gap | Risk | Planned in |
 |---|---|---|
 | CI isn't yet required for merging | A red PR can still be merged | Owner sets branch protection ([decision 0008](decisions/0008-required-ci-checks.md)) |
-| Contrast excluded from the axe checks | FE-03 regressions go unnoticed | Decision D7 |
+| Contrast excluded from the current pages' axe checks | FE-03 regressions on the static pages go unnoticed | The new frontend is checked with contrast ([decision 0017](decisions/0017-icons-and-text-contrast.md)); the static pages retire at cutover |
+| The new frontend has only its shell | Its journeys are tested only on the static pages | Milestones 6–8 add each journey's new route |
 | Chromium only | Safari- or Firefox-only regressions | Not planned |
 
 ## Proposed frontend testing strategy
@@ -111,9 +126,9 @@ The counts above were updated in Milestone 4 (decisions 0013–0015). The 10 `te
 - **Accessibility:** `axe-playwright-python` on each page; fail on new serious violations.
 - **These are the parity suite:** the same tests, with locator changes, must pass against any migrated frontend. That's what makes a migration verifiable ([FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md#verifying-functional-parity)).
 
-### Later, if the Next.js migration is approved (Milestone 5+)
+### The Next.js frontend (approved; foundation built in Milestone 5)
 
-- **Unit and component tests:** Vitest with React Testing Library, for formatting helpers, the sentiment-bucket and positive-share maths, form schemas (Zod), and the components.
-- **API mocking:** MSW, for component tests of the loading, empty and error states.
-- **Contract tests:** generate TypeScript types from FastAPI's `/openapi.json`. CI fails if the generated types change without the frontend being updated.
-- **End-to-end:** Playwright, reusing the Milestone 2 journeys.
+- **Unit and component tests (implemented):** Vitest with React Testing Library, in `frontend/src/**/*.test.ts(x)`, for the moved logic (ticker figures, redirects, the API client) and the components. Later: the sentiment-bucket and positive-share maths, form schemas (Zod).
+- **API mocking (implemented):** MSW, for the loading, empty, error, 401 and unreachable states.
+- **Contract (implemented):** TypeScript types generated from FastAPI's schema (`pnpm api:types`); the Frontend workflow fails if they're stale.
+- **End-to-end (implemented for the shell, [decision 0018](decisions/0018-frontend-checks.md)):** the same Python Playwright suite. Its fixtures start the built app on `127.0.0.1:3000` (skipped locally if it isn't built; required in CI). Each journey gains its new route as the pages move.

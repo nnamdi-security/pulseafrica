@@ -60,18 +60,25 @@ paths:
 
 ---
 
-## Proposed Next.js standards (INACTIVE until a migration milestone is approved)
+## Next.js standards (`frontend/`, active since Milestone 5)
 
-These apply **only** to code under `frontend/` once Milestone 5 is approved. Until then, don't create `frontend/`. The full plan is in [FRONTEND_MIGRATION.md](../../docs/FRONTEND_MIGRATION.md).
+These apply to code under `frontend/` ([decision 0016](../../docs/decisions/0016-nextjs-frontend.md)). Commands are in [frontend/README.md](../../frontend/README.md); the full plan is in [FRONTEND_MIGRATION.md](../../docs/FRONTEND_MIGRATION.md). Pages move only in their milestone (M6–M8), with the `frontend-migration` skill; until then, page bugs are fixed in the static pages.
 
-- **Stack:** Next.js App Router, TypeScript `strict`, Tailwind (theme = DESIGN_SYSTEM tokens), shadcn/ui primitives **re-themed**, TanStack Query for server state, React Hook Form + Zod, Recharts, `next/font` for the three fonts, pnpm with a committed lockfile.
+- **Stack:** Next.js App Router, TypeScript `strict`, Tailwind CSS 4 (the theme in `src/styles/globals.css` is DESIGN_SYSTEM's tokens and nothing else), shadcn/ui primitives **re-themed** in `src/components/ui/`, TanStack Query for server state, `@tabler/icons-react`, `next/font` for the three fonts, pnpm with a committed lockfile. Later: React Hook Form + Zod, Recharts.
+- **Versions:** pinned exactly in `package.json`, from releases at least two weeks old; upgraded on purpose, never as a side effect.
 - **No:** Prisma or any ORM, NextAuth, Redux or Zustand, axios, or business logic in route handlers.
+- **Styling:**
+  - only theme classes (`bg-navy`, `text-gold-ink`, `text-parchment/65`); a lint rule rejects raw hex and `rgb()` values;
+  - desktop-first variants `tablet:` (≤ 900px) and `mobile:` (≤ 600px);
+  - FE-03 is fixed here ([decision 0017](../../docs/decisions/0017-icons-and-text-contrast.md)): `gold-ink` for small text on light surfaces, nothing under 10px, faint text on navy at least `parchment/50`.
 - **API:**
-  - types generated from FastAPI's `/openapi.json` (`openapi-typescript`), never hand-written;
-  - one `lib/api/client.ts` keeping `api.js`'s `ApiError` semantics;
-  - same-origin `/api` via rewrites.
+  - types generated into `src/lib/api/schema.d.ts` (`pnpm api:types`), never hand-written;
+  - every request goes through `src/lib/api/client.ts`, which keeps `api.js`'s `ApiError` semantics;
+  - same-origin `/api` via the rewrite in `next.config.ts`; query hooks in `src/lib/api/queries.ts` with the keys in FRONTEND_MIGRATION §8.
 - **Auth:**
-  - HttpOnly cookie sessions issued by FastAPI;
-  - middleware redirects for user experience only;
-  - always handle 401 and 403 from the API.
+  - FastAPI's HttpOnly cookie session only; never store a token in JavaScript-readable storage;
+  - writes carry the CSRF header (the client adds it);
+  - signing out clears the Query cache;
+  - middleware (Next.js 16: `proxy.ts`) redirects are for user experience only; always handle 401 and 403 from the API.
+- **Checks:** `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm budget`; browser checks in `e2e/` against the built app ([decision 0018](../../docs/decisions/0018-frontend-checks.md)).
 - **Parity:** every migrated page must pass the Milestone 2 Playwright journeys and a side-by-side screenshot review before cutover. No redesigns during migration.

@@ -1,6 +1,6 @@
 # Architecture
 
-> **Implemented** sections describe `main` at `7119fa7`. **Proposed** sections are recommendations only; nothing proposed exists in the code.
+> **Implemented** sections describe `main` at `7119fa7`, except the new frontend foundation, which is Milestone 5. **Planned** sections are approved but not built yet.
 
 ## Implemented: overview
 
@@ -99,11 +99,31 @@ There's no build step, framework or bundler on the frontend. The API is a single
 
 No deployed environment exists. See [DEPLOYMENT.md](DEPLOYMENT.md).
 
+## Implemented: new frontend foundation (`frontend/`, Milestone 5)
+
+The Next.js app that replaces the static pages over Milestones 6–8 ([decision 0016](decisions/0016-nextjs-frontend.md)). It runs locally and in CI only; nothing is deployed, and the static pages are unchanged.
+
+| Piece | Responsibility |
+|---|---|
+| **`src/app/layout.tsx`** | The shell, once: `Ticker`, `SiteHeader` (nav and `NavAuth`), the page, `SiteFooter`, inside the Query provider. Fonts from `next/font` |
+| **`src/lib/api/client.ts`** | The only `fetch`. Same-origin `/api`, the `pa_session` cookie, the CSRF header on writes, `ApiError {status, message, fields}` as in `api.js` |
+| **`src/lib/api/schema.d.ts`** | Types generated from FastAPI's OpenAPI schema (`python -m app.export_openapi`); CI fails if they're stale |
+| **`src/lib/api/queries.ts`** | TanStack Query hooks: `useMe`, `useSignOut` (clears the cache), `useStats`, `usePolls`, `useReference` |
+| **`src/lib/live.ts`** | The ticker's figures, ported from `ticker.js` with the same outputs |
+| **`src/lib/redirects.ts`** | Old `.html` URLs, hash tabs and `next` values → new routes (307 until cutover) |
+| **`src/styles/globals.css`** | The Tailwind theme: the design tokens and nothing else; shadcn/ui variables mapped onto them |
+| **`next.config.ts`** | Rewrites `/api/*` to `API_INTERNAL_URL` (same origin, so no CORS); the legacy redirects |
+
+```
+Browser ──▶ Next.js :3000 ── /api/* rewrite ──▶ FastAPI :8000 ──▶ PostgreSQL
+            (shell only)       cookie + CSRF header
+```
+
 ---
 
-## Proposed: future architecture (approval required)
+## Planned: the rest of the migration (approved, Milestones 6–8)
 
-Details and justification are in [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md).
+Details and justification are in [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md). The foundation above exists; the pages don't yet.
 
 ```
 Browser ── https://<site> ──▶ Next.js (App Router, TypeScript)
@@ -117,13 +137,13 @@ Browser ── https://<site> ──▶ Next.js (App Router, TypeScript)
                               PostgreSQL (SQLAlchemy + Alembic, unchanged)
 ```
 
-**Unchanged in any proposal:**
+**Unchanged by the migration:**
 
 - **FastAPI** stays authoritative for authentication, authorization, validation, business rules and aggregation.
 - **PostgreSQL and SQLAlchemy** stay the only data layer. There's no ORM, database client or business logic in the frontend.
 - **The contract** is FastAPI's OpenAPI schema. The frontend consumes generated types.
 
-**Changed under the proposal:**
+**Changed by the migration:**
 
 - **Sessions:** HttpOnly cookie sessions issued by FastAPI on the same origin ([SECURITY.md](SECURITY.md#recommended-authentication-architecture)).
 - **Shared code:** the copy-pasted page shell and helpers become shared React components and typed modules.

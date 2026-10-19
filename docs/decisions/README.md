@@ -16,7 +16,7 @@ There's no need for one for routine features or bug fixes that follow the existi
 ## Process
 
 1. **Copy the template** below into `docs/decisions/NNNN-short-title.md`, using the next free number with four digits.
-2. Set **Status: Proposed** and open a PR. Pending owner decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner) (D1–D24).
+2. Set **Status: Proposed** and open a PR. Pending owner decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner) (D1–D31).
 3. **The project owner approves**, and the status becomes **Accepted** with the date. Implementation PRs link to the record.
 4. **Never edit an accepted record's decision.** To change course, write a new record with **Status: Accepted, supersedes NNNN**, and mark the old one **Superseded by NNNN**.
 
@@ -61,7 +61,12 @@ What becomes easier, what becomes harder, what must now be done.
 | [0013](0013-unweighted-results-and-methodology-copy.md) | Results stay unweighted; the methodology describes what is implemented (D19, D22, D23) | Accepted (2026-10-19) |
 | [0014](0014-sample-size-without-margin-of-error.md) | Sample size beside every figure, and no margin of error (D20, D21) | Accepted (2026-10-19) |
 | [0015](0015-admin-draft-results.md) | Admins can open a draft's results page (D24) | Accepted (2026-10-19) |
+| [0016](0016-nextjs-frontend.md) | Migrate the frontend to Next.js, starting with a foundation in `frontend/` (D5, D25, D30) | Accepted (2026-10-19) |
+| [0017](0017-icons-and-text-contrast.md) | Tabler icons, and readable text in the new frontend (D6, D7) | Accepted (2026-10-19) |
+| [0018](0018-frontend-checks.md) | Checks for the new frontend: the Python browser suite, a 150 KB budget, a required workflow (D26, D27, D28) | Accepted (2026-10-19) |
+| [0019](0019-footer-links.md) | Real links only in the new footer (D29) | Accepted (2026-10-19) |
+| [0020](0020-javascript-budget.md) | A JavaScript budget Next.js can meet: 250 KB (D31) | Proposed |
 
-The remaining pending decisions (D5–D7) are in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
+Pending decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 
 **Earlier choices.** Some choices were made before this log existed, for example replacing the planned Node.js/Express/MongoDB backend with FastAPI and PostgreSQL (commit `3df4063`, which updated the README and the original brief). They're visible in git history. Record one retrospectively only if it's revisited, citing that commit as evidence, rather than reconstructing reasoning that wasn't written down at the time.

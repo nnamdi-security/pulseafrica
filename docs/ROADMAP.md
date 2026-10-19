@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status values:** COMPLETED · PARTIALLY COMPLETED · NOT STARTED · PROPOSED — APPROVAL REQUIRED.
+**Status values:** COMPLETED · PARTIALLY COMPLETED · APPROVED, NOT STARTED · NOT STARTED · PROPOSED — APPROVAL REQUIRED.
 
 Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by dependency. In particular, the frontend migration (M5–M8) can't start until M1–M3 give it a stable API, a parity test suite, and cookie sessions.
 
@@ -100,9 +100,9 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** a cookie-plus-bearer dual mode confusing the authorization code. Mitigation: one dependency (`get_optional_user`) remains the only token reader.
 - **Completion condition:** findings closed; [SECURITY.md](SECURITY.md) updated to "implemented".
 
-## M4: Research integrity and methodology (COMPLETED, pending merge)
+## M4: Research integrity and methodology (COMPLETED)
 
-- **Progress:** built in one PR following owner decisions D19–D24 ([0013–0015](decisions/README.md)), per the [Milestone 4 plan](https://claude.ai/code/artifact/e812979a-a37f-4570-b130-3c46a243dc59). Fixed: METH-02, METH-03, DB-03, BE-04. Weighting was not implemented (D19): there are no population figures for a fictional nation, so it stays planned.
+- **Progress:** merged in PR #10 following owner decisions D19–D24 ([0013–0015](decisions/README.md)), per the [Milestone 4 plan](https://claude.ai/code/artifact/e812979a-a37f-4570-b130-3c46a243dc59). Fixed: METH-02, METH-03, DB-03, BE-04. Weighting was not implemented (D19): there are no population figures for a fictional nation, so it stays planned.
 - **Left for later:** About's team biographies, funding model and 2024–2025 timeline figures (M9 copy review, D23).
 
 - **Objective:** make the results and the methodology honest and more rigorous.
@@ -116,7 +116,16 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance criteria:** every quantitative claim on a public page is either true or labelled as planned. If weighting is implemented: unit-tested against hand-computed examples, with raw and weighted figures both available.
 - **Risks:** statistical errors presented as authoritative. Mitigation: label the method, keep raw figures visible, and peer-review the maths.
 
-## M5: Frontend foundation (PROPOSED — APPROVAL REQUIRED)
+## M5: Frontend foundation (COMPLETED, pending merge)
+
+- **Progress:** approved 2026-10-19 with decisions D5–D7 and D25–D30 ([0016–0019](decisions/README.md)), per the [Milestone 5 plan](https://claude.ai/code/artifact/584a2743-417c-43a7-8726-64872dfdd638), and built in one PR:
+  - `frontend/`: Next.js 16 (App Router), React 19, TypeScript strict, pnpm, Tailwind CSS 4 with the design tokens as the whole theme, re-themed shadcn/ui Button, `next/font`, `@tabler/icons-react`;
+  - the shell (ticker, nav with the cookie-session sign-in slot, footer), not-found, error and loading routes; FE-03 fixed in it (decision 0017) and the footer's dead links (decision 0019);
+  - `lib/api/client.ts`, types generated from `python -m app.export_openapi`, TanStack Query hooks;
+  - the legacy-URL redirect scaffold (307) with hash and `next` mapping;
+  - 50 Vitest tests, 26 browser checks in the existing suite (decision 0018), the "Frontend" workflow, shell screenshots for review.
+- **Deviation:** the 150 KB JavaScript budget (D27) is below what Next.js and React load on their own (about 172 KB gzipped); the build uses 250 KB, pending the owner's choice (D31).
+- **Left for the owner:** the side-by-side screenshot review on the PR, and adding "Frontend" to branch protection once it's green on `main` (D28).
 
 - **Objective:** a Next.js app skeleton that looks like PulseAfrica and talks to FastAPI correctly.
 - **Dependencies:** approval of Option A (D5); M2; M3.
@@ -130,7 +139,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance criteria:** the layout matches the current shell in screenshot review at 1280px and 390px; the type check, lint and unit tests pass in CI; the bundle budget is set.
 - **Estimate:** 4–6 days.
 
-## M6: Public pages migration (PROPOSED — APPROVAL REQUIRED)
+## M6: Public pages migration (APPROVED, NOT STARTED)
 
 - **Scope:** Home, Polls, Poll (including the sign-in gate), Results, Methodology, About.
 - **Dependencies:** M5.
@@ -138,14 +147,14 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** results-maths divergence; design drift.
 - **Estimate:** 10–14 days.
 
-## M7: Authentication and user experience (PROPOSED — APPROVAL REQUIRED)
+## M7: Authentication and user experience (APPROVED, NOT STARTED)
 
 - **Scope:** Login, Register, cookie sessions end to end, middleware, Dashboard (profile, history, settings).
 - **Dependencies:** M3 (cookie support), M6.
 - **Acceptance criteria:** no token readable by JavaScript; CSRF tests pass; `next` round trips; keep-me-signed-in behaves as specified; the dashboard parity journeys pass.
 - **Estimate:** 5–8 days.
 
-## M8: Administration and cutover (PROPOSED — APPROVAL REQUIRED)
+## M8: Administration and cutover (APPROVED, NOT STARTED)
 
 - **Scope:** Admin overview, polls and editor, users; the full parity suite; screenshot sign-off; tag `legacy-frontend-final`; switch traffic; permanent redirects after two stable weeks.
 - **Dependencies:** M7.
@@ -186,9 +195,9 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D2 | ~~Methodology~~ **Decided 2026-10-19:** the M1 copy ([0003](decisions/0003-privacy-and-methodology-copy.md)); no weighting or margins of error for now (D19, D20) | M4 |
 | D3 | Synthetic data: ~~disclosure wording~~ **decided 2026-10-19** ([0004](decisions/0004-demonstration-data-disclosure.md)); whether any deployment shows demo data still open ([METH-01](AUDIT.md#meth-01)) | M9 |
 | D4 | ~~Minimum public group size~~ **Decided 2026-10-19:** *k* = 10, and overall percentages hidden below it (D4a) ([0001](decisions/0001-minimum-public-group-size.md)) | M1 |
-| D5 | Frontend: Option A (Next.js, recommended), Option B (modernise in place), or defer ([FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md)) | M5–M8 |
-| D6 | Icons if migrating: `@tabler/icons-react` (recommended for parity) or Lucide | M5 |
-| D7 | Contrast fix FE-03 (a visible design change: darker gold for small text) | M1 or M6 |
+| D5 | ~~Frontend direction~~ **Decided 2026-10-19:** Option A, Next.js ([0016](decisions/0016-nextjs-frontend.md)) | M5–M8 |
+| D6 | ~~Icons~~ **Decided 2026-10-19:** `@tabler/icons-react` ([0017](decisions/0017-icons-and-text-contrast.md)) | M5 |
+| D7 | ~~Contrast fix FE-03~~ **Decided 2026-10-19:** in the new frontend only, from M5 ([0017](decisions/0017-icons-and-text-contrast.md)) | M5 |
 | D8 | ~~Browser-test tooling~~ **Decided 2026-10-19:** Python Playwright ([0005](decisions/0005-browser-tests-in-python.md)) | M2 |
 | D9 | ~~"Anonymous" badge and ticker wording~~ **Decided 2026-10-19:** "Totals Only" ([0007](decisions/0007-totals-only-wording.md)) | M2 |
 | D10 | ~~Live-results timing leak~~ **Decided 2026-10-19:** steps of 10, breakdowns after close ([0006](decisions/0006-results-released-in-steps.md)) | M2 |
@@ -206,5 +215,12 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D22 | ~~Methodology rewrite~~ **Decided 2026-10-19:** describe current practice, with a "Planned" card ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)) | M4 |
 | D23 | ~~Other claims~~ **Decided 2026-10-19:** fix what the code contradicts; team and funding copy left for M9 ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)) | M4 |
 | D24 | ~~Draft results for admins~~ **Decided 2026-10-19:** admins can open them ([0015](decisions/0015-admin-draft-results.md)) | M4 |
+| D25 | ~~Toolchain~~ **Decided 2026-10-19:** Node 24, pnpm, Next.js + React 19 pinned, Tailwind CSS 4 ([0016](decisions/0016-nextjs-frontend.md)) | M5 |
+| D26 | ~~Browser tests for the new frontend~~ **Decided 2026-10-19:** the existing Python suite ([0018](decisions/0018-frontend-checks.md)) | M5 |
+| D27 | ~~JavaScript budget~~ **Decided 2026-10-19:** 150 KB gzipped per route, enforced ([0018](decisions/0018-frontend-checks.md)); too low, see D31 | M5 |
+| D28 | ~~Frontend check required~~ **Decided 2026-10-19:** yes, once green on `main`; the owner sets branch protection ([0018](decisions/0018-frontend-checks.md)) | M5 |
+| D29 | ~~Footer placeholder links~~ **Decided 2026-10-19:** real links only ([0019](decisions/0019-footer-links.md)) | M5 |
+| D30 | ~~Where the new frontend runs~~ **Decided 2026-10-19:** `frontend/`, local and CI only in M5 ([0016](decisions/0016-nextjs-frontend.md)) | M5 |
+| D31 | JavaScript budget, revised: 250 KB (recommended), 200 KB, or report only ([proposed 0020](decisions/0020-javascript-budget.md)) | M5 |
 
 Record each decision in [`docs/decisions/`](decisions/README.md) when it's made.
