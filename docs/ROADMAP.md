@@ -56,12 +56,12 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** changing privacy and methodology wording without approval. Mitigation: decisions D1–D3 first.
 - **Completion condition:** all M1 findings closed in AUDIT.md with links to their commits.
 
-## M2: Regression safety net (COMPLETED, pending merge of PR #7 and branch protection)
+## M2: Regression safety net (COMPLETED, pending branch protection)
 
-- **Progress:** all in PR #7, following owner decisions D8–D11 ([0005–0008](decisions/README.md)), per the [Milestone 2 plan](https://claude.ai/code/artifact/5247e3dc-01c6-47ac-8c30-a5dacc04eb5e):
+- **Progress:** merged in PR #7, following owner decisions D8–D11 ([0005–0008](decisions/README.md)), per the [Milestone 2 plan](https://claude.ai/code/artifact/5247e3dc-01c6-47ac-8c30-a5dacc04eb5e):
   - **Safety net:** a Python Playwright suite in `e2e/` (all 8 journeys, axe on every page, a retired-copy check), the "Browser tests" workflow, and a migration up/down/up check in the backend workflow. TEST-01 fixed.
   - **Milestone 1 follow-ups:** results released in steps of 10 with breakdowns after close (D10, the live-results timing leak); "Totals Only" badge and ticker (D9); the "United STATEs" footer typo on `poll.html`.
-  - **Not done:** TEST-02 (the `httpx2` swap needs dependency approval).
+  - **After the milestone:** TEST-02 fixed by moving the test client to `httpx2`, with the owner's approval of the swap.
 - **Deliverables as built:** `e2e/` and `.github/workflows/browser-tests.yml` (instead of one `ci.yml`, alongside the existing `backend-tests.yml`).
 
 - **Objective:** automated protection of every current user journey. **A prerequisite for any frontend work.**

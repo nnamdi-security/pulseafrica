@@ -51,7 +51,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [BE-05](#be-05) | IMPROVEMENT | Operations | `/api/health` doesn't check the database | Confirmed (inspection) |
 | [METH-03](#meth-03) | IMPROVEMENT | Research integrity | No sample-size warnings or uncertainty estimates in results | Confirmed (inspection) |
 | [DB-03](#db-03) | IMPROVEMENT | Database | Demographic value lists are duplicated in four places | Confirmed (inspection) |
-| [TEST-02](#test-02) | IMPROVEMENT | Testing | Test suite emits a Starlette `TestClient` deprecation warning | Reproduced |
+| [TEST-02](#test-02) | IMPROVEMENT | Testing | Test suite emits a Starlette `TestClient` deprecation warning | Fixed (M2) |
 
 **Totals:** 1 critical, 6 high, 11 medium, 11 low, 5 improvements.
 
@@ -424,7 +424,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 
 - **Evidence:** every pytest run emits `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead.`
 - **Recommended fix:** follow the upstream migration when it's stable, and pin the test dependencies.
-- **Status (M2):** still open. Replacing `httpx` with `httpx2` (2.14) in `requirements.txt` removes the warning in a local run, but swapping a dependency needs the owner's approval, so it wasn't committed.
+- **Status:** fixed after Milestone 2, with the owner's approval of the dependency swap (2026-10-19). `requirements.txt` now pins `httpx2>=2.14,<3` instead of `httpx`, which is the package Starlette's test client asks for. No test or app code imports `httpx` directly, so nothing else changed.
 
 ---
 
