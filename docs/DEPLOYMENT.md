@@ -10,9 +10,10 @@
 | The frontend calls `http://localhost:8000/api` | `api.js` | Set `window.PULSE_API_BASE` in every page, or serve the API at `/api` on the same origin and change the default to `/api` |
 | CORS allows `localhost:5500` only | `CORS_ORIGINS` | Set it to the real frontend origin. With a same-origin setup, CORS isn't needed |
 | `uvicorn --reload`, one process | `backend/README.md` | Run without reload, with several workers behind a proxy, and trust the forwarded headers |
-| `/docs` and `/openapi.json` are public | FastAPI defaults | Disable in production ([SEC-10](AUDIT.md#sec-10)) |
-| No logging setup | — | Configure structured logs ([BE-02](AUDIT.md#be-02)) |
-| `/api/health` doesn't check the database | `main.py` | Add a readiness check ([BE-05](AUDIT.md#be-05)) |
+| `/docs` and `/openapi.json` are served unless `ENVIRONMENT=production` | `main.py` | Set `ENVIRONMENT=production` ([SEC-10](AUDIT.md#sec-10)) |
+| Logs are JSON lines on stderr with a request id | `core/logging.py` | Ship stderr to the log store; pass the edge's request id as `X-Request-ID` ([BE-02](AUDIT.md#be-02)) |
+| `/api/health` is liveness; `/api/health/ready` checks the database | `main.py` | Point load-balancer readiness at `/api/health/ready` ([BE-05](AUDIT.md#be-05)) |
+| Rate limits key on the client address | `api/ratelimit.py` | Behind a proxy, list it in `TRUSTED_PROXIES`, or every user shares the proxy's address and its limits ([decision 0009](decisions/0009-rate-limiting.md)) |
 | Demo data via `python -m app.seed` | `app/seed.py` | **Only** in an explicitly labelled demo deployment, with disclosure ([METH-01](AUDIT.md#meth-01)) |
 
 ## Recommended infrastructure
@@ -49,13 +50,17 @@ The README's original plan (Vercel + Render + managed Postgres) is reasonable fo
 | `JWT_SECRET_KEY` | `.env` value; required, 32+ bytes, never `change-me` (enforced at startup) | Required, strong, unique per environment |
 | `JWT_EXPIRE_MINUTES` | 60 | 15–60 |
 | `CORS_ORIGINS` | Live Server origins | The frontend origin(s) only, or none if same-origin |
-| *(proposed)* `ENVIRONMENT`, `DOCS_ENABLED`, `DEMO_MODE`, `LOG_LEVEL` | — | `production`, `false`, `false`, `info` |
+| `ENVIRONMENT` | `development` | `production` (docs off, HSTS, https-only CORS origins, `Secure` session cookie) |
+| `LOG_LEVEL` | `INFO` | `INFO` |
+| `RATE_LIMITING` | `true` | `true` (only the browser suite turns it off) |
+| `TRUSTED_PROXIES` | empty | The reverse proxy's address(es) |
+| *(proposed)* `DEMO_MODE` | — | `false` |
 
 ## Security considerations
 
-- **TLS everywhere.** HSTS at the edge once stable.
-- **Security headers:** CSP (self plus required CDNs, or self-hosted assets), `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'`, `Referrer-Policy: strict-origin-when-cross-origin` ([SEC-07](AUDIT.md#sec-07)).
-- **Rate limits:** at the edge or in the app on `/api/auth/*` ([SEC-03](AUDIT.md#sec-03)).
+- **TLS everywhere.** The API sends HSTS in production; set it at the edge too once stable.
+- **Security headers:** the API sets its own (M3). The static pages' host must add a CSP (self plus the required CDNs, which carry SRI hashes), `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'` and `Referrer-Policy: strict-origin-when-cross-origin` ([SEC-07](AUDIT.md#sec-07)).
+- **Rate limits:** the app limits `/api/auth/*` itself (M3, [SEC-03](AUDIT.md#sec-03)); edge limits are an optional extra layer.
 - **Least privilege:** the database role used by the app needs DML plus the migration DDL. Ideally use a separate migration role.
 - **Never run `app.seed`, `alembic downgrade` or the test suite against production.**
 

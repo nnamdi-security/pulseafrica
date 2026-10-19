@@ -20,18 +20,25 @@ def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(encoded, hashed.encode())
 
 
-def create_access_token(user_id: int) -> str:
+def create_access_token(user_id: int, token_version: int) -> str:
     settings = get_settings()
-    expires = datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expire_minutes)
-    payload = {"sub": str(user_id), "exp": expires}
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": str(user_id),
+        "iat": now,
+        "exp": now + timedelta(minutes=settings.jwt_expire_minutes),
+        "ver": token_version,
+    }
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
-def decode_access_token(token: str) -> int | None:
-    """Return the user id stored in the token, or None if it is invalid or expired."""
+def decode_access_token(token: str) -> tuple[int, int] | None:
+    """Return the user id and token version stored in the token, or None if it is invalid or
+    expired. Tokens without a version predate revocation and are refused."""
     settings = get_settings()
     try:
-        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
-        return int(payload["sub"])
-    except (jwt.PyJWTError, KeyError, ValueError):
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm],
+                             options={"require": ["sub", "exp", "ver"]})
+        return int(payload["sub"]), int(payload["ver"])
+    except (jwt.PyJWTError, KeyError, TypeError, ValueError):
         return None

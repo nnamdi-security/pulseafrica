@@ -52,12 +52,12 @@ There's no build step, framework or bundler on the frontend. The API is a single
 
 | Layer | Contents | Notes |
 |---|---|---|
-| **App** (`main.py`) | FastAPI app, CORS middleware, 6 routers + `/api/health` | No security headers or logging setup ([SEC-07](AUDIT.md#sec-07), [BE-02](AUDIT.md#be-02)) |
+| **App** (`main.py`) | `create_app(settings)`: CORS, a request middleware (request id, security headers, one JSON log line), a 500 handler, 6 routers, `/api/health` and `/api/health/ready` | Production profile via `ENVIRONMENT` |
 | **Routes** (`api/routes/`) | Request handling *and* business rules (there's no separate service layer) | Appropriate at this size. Extract services only when a rule is needed in two places |
-| **Dependencies** (`api/deps.py`) | `DbSession`, `OptionalUser`, `CurrentUser`, `AdminUser` | Authorization is declared in each route's signature |
+| **Dependencies** (`api/deps.py`) | `DbSession`, `OptionalUser`, `CurrentUser`, `AdminUser`; `get_optional_user` reads the bearer token or the session cookie (with the CSRF check) | Authorization is declared in each route's signature. `api/ratelimit.py` and `api/rules.py` hold shared rules |
 | **Schemas** (`schemas/`) | Request and response models; `CamelModel` aliasing; shared validated types (`StateName`, `AgeRange`, `NewPassword`, `FullName`) | The contract layer |
-| **Models** (`models/`) | `User`, `Poll`, `Question`, `Option`, `Response`, `Answer` | See [DATABASE.md](DATABASE.md) |
-| **Core** (`core/`) | `config.py` (pydantic-settings), `security.py` (bcrypt, JWT), `constants.py` (reference lists) | |
+| **Models** (`models/`) | `User`, `Poll`, `Question`, `Option`, `Response`, `Answer`, `RateLimitHit` | See [DATABASE.md](DATABASE.md) |
+| **Core** (`core/`) | `config.py` (pydantic-settings), `security.py` (bcrypt, JWT), `logging.py` (JSON logs), `constants.py` (reference lists) | |
 | **Scripts** | `app/seed.py` (demo data, empty databases only), `app/create_admin.py` | |
 
 ## Implemented: key request flows

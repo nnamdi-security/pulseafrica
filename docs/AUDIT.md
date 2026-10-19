@@ -20,26 +20,26 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 |---|---|---|---|---|
 | [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Fixed (M1) |
 | [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Fixed (M1) |
-| [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Confirmed (inspection) |
+| [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Fixed (M3) |
 | [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Fixed (M1) |
 | [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Fixed (M1) |
 | [PRIV-02](#priv-02) | HIGH | Privacy / honesty | Pages promise answers are "never linked to your identity", but the schema links them | Fixed (M1) |
 | [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Fixed (M1) |
-| [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Potential risk |
-| [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Reproduced |
+| [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Partly fixed (M3: API side) |
+| [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Fixed (M3) |
 | [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
-| [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Reproduced (API) |
-| [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Confirmed (inspection) |
+| [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed for the API (M3) |
+| [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Fixed (M3; fonts excepted) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Confirmed (inspection) |
 | [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
 | [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Confirmed (inspection) |
 | [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Reproduced (computed) |
 | [TEST-01](#test-01) | MEDIUM | Testing | No frontend or end-to-end tests and no CI | Fixed (M2) |
 | [DEP-01](#dep-01) | MEDIUM | Deployment | No production configuration (server, proxy headers, logging, deploy files) | Confirmed (inspection) |
-| [SEC-09](#sec-09) | LOW | Security | Registration reveals whether an email is already registered | Reproduced |
-| [SEC-10](#sec-10) | LOW | Security | `/docs` and `/openapi.json` are public in every environment | Reproduced |
-| [BE-01](#be-01) | LOW | Backend | `%` and `_` in search terms act as SQL wildcards | Reproduced |
-| [BE-02](#be-02) | LOW | Operations | No logging configuration or request IDs | Confirmed (inspection) |
+| [SEC-09](#sec-09) | LOW | Security | Registration reveals whether an email is already registered | Accepted (M3) |
+| [SEC-10](#sec-10) | LOW | Security | `/docs` and `/openapi.json` are public in every environment | Fixed (M3) |
+| [BE-01](#be-01) | LOW | Backend | `%` and `_` in search terms act as SQL wildcards | Fixed (M3) |
+| [BE-02](#be-02) | LOW | Operations | No logging configuration or request IDs | Fixed (M3) |
 | [BE-03](#be-03) | LOW | Performance | `GET /api/polls` is unpaginated and loads every question and option | Confirmed (inspection) |
 | [DB-01](#db-01) | LOW | Database | No index on `responses.created_at`, though several queries filter on it | Potential risk |
 | [DB-02](#db-02) | LOW | Database | "Option belongs to question" is enforced only in application code | Potential risk |
@@ -48,7 +48,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [FE-06](#fe-06) | LOW | Security | XSS safety depends on hand-escaping at 70 `innerHTML` sites | Potential risk |
 | [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Fixed (M1) |
 | [BE-04](#be-04) | IMPROVEMENT | Backend | Admins can't preview results of a draft poll | Reproduced |
-| [BE-05](#be-05) | IMPROVEMENT | Operations | `/api/health` doesn't check the database | Confirmed (inspection) |
+| [BE-05](#be-05) | IMPROVEMENT | Operations | `/api/health` doesn't check the database | Fixed (M3) |
 | [METH-03](#meth-03) | IMPROVEMENT | Research integrity | No sample-size warnings or uncertainty estimates in results | Confirmed (inspection) |
 | [DB-03](#db-03) | IMPROVEMENT | Database | Demographic value lists are duplicated in four places | Confirmed (inspection) |
 | [TEST-02](#test-02) | IMPROVEMENT | Testing | Test suite emits a Starlette `TestClient` deprecation warning | Fixed (M2) |
@@ -112,6 +112,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** credential stuffing and brute force against `/api/auth/login`; mass account creation via `/api/auth/register`, which also inflates "Registered voices"; password guessing on `/api/auth/me` (DELETE) and `/me/password`.
 - **Recommended fix:** per-IP and per-account limits on login, register, password change and delete, either in the app (e.g. `slowapi`) or at the reverse proxy. Add failure counters with a short lockout, and tests.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M3, commit `0f65fed`):** decisions D12 and D13 ([0009](decisions/0009-rate-limiting.md)). The API counts attempts in a `rate_limit_hits` table shared by every worker: login 10 a minute per address, 10 failed logins in 15 minutes pause that account from any address, register 5 an hour per address, and password change plus account deletion 5 in 15 minutes per user. Over a limit it answers 429 with `Retry-After`. `X-Forwarded-For` is read only from `TRUSTED_PROXIES`. Tests in `tests/test_rate_limits.py`, on SQLite and Postgres. Concurrent requests can exceed a limit by their number; accepted.
 
 <a id="int-01"></a>
 ### INT-01: Polls keep accepting responses after their closing date (HIGH)
@@ -184,6 +185,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** a single XSS becomes full account takeover for up to 60 minutes per stolen token. Bearer tokens are, however, immune to CSRF.
 - **Recommended fix:** move to an HttpOnly, Secure, SameSite cookie session with CSRF protection. See [SECURITY.md](SECURITY.md#recommended-authentication-architecture); this is best done together with the frontend migration.
 - **Verification status:** Potential risk (no XSS found).
+- **Resolution (M3, backend half, commit `ecea133`):** decisions D15 and D16 ([0011](decisions/0011-cookie-session-and-csrf.md)). Login also sets an HttpOnly `pa_session` cookie; `get_optional_user` reads bearer first, then the cookie, and cookie-authenticated writes need `X-Requested-With: pulseafrica`. **Still open for the current pages,** which keep the bearer token in Web Storage until a frontend moves to the cookie (M7).
 
 <a id="sec-05"></a>
 ### SEC-05: Changing a password doesn't revoke existing tokens (MEDIUM)
@@ -194,6 +196,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** someone who steals a token keeps access for up to 60 minutes after the owner changes their password.
 - **Recommended fix:** add `iat` to tokens and a `password_changed_at` (or `token_version`) column. Reject tokens issued before it.
 - **Verification status:** Reproduced.
+- **Resolution (M3, commit `91e5d82`):** decision D14 ([0010](decisions/0010-token-version-revocation.md)). Tokens carry `iat` and `ver`; `users.token_version` (migration `0005`) must match. `POST /api/auth/logout`, a password change, suspension and demotion raise it, so probe P6's old token now gets 401. Tokens without `ver` are refused, so everyone signs in once after release. Tests in `tests/test_sessions.py`; sign-out and password change are covered in the browser suite.
 
 <a id="sec-06"></a>
 ### SEC-06: The sole admin can delete their own account (MEDIUM)
@@ -215,6 +218,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** there's no defence in depth against XSS, clickjacking or MIME sniffing.
 - **Recommended fix:** add header middleware to FastAPI, and set a CSP at the frontend host. The CSP needs to allow the CDN origins in use, or self-host them.
 - **Verification status:** Reproduced (API); static hosting unverifiable here.
+- **Resolution (M3, commit `eb99122`):** the API sends `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` and `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` on every response (not the CSP on `/docs`), plus HSTS in production. Tests in `tests/test_hardening.py`. **Still open:** a CSP for the static pages, which their host sets (M9, [DEPLOYMENT.md](DEPLOYMENT.md)).
 
 <a id="sec-08"></a>
 ### SEC-08: CDN assets without Subresource Integrity (MEDIUM)
@@ -225,6 +229,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** a compromised CDN file runs with full page privileges, including reading tokens (SEC-04).
 - **Recommended fix:** add `integrity` and `crossorigin` to the `<script>` and `<link>` tags, or self-host the assets. A migration bundles Chart.js and the icons anyway.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M3, commit `25dd4dd`):** decision D17 ([0012](decisions/0012-asset-integrity.md)). The Tabler Icons 3.19.0 stylesheet (9 pages) and Chart.js 4.4.1 (`results.html`) carry SHA-384 `integrity` and `crossorigin="anonymous"`, hashed from the npm packages the CDNs serve. Google Fonts stays without a hash: its stylesheet varies by browser. `e2e/test_assets.py` checks both files still load.
 
 <a id="meth-02"></a>
 ### METH-02: Copy claims methodology that doesn't exist (MEDIUM)
@@ -315,6 +320,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** an attacker can check whether an email is registered. For a civic-opinion site, membership itself is mildly sensitive.
 - **Recommended fix:** accept as a usability trade-off for now, with rate limiting (SEC-03). Once email verification exists, return a neutral "check your inbox" response instead.
 - **Verification status:** Reproduced.
+- **Resolution (M3):** accepted as a usability trade-off (decision D18, [0009](decisions/0009-rate-limiting.md)) now that registration is limited to 5 attempts an hour per address. Revisit if email verification is built.
 
 <a id="sec-10"></a>
 ### SEC-10: API docs are public in every environment (LOW)
@@ -323,6 +329,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** information disclosure; it makes it easier to map the admin endpoints.
 - **Recommended fix:** disable both in production via a setting (`docs_url=None`).
 - **Verification status:** Reproduced.
+- **Resolution (M3, commit `eb99122`):** `ENVIRONMENT=production` turns off `/docs`, `/redoc` and `/openapi.json`, adds HSTS and refuses plain-http CORS origins. Tests in `tests/test_hardening.py`.
 
 <a id="be-01"></a>
 ### BE-01: Search treats `%` and `_` as wildcards (LOW)
@@ -331,6 +338,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Evidence:** probe P5: admin search `%` matched 2 of 2 users.
 - **Recommended fix:** escape `\`, `%` and `_`, and pass `escape="\\"`.
 - **Verification status:** Reproduced.
+- **Resolution (M3, commit `732bd65`):** `contains()` in `app/api/rules.py` escapes `\`, `%` and `_` and passes `escape`; both searches use it. Probe P5's `%` now matches nobody (tests in `test_polls.py` and `test_admin.py`, on SQLite and Postgres).
 
 <a id="be-02"></a>
 ### BE-02: No logging configuration (LOW)
@@ -338,6 +346,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Description:** the app has no `logging` setup, structured logs or request IDs. Unhandled exceptions produce uvicorn's default traceback and a bare 500.
 - **Recommended fix:** add structured logging with request IDs and an exception handler that logs, without exposing internals.
 - **Verification status:** Confirmed (inspection: no `logging`/`getLogger` in `backend/app`).
+- **Resolution (M3, commit `eb99122`):** `app/core/logging.py` writes JSON lines with a request id (from a plain `X-Request-ID`, or new), echoed in the response. One line per request (method, path, status, duration; never query strings, headers or bodies), and unhandled errors are logged with their traceback and answered with a plain 500 `{detail}`. Tests in `tests/test_hardening.py`.
 
 <a id="be-03"></a>
 ### BE-03: Poll list is unpaginated (LOW)
@@ -406,6 +415,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 
 - **Description:** `/api/health` always returns `{"status":"ok"}`.
 - **Recommended fix:** add `/api/health/ready`, which runs `SELECT 1`, for load-balancer readiness checks.
+- **Resolution (M3, commit `eb99122`):** `GET /api/health/ready` runs `SELECT 1` and answers 503 when the database fails.
 
 <a id="meth-03"></a>
 ### METH-03: No uncertainty or sample-size warnings (IMPROVEMENT)

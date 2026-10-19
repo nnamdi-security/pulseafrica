@@ -4,6 +4,8 @@ import secrets
 
 from playwright.sync_api import Page, expect
 
+from conftest import api, sign_in
+
 
 def test_register_with_errors_then_succeed(page: Page, citizen, console_errors):
     page.goto("/login.html#register")
@@ -50,3 +52,15 @@ def test_login_with_a_wrong_password_then_succeed(page: Page, citizen, console_e
     form.get_by_role("button", name="Sign in").click()
     expect(page.get_by_role("heading", name="You’re signed in")).to_be_visible()
     expect(page.get_by_text(f"Signed in as {citizen.email}")).to_be_visible()
+
+
+def test_sign_out_revokes_the_token(page: Page, citizen, console_errors):
+    """Signing out asks the API to revoke the token, not only forgets it (SEC-05, decision 0010)."""
+    sign_in(page, citizen)
+    page.goto("/index.html")
+    nav = page.get_by_role("navigation", name="Main navigation")
+    with page.expect_response(lambda res: res.url.endswith("/api/auth/logout")) as logout:
+        nav.get_by_role("button", name="Sign out").click()
+    assert logout.value.status == 204
+    expect(nav.get_by_role("button", name="Sign out")).to_have_count(0)
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 401

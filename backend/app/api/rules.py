@@ -23,6 +23,12 @@ def ensure_another_active_admin(db: Session, user: User) -> None:
         )
 
 
+def contains(column: ColumnElement, term: str) -> ColumnElement[bool]:
+    """Case-insensitive "column contains term", with `%` and `_` in the term matched literally (BE-01)."""
+    escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return column.ilike(f"%{escaped}%", escape="\\")
+
+
 def closing_date_passed(closes_at: datetime | None) -> bool:
     if closes_at is None:
         return False

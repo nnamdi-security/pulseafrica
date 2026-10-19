@@ -1,6 +1,6 @@
 # Security
 
-This describes the security model **as implemented** on `main` (`7119fa7`), its known weaknesses (with IDs from [AUDIT.md](AUDIT.md)), and the recommended direction. Nothing in this document has been changed in the code yet.
+This describes the security model **as implemented** after Milestone 3, its known weaknesses (with IDs from [AUDIT.md](AUDIT.md)), and the recommended direction.
 
 ## Current implementation
 
@@ -8,13 +8,16 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 
 | Aspect | Implementation | Where |
 |---|---|---|
-| **Passwords** | bcrypt (default cost 12) via the `bcrypt` package. Rules: 8–128 characters, a letter and a digit (frontend and backend agree) | `core/security.py`, `schemas/user.py` |
-| **Tokens** | HS256 JWT, claims `sub` (user id) and `exp` (default 60 min, `JWT_EXPIRE_MINUTES`). The algorithm is pinned on decode | `core/security.py` |
+| **Passwords** | bcrypt (default cost 12) via the `bcrypt` package. Rules: at least 8 characters and at most 72 UTF-8 bytes, a letter and a digit (frontend and backend agree, [SEC-02](AUDIT.md#sec-02)) | `core/security.py`, `schemas/user.py` |
+| **Tokens** | HS256 JWT, claims `sub` (user id), `iat`, `exp` (default 60 min, `JWT_EXPIRE_MINUTES`) and `ver` (the user's `token_version`). The algorithm is pinned on decode, and `ver` must match ([SEC-05](AUDIT.md#sec-05), fixed) | `core/security.py`, `api/deps.py` |
 | **Secret** | `JWT_SECRET_KEY` from the environment or `backend/.env`; required, 32+ bytes, and the API refuses to start otherwise ([SEC-01](AUDIT.md#sec-01), fixed) | `core/config.py` |
-| **Transport** | `Authorization: Bearer` header; CORS allows the configured origins (`CORS_ORIGINS`, default the Live Server ports) | `main.py`, `api.js` |
+| **Transport** | `Authorization: Bearer` header; CORS allows the configured origins (`CORS_ORIGINS`, default the Live Server ports; https only in production) | `main.py`, `api.js` |
+| **Session cookie** | Login also sets `pa_session` (HttpOnly, SameSite=Lax, `Path=/api`, Secure in production). Read only when no bearer header is sent; cookie-authenticated writes need `X-Requested-With: pulseafrica` (CSRF). The current pages don't use it ([decision 0011](decisions/0011-cookie-session-and-csrf.md)) | `api/deps.py`, `routes/auth.py` |
 | **Browser storage** | `localStorage` ("Keep me signed in") or `sessionStorage`, plus a cached profile ([SEC-04](AUDIT.md#sec-04)) | `api.js` |
-| **Logout** | Client-side only: deletes the stored token. There's no server-side revocation | `api.js`, `nav-auth.js` |
-| **Session end** | Expiry after 60 minutes; suspension and account deletion take effect at once, because each request reloads the user | `api/deps.py` |
+| **Logout** | `POST /api/auth/logout` raises `token_version`, revoking every token of that user, and clears the cookie; `api.js` also deletes the stored token ([decision 0010](decisions/0010-token-version-revocation.md)) | `routes/auth.py`, `api.js` |
+| **Session end** | Expiry after 60 minutes. Sign-out, a password change, suspension, demotion and account deletion take effect at once, because each request reloads the user and checks its token version | `api/deps.py` |
+| **Rate limits** | Login per address and per account, register per address, password checks per user; 429 with `Retry-After` ([decision 0009](decisions/0009-rate-limiting.md)) | `api/ratelimit.py` |
+| **Response headers** | nosniff, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a deny-all CSP on API responses, HSTS in production ([SEC-07](AUDIT.md#sec-07)) | `main.py` |
 
 ### Authorization boundaries
 
@@ -32,7 +35,7 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 ### Input handling
 
 - **Validation:** every request body is a Pydantic model. Reference values are checked against `core/constants.py`, and unknown fields are ignored.
-- **SQL:** goes only through the SQLAlchemy expression language, with bound parameters.
+- **SQL:** goes only through the SQLAlchemy expression language, with bound parameters. Search terms escape `%` and `_` (`contains()` in `api/rules.py`, [BE-01](AUDIT.md#be-01)).
 - **HTML output:** the frontend escapes all API text with `escapeHtml()`, or uses `textContent` ([FE-06](AUDIT.md#fe-06)).
 - **`?next=` redirect:** `login.html` accepts only same-site page names (`/^[a-z0-9_-]+\.html(\?[^#]*)?$/i`). This blocks open redirects to other origins.
 
@@ -46,28 +49,27 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 
 | ID | Priority | Summary |
 |---|---|---|
-| SEC-03 | HIGH | No rate limiting or lockout |
-| SEC-04 | MEDIUM | Tokens readable by any script on the origin |
-| SEC-05 | MEDIUM | No token revocation on password change; no `iat` |
-| SEC-07 | MEDIUM | No security headers or CSP |
-| SEC-08 | MEDIUM | CDN assets without SRI |
-| SEC-09 | LOW | Registration reveals existing emails |
-| SEC-10 | LOW | `/docs` and `/openapi.json` public in production |
+| SEC-04 | MEDIUM | The current pages keep the token where any script on the origin can read it. The API side (cookie plus CSRF) is done; the pages move in M7 |
+| SEC-07 | MEDIUM | The static pages have no CSP; their host sets it (M9). The API sends its headers |
+| SEC-08 | LOW (residual) | Google Fonts loads without SRI; the icons and Chart.js carry hashes |
+| SEC-09 | LOW | Registration reveals existing emails; accepted with rate limiting ([decision 0009](decisions/0009-rate-limiting.md)) |
 
-## Recommendations for the current stack (Milestones 1 and 3)
+Fixed in Milestone 3: SEC-03 (rate limits), SEC-05 (revocation), SEC-10 (docs off in production), and the API halves of SEC-04 and SEC-07.
+
+## Recommendations for the current stack (Milestones 1 and 3, implemented)
 
 1. **Fail closed on secrets:** refuse to start without a strong `JWT_SECRET_KEY`, and resolve `.env` from `backend/` (SEC-01).
 2. **Byte-length password validation, with a safe verify** (SEC-02).
-3. **Rate limiting:** about 5 per minute per IP and per account on login; tighter on register, password change and delete (SEC-03).
+3. **Rate limiting** on login, register, password change and delete (SEC-03): implemented in M3 with the limits in [decision 0009](decisions/0009-rate-limiting.md).
 4. **Small-cell suppression** in public results (PRIV-01) and **honest privacy copy** (PRIV-02): done in M1 ([decisions 0001 and 0003](decisions/README.md)). Live results no longer leak through timing: figures move in steps of 10, and breakdowns wait for the poll to close (M2, [decision 0006](decisions/0006-results-released-in-steps.md)).
-5. **`iat` claim plus `password_changed_at`**, so a password change revokes older tokens (SEC-05).
+5. **`iat` claim plus a token version**, so sign-out and a password change revoke older tokens (SEC-05): implemented in M3 ([decision 0010](decisions/0010-token-version-revocation.md)).
 6. **Last-admin guard on account deletion** (SEC-06).
-7. **Security-header middleware** on the API. **CSP, SRI or self-hosted assets** on the frontend (SEC-07, SEC-08).
-8. **Production settings:** hide the docs, and set an explicit CORS origin list (SEC-10, [DEPLOYMENT.md](DEPLOYMENT.md)).
+7. **Security-header middleware** on the API, and **SRI** on the CDN files (SEC-07, SEC-08): implemented in M3. A CSP for the static pages waits for their host (M9).
+8. **Production settings:** `ENVIRONMENT=production` hides the docs and requires https CORS origins (SEC-10): implemented in M3.
 
 ## Recommended authentication architecture
 
-This applies if the frontend migration is approved; the backend work in Milestone 3 is useful either way.
+This applies if the frontend migration is approved. **The backend half is implemented (Milestone 3):** the cookie, the CSRF header, logout and the token version below all exist; only a frontend that uses them is missing.
 
 ### Why not "just move the JWT into a cookie"
 

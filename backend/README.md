@@ -123,6 +123,7 @@ users ──< responses >── polls ──< questions ──< options
 | `options` | Ordered answer choices for a question |
 | `responses` | One per user per poll (enforced by a unique constraint) + demographics given at submission |
 | `answers` | The option chosen for each question in a response |
+| `rate_limit_hits` | Counted attempts at login, registration and password checks, kept for at most an hour |
 
 Demographics are stored on each response (not just the user) because `poll.html` asks for them at submission time, and results are broken down by what was reported then.
 
@@ -137,16 +138,18 @@ Demographics are stored on each response (not just the user) because `poll.html`
 
 ## API
 
-JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript frontend. Authenticated endpoints need the header `Authorization: Bearer <accessToken>`.
+JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript frontend. Authenticated endpoints need the header `Authorization: Bearer <accessToken>`. Login also sets an HttpOnly `pa_session` cookie; writes authenticated by that cookie need `X-Requested-With: pulseafrica`. Login, register, password change and account deletion are rate-limited (429). Full details: [docs/API_CONTRACTS.md](../docs/API_CONTRACTS.md).
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| GET | `/api/health` | — | Health check |
+| GET | `/api/health` | — | Liveness check |
+| GET | `/api/health/ready` | — | Readiness: `200` once the database answers, `503` otherwise |
 | POST | `/api/auth/register` | — | Create an account |
-| POST | `/api/auth/login` | — | Get an access token |
+| POST | `/api/auth/login` | — | Get an access token (and the session cookie; `remember: true` makes it outlive the browser session) |
+| POST | `/api/auth/logout` | Optional | Revoke every token of the signed-in user and clear the cookie → `204` |
 | GET | `/api/auth/me` | User | Current user's profile |
 | PATCH | `/api/auth/me` | User | Update any of `fullName`, `state`, `ageRange` (email can't be changed) |
-| POST | `/api/auth/me/password` | User | Change password: `currentPassword`, `newPassword`, `confirmPassword` → `204`, or `403` if the current password is wrong |
+| POST | `/api/auth/me/password` | User | Change password: `currentPassword`, `newPassword`, `confirmPassword` → `204` (earlier tokens stop working; sign in again), or `403` if the current password is wrong |
 | DELETE | `/api/auth/me` | User | Delete the account and all its responses. Body `{ "password": "…" }` → `204`, or `403` if the password is wrong |
 | GET | `/api/auth/me/responses` | User | Polls the user has answered (title, category, status, when), newest first. Never includes how they answered |
 | GET | `/api/polls` | — | List polls with `responseCount`, `questionCount` and a first-question `preview`. Query: `category`, `status`, `search` |
@@ -157,7 +160,7 @@ JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript fronten
 | DELETE | `/api/polls/{id}` | Admin | Delete a poll with every response to it |
 | GET | `/api/admin/overview` | Admin | User, poll and response totals, responses per day for 14 days, and each poll's participation |
 | GET | `/api/admin/users` | Admin | Users with their response counts, newest first. Query: `search` (name or email), `role`, `status` (`active` / `suspended`), `limit`, `offset` → `{ total, items }` |
-| PATCH | `/api/admin/users/{id}` | Admin | Suspend / reactivate (`isActive`) or change `role`. A suspended user's token stops working immediately. You can't suspend or demote yourself, and the last active admin can't be removed (`409`) |
+| PATCH | `/api/admin/users/{id}` | Admin | Suspend / reactivate (`isActive`) or change `role`. Suspending or demoting a user revokes their tokens immediately. You can't suspend or demote yourself, and the last active admin can't be removed (`409`) |
 | GET | `/api/stats` | — | Site-wide figures: active / closed polls, total responses, registered users, states covered, responses in the last 7 days, trending poll |
 | GET | `/api/results/{pollId}` | — | Counts and percentages per question: overall, by state / age range / gender / education / occupation, and per day (`trend`) |
 

@@ -5,7 +5,13 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import AdminUser, DbSession, OptionalUser
-from app.api.rules import closing_date_passed, effective_status, has_effective_status, published_responses
+from app.api.rules import (
+    closing_date_passed,
+    contains,
+    effective_status,
+    has_effective_status,
+    published_responses,
+)
 from app.core.constants import MIN_GROUP_SIZE
 from app.models import Answer, Option, Poll, PollStatus, Question, Response, User, UserRole
 from app.schemas.poll import PollCreate, PollOut, PollSummary, PollUpdate, PreviewOption, QuestionIn
@@ -81,7 +87,7 @@ def list_polls(
     if status_filter:
         query = query.where(has_effective_status(status_filter))
     if search:
-        query = query.where(Poll.title.ilike(f"%{search}%"))
+        query = query.where(contains(Poll.title, search))
     polls = list(db.scalars(query))
     stats = _stats(db, polls)
     return [PollSummary.model_validate(p).model_copy(update=stats[p.id]) for p in polls]

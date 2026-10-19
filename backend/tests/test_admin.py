@@ -122,6 +122,15 @@ def test_list_users_with_filters(client, admin_headers, citizen_headers):
     assert client.get("/api/admin/users?limit=2&offset=2", headers=admin_headers).json()["total"] == 3
 
 
+def test_user_search_treats_wildcards_literally(client, admin_headers):
+    """BE-01: probe P5's `%` matched every user."""
+    register_and_login(client, email="ada_obi@example.com", fullName="Ada Obi")
+    register_and_login(client, email="adaxobi@example.com", fullName="Ada X Obi")
+    search = lambda q: [u["email"] for u in client.get("/api/admin/users", params={"search": q}, headers=admin_headers).json()["items"]]
+    assert search("%") == []
+    assert search("ada_obi") == ["ada_obi@example.com"]
+
+
 def test_suspend_and_reactivate(client, admin_headers, citizen_headers):
     users = client.get("/api/admin/users", headers=admin_headers).json()["items"]
     citizen = next(u for u in users if u["role"] == "citizen")
@@ -152,7 +161,10 @@ def test_permissions(client, admin_headers, citizen_headers, db):
 
     # The new admin can demote the original one (there's still an admin left)…
     assert client.patch(f"/api/admin/users/{me['id']}", json={"role": "citizen"}, headers=citizen_headers).status_code == 200
-    assert client.get("/api/admin/overview", headers=admin_headers).status_code == 403
+    # Demotion revokes their tokens (decision 0010); signed in again, they're a citizen.
+    assert client.get("/api/admin/overview", headers=admin_headers).status_code == 401
+    token = client.post("/api/auth/login", json={"email": "admin@example.com", "password": "secret123"}).json()["accessToken"]
+    assert client.get("/api/admin/overview", headers={"Authorization": f"Bearer {token}"}).status_code == 403
     # …but can't then remove themselves, the last admin
     assert client.patch(f"/api/admin/users/{citizen['id']}", json={"role": "citizen"}, headers=citizen_headers).status_code == 409
     assert client.patch("/api/admin/users/999", json={"isActive": False}, headers=citizen_headers).status_code == 404

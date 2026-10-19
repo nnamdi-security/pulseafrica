@@ -8,15 +8,15 @@
 | **Environment** | Python 3.13.16 in `backend/.venv`; PostgreSQL 16 (local) |
 | **Key versions** | fastapi 0.146.0, SQLAlchemy 2.1.5, pydantic 2.14.1, alembic 1.20.0, bcrypt 5.0.0, PyJWT 2.15.1, pytest 9.1.1, httpx2 2.14.0 |
 | **Import check** | `python -c "import app.main"`: OK |
-| **Migrations** | `alembic current` = `alembic heads` = `9a1a4b1d975d` (migration 0003); up/down/up on Postgres clean; `alembic check`: "No new upgrade operations detected" (models match migrations) |
+| **Migrations** | `alembic current` = `alembic heads` = `4accab79d306` (migration 0005); up/down/up on Postgres clean; `alembic check`: "No new upgrade operations detected" (models match migrations) |
 
 | Command (run from `backend/`) | Collected | Passed | Failed | Skipped | Errors | Time |
 |---|---|---|---|---|---|---|
-| `pytest` (in-memory SQLite, the default) | 81 | **80** | 0 | 1 | 0 | ~66 s |
-| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 81 | **81** | 0 | 0 | 0 | ~79 s |
-| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium) | 63 | **63** | 0 | 0 | 0 | ~78 s |
+| `pytest` (in-memory SQLite, the default) | 137 | **136** | 0 | 1 | 0 | ~110 s |
+| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 137 | **137** | 0 | 0 | 0 | ~125 s |
+| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium) | 74 | **74** in CI | 0 | 0 | 0 | ~120 s |
 
-The counts above were updated in Milestone 2 (results released in steps, decision 0006; the browser suite, decision 0005). The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
+The counts above were updated in Milestone 3 (decisions 0009–0012). The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 
 - **One expected warning in both runs:** PyJWT's `InsecureKeyLengthWarning` from `test_token_signed_with_the_old_default_is_rejected`, which signs a token with the old 9-byte default key on purpose (SEC-01). The Starlette test-client warning is gone since the move to `httpx2` ([TEST-02](AUDIT.md#test-02) fixed).
 - **No environment-related failures or missing dependencies.**
@@ -30,10 +30,13 @@ The counts above were updated in Milestone 2 (results released in steps, decisio
 | `tests/test_config.py` | 9 | The JWT secret guard (missing, example, short, multi-byte, 32 bytes), `.env` read from `backend/`, startup refusal, tokens signed with the old default (SEC-01) |
 | `tests/test_auth.py` | 9 | Register (success, duplicate, validation rules), login, `/me`, invalid tokens, 72/73-byte and multi-byte passwords, over-long login (SEC-02) |
 | `tests/test_account.py` | 9 | Profile update and validation, password change, my-responses (no answers leaked), account deletion removes responses, over-long passwords (SEC-02), last-admin deletion guard (SEC-06) |
-| `tests/test_polls.py` | 21 | Admin-only creation, drafts hidden, filters, one response per user, answer validation, closed polls, results breakdowns, counts, preview, `hasResponded`, categories, optional demographics, trend, past closing date refused and reported as closed everywhere (INT-01), simultaneous duplicate submissions (Postgres only) |
+| `tests/test_polls.py` | 22 | Admin-only creation, drafts hidden, filters, one response per user, answer validation, closed polls, results breakdowns, counts, preview, `hasResponded`, categories, optional demographics, trend, past closing date refused and reported as closed everywhere (INT-01), simultaneous duplicate submissions (Postgres only), `%` and `_` searched literally (BE-01) |
 | `tests/test_results.py` | 16 | Minimum group size (PRIV-01): probe P3, the 9/10 boundary, overall counts unchanged, skipped optional questions, polls under 10 responses, trend suppression and day/week/month grouping, and a randomised check that no breakdown or trend leaves a remainder of 1–9. Release steps (decision 0006): open polls hold breakdowns and trend, one response can't move the figures, closing (or passing the closing date) releases breakdowns, closed polls count whole steps only, the list preview steps too |
-| `tests/test_admin.py` | 11 | Admin-only access, overview, edit, open/close, past closing date, questions locked once answered, delete, user list and filters, suspend/reactivate, permissions, last-active-admin protection |
+| `tests/test_admin.py` | 12 | Admin-only access, overview, edit, open/close, past closing date, questions locked once answered, delete, user list and filters, `%` and `_` searched literally (BE-01), suspend/reactivate, permissions (a demoted admin's token is revoked), last-active-admin protection |
 | `tests/test_stats.py` | 2 | Empty platform, counts exclude drafts, no synthetic polls |
+| `tests/test_hardening.py` | 17 | Security headers on 200/404/422 and CORS preflights, no CSP on `/docs` (SEC-07); production hides the docs, adds HSTS and refuses http origins (SEC-10); readiness 200 and 503 (BE-05); JSON request logs with ids and no passwords, tokens, emails or query strings, forwarded ids, logged and hidden 500s (BE-02) |
+| `tests/test_rate_limits.py` | 14 | Every limit at its boundary with 429 and `Retry-After`, windows expiring, the per-account pause from another address, failed attempts counting, `X-Forwarded-For` only from trusted proxies, pruning, the off switch (SEC-03) |
+| `tests/test_sessions.py` | 23 | Token claims; logout, password change, suspension and demotion revoke tokens, promotion doesn't, unversioned tokens refused (SEC-05); the session cookie's attributes, cookie-only sign-in, the CSRF header on every write, bearer precedence, logout clearing the cookie, a citizen's cookie on admin routes (SEC-04) |
 | `tests/test_seed.py` | 4 | Seed polls are valid payloads, turnout table, drift helper, seeded polls flagged synthetic in polls, results and stats (METH-01) |
 
 ### Browser tests by file (`e2e/`)
@@ -43,17 +46,19 @@ The counts above were updated in Milestone 2 (results released in steps, decisio
 | `test_browse_polls.py` | 1 | Journey 1: browse, search (match and no match), status and category filters, demo-data note |
 | `test_take_poll.py` | 1 | Journey 2: sign-in gate, `?next=` return, Next disabled until answered, prefilled demographics, submit, thank-you count, "already responded" on reload |
 | `test_results.py` | 2 | Journey 3: tabs, poll and question pickers; an open poll holds its breakdowns, a closed one shows them (decision 0006) |
-| `test_register_and_login.py` | 2 | Journey 4: empty form, password mismatch, taken email (409), success; wrong password then success |
-| `test_dashboard.py` | 2 | Journey 5: history, profile edit, wrong then right current password, delete behind its confirmation; signed-out state |
+| `test_register_and_login.py` | 3 | Journey 4: empty form, password mismatch, taken email (409), success; wrong password then success; signing out revokes the token |
+| `test_dashboard.py` | 2 | Journey 5: history, profile edit, wrong then right current password (the old token is revoked and the page stays signed in), delete behind its confirmation; signed-out state |
 | `test_admin.py` | 3 | Journey 6: create a draft, publish, close, cancelled and confirmed delete; suspend, reactivate, promote and demote a user (checked against the API); a citizen is refused |
 | `test_server_down.py` | 4 | Journey 7: polls, poll, results and login pages with the API unreachable |
 | `test_mobile.py` | 14 | Journey 8: no sideways scroll at 390px on every page and tab, signed in where needed |
 | `test_accessibility.py` | 15 | axe on all 9 pages (and tabs), failing on serious or critical violations except the known FE-03 contrast ones |
+| `test_assets.py` | 10 | The icon stylesheet on all 9 pages and Chart.js carry `integrity` and still load (SEC-08) |
 | `test_copy.py` | 19 | No page claims anonymity or "never linked" (decisions 0003, 0007); all 9 pages carry the "Totals Only" badge and ticker |
 
 ## How the browser tests work
 
 - **Setup:** `python -m venv .venv && pip install -r e2e/requirements.txt && python -m playwright install chromium` (it includes the backend's requirements). Run `pytest` from `e2e/` with `E2E_POSTGRES_URL` set to any database on a Postgres server where the role may create databases.
+- **Rate limits:** the suite starts the API with `RATE_LIMITING=false`, since every test signs in from one address; `backend/tests/test_rate_limits.py` covers the limits.
 - **Isolation:** each run creates its own database (`pulseafrica_e2e_<random>`), runs `alembic upgrade head` and `python -m app.seed`, registers an admin, starts the API on `localhost:8000` and serves the pages on `127.0.0.1:5500`, then drops the database. Ports 8000 and 5500 must be free. No other database is touched.
 - **Data:** journeys that change data use their own freshly registered users and polls, so the order of tests doesn't matter. Seeded polls are looked up by title.
 - **Waiting:** only Playwright's auto-waiting assertions and `networkidle`; no fixed sleeps. Every journey fails on a JavaScript page error.

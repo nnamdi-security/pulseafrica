@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", extra="ignore")
 
     app_name: str = "PulseAfrica API"
+    # "production" turns off the API docs, adds HSTS and requires https CORS origins.
+    environment: Literal["development", "production"] = "development"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     database_url: str = "postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica"
 
     jwt_secret_key: str  # required: there is deliberately no default
@@ -26,6 +29,12 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60
 
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5500", "http://127.0.0.1:5500"]
+
+    # Limits on login, register and password checks (decision 0009). Off only for the browser
+    # suite, which signs many users in from one address.
+    rate_limiting: bool = True
+    # Addresses of reverse proxies whose X-Forwarded-For header gives the client's address.
+    trusted_proxies: Annotated[list[str], NoDecode] = []
 
     @model_validator(mode="before")
     @classmethod
@@ -44,12 +53,20 @@ class Settings(BaseSettings):
             )
         return value
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "trusted_proxies", mode="before")
     @classmethod
-    def split_origins(cls, value: str | list[str]) -> list[str]:
+    def split_list(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @model_validator(mode="after")
+    def production_origins(self) -> "Settings":
+        if self.environment == "production":
+            insecure = [origin for origin in self.cors_origins if not origin.startswith("https://")]
+            if insecure:
+                raise ValueError(f"In production, CORS_ORIGINS must all use https. Not allowed: {', '.join(insecure)}")
+        return self
 
 
 @lru_cache

@@ -103,7 +103,9 @@ def stack(tmp_path_factory):
     database_url = "postgresql+psycopg://" + server.split("://", 1)[1].rsplit("/", 1)[0] + "/" + name
 
     logs = tmp_path_factory.mktemp("logs")
-    env = {**os.environ, "DATABASE_URL": database_url, "JWT_SECRET_KEY": secrets.token_urlsafe(48)}
+    # Rate limits off: every test signs users in from this one address (decision 0009).
+    env = {**os.environ, "DATABASE_URL": database_url, "JWT_SECRET_KEY": secrets.token_urlsafe(48),
+           "RATE_LIMITING": "false"}
     processes: list[subprocess.Popen] = []
     try:
         for step in (["alembic", "upgrade", "head"], ["app.seed"]):
