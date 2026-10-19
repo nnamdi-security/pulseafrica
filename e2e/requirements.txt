@@ -1,0 +1,6 @@
+# Browser tests (decision 0005). The suite starts the real API, so it needs the backend's packages too.
+-r ../backend/requirements.txt
+
+playwright==1.56.0
+pytest-playwright==0.7.1
+axe-playwright-python==0.1.8
