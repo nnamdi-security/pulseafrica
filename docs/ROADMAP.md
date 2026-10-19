@@ -29,9 +29,10 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance:** every document is consistent with the code at `7119fa7`; the test baseline was recorded from real runs (43/43 on SQLite and on Postgres).
 - **Completion condition:** this PR is reviewed and merged.
 
-## M1: Critical stabilisation (IN PROGRESS)
+## M1: Critical stabilisation (COMPLETED, pending merge of PR #6)
 
-- **Progress:** Batch A is done on its branch (DOC-01, SEC-01, SEC-02, SEC-06, INT-01 part 1, and the Postgres concurrency test). Showing past-date polls as closed (INT-01 part 2) waits on decision INT-01a; Batch B (PRIV-01) on D4 and D4a; Batch C (METH-01, PRIV-02, FE-01) on D1–D3.
+- **Progress:** Batch A merged in PR #5 (DOC-01, SEC-01, SEC-02, SEC-06, INT-01 part 1, and the Postgres concurrency test). Batches B and C are in PR #6: PRIV-01 (*k* = 10), INT-01 part 2 (effective status), METH-01, PRIV-02 and FE-01, following owner decisions D1–D4, D4a and INT-01a ([decision records 0001–0004](decisions/README.md)). Every M1 finding is marked fixed in AUDIT.md with its commit.
+- **Left for later milestones:** the live-results timing leak (needs a decision on delayed or batched results); the "Anonymous Data" badge and ticker placeholder on every page (copy decision); METH-02's methodology claims (M4); hiding demo polls by environment (M9).
 
 - **Objective:** remove the defects that make the current application unsafe or misleading.
 - **Dependencies:** M0. Product decisions D1–D3 (below) for the copy-related items.
@@ -41,7 +42,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
   |---|---|
   | Fail closed on a missing or weak `JWT_SECRET_KEY`; resolve `.env` from `backend/` | SEC-01 |
   | Password byte-length validation (≤ 72); safe `verify_password` | SEC-02 |
-  | Reject responses once `closes_at` has passed | INT-01 |
+  | Reject responses once `closes_at` has passed, and report such polls as closed | INT-01 (decision INT-01a) |
   | Server-side minimum group size for public breakdowns and the trend | PRIV-01 (decision D4: *k*) |
   | Last-admin guard on `DELETE /auth/me` | SEC-06 |
   | Synthetic-data flag plus a visible disclosure | METH-01 (decision D3) |
@@ -168,10 +169,10 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 
 | ID | Decision | Blocks |
 |---|---|---|
-| D1 | Privacy model: correct the copy (recommended now) *or* separate participation from answers ([PRIV-02](AUDIT.md#priv-02)) | M1 |
-| D2 | Methodology: relabel claims as planned, *or* implement weighting and margins of error ([METH-02](AUDIT.md#meth-02)) | M1 copy, M4 |
-| D3 | Synthetic data: disclosure wording; whether any deployment shows demo data ([METH-01](AUDIT.md#meth-01)) | M1, M9 |
-| D4 | Minimum public group size *k* (5 or 10) ([PRIV-01](AUDIT.md#priv-01)) | M1 |
+| D1 | ~~Privacy model~~ **Decided 2026-10-19:** correct the copy ([0003](decisions/0003-privacy-and-methodology-copy.md)) | M1 |
+| D2 | Methodology: ~~relabel claims as planned~~ **decided 2026-10-19 for the M1 copy** ([0003](decisions/0003-privacy-and-methodology-copy.md)); implementing weighting and margins of error still open ([METH-02](AUDIT.md#meth-02)) | M4 |
+| D3 | Synthetic data: ~~disclosure wording~~ **decided 2026-10-19** ([0004](decisions/0004-demonstration-data-disclosure.md)); whether any deployment shows demo data still open ([METH-01](AUDIT.md#meth-01)) | M9 |
+| D4 | ~~Minimum public group size~~ **Decided 2026-10-19:** *k* = 10, and overall percentages hidden below it (D4a) ([0001](decisions/0001-minimum-public-group-size.md)) | M1 |
 | D5 | Frontend: Option A (Next.js, recommended), Option B (modernise in place), or defer ([FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md)) | M5–M8 |
 | D6 | Icons if migrating: `@tabler/icons-react` (recommended for parity) or Lucide | M5 |
 | D7 | Contrast fix FE-03 (a visible design change: darker gold for small text) | M1 or M6 |
