@@ -23,7 +23,7 @@ PulseAfrica **is** an opinion-research platform. It is **not**:
 - **Results are reported as samples** of respondents, never as votes or mandates.
 - **Methodology limits are disclosed.**
 - **Respondent privacy is protected.**
-- **Synthetic demonstration data is never presented as genuine research** (currently violated: [METH-01](AUDIT.md#meth-01)).
+- **Synthetic demonstration data is never presented as genuine research** (seeded polls are flagged and labelled "Demonstration data" since M1: [METH-01](AUDIT.md#meth-01), [decision 0004](decisions/0004-demonstration-data-disclosure.md)).
 
 ## Target users
 
@@ -76,8 +76,6 @@ Owner approval is required for each; see [ROADMAP.md](ROADMAP.md).
 
 | Decision | Options |
 |---|---|
-| **Privacy model** ([PRIV-02](AUDIT.md#priv-02)) | Correct the copy, *or* separate participation from answers |
-| **Methodology copy** ([METH-02](AUDIT.md#meth-02)) | Rewrite as "planned", *or* implement weighting and margins of error |
-| **Synthetic-data disclosure** ([METH-01](AUDIT.md#meth-01)) | Banner wording, and whether the demo deployment is the only deployment |
-| **Minimum public group size** ([PRIV-01](AUDIT.md#priv-01)) | *k* = 5 or *k* = 10 |
+| **Methodology** ([METH-02](AUDIT.md#meth-02)) | Rewrite the remaining claims as "planned", *or* implement weighting and margins of error (the M1 copy is decided: [0003](decisions/0003-privacy-and-methodology-copy.md)) |
+| **Synthetic data by environment** ([METH-01](AUDIT.md#meth-01)) | Whether the demo deployment is the only deployment (disclosure decided: [0004](decisions/0004-demonstration-data-disclosure.md)) |
 | **Frontend migration to Next.js** | See [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md) |
