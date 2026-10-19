@@ -15,9 +15,10 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 - **`login.html`**: sign in and create account
 - **`polls.html`**: the poll directory, with live counts, filters, sorting and search
 - **`poll.html`**: taking a poll (`poll.html?id=1`), from sign-in through to the thank-you screen
+- **`results.html`**: the results dashboard (`results.html?id=1`), with overview, demographic, state and trend tabs
 - **The nav** on every page shows the signed-in user's name and a Sign out button
 
-`results.html`, the home page and the ticker still show static placeholder numbers hard-coded into the HTML.
+The home page and the ticker still show static placeholder numbers hard-coded into the HTML.
 
 ---
 
@@ -110,7 +111,7 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 
 The API is Python + FastAPI + PostgreSQL. Setup steps, the database schema, and every endpoint are documented in **[`backend/README.md`](backend/README.md)**. In short: `docker compose up -d`, install `requirements.txt`, `alembic upgrade head`, then `uvicorn app.main:app --reload`. Interactive API docs are then at `http://localhost:8000/docs`.
 
-For a populated demo, run `python -m app.seed` once after migrating. It adds the 10 polls from the original static page and 300 demo voters' responses.
+For a populated demo, run `python -m app.seed` once after migrating. It adds the 10 polls from the original static page and 300 demo voters' responses, spread over each poll's open period so the trend charts have data.
 
 The connected pages need the backend running. Open the page through Live Server (`http://localhost:5500` or `http://127.0.0.1:5500`); opening the HTML file directly (`file://`) is blocked by the API's CORS settings.
 
@@ -151,7 +152,8 @@ The connected pages need the backend running. Open the page through Live Server 
 **Phase 3 — Integration**
 - [x] Wire login / register to the auth API (`api.js`)
 - [x] Wire polls directory and single poll pages to the API
-- [ ] Wire the results dashboard (`results.html?id=…`) to the API
+- [x] Wire the results dashboard (`results.html?id=…`) to the API
+- [ ] Wire the home page and ticker to the API
 - [x] Sign-in state in the nav (user's name, sign out) via `nav-auth.js`
 - [ ] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates

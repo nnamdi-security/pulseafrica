@@ -5,7 +5,9 @@
 
 Demo voters get emails like voter1@demo.pulseafrica.example and an unusable
 password, so nobody can sign in as them. Their answers are drawn at random,
-weighted towards the percentages the static cards used to display.
+weighted towards the percentages the static cards used to display, and spread
+over the time each poll has been open with a gentle drift in opinion, so the
+results page's trend charts have something to show.
 """
 
 import argparse
@@ -136,6 +138,16 @@ POLLS = [
 ]
 
 
+def drifted(weights: list[float], drift: float, t: float) -> list[float]:
+    """Shift weight towards the positive (first-half) options as t goes from 0 to 1
+    when drift > 0, or towards the negative (last-half) options when drift < 0."""
+    n = len(weights)
+    half = n // 2
+    tone = [1 if i < half else -1 if i >= n - half else 0 for i in range(n)]
+    shift = drift * (2 * t - 1)  # -drift at the start, +drift at the end
+    return [w * max(0.05, 1 + shift * k) for w, k in zip(weights, tone)]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--responses", type=int, default=300, help="number of demo voters (default 300)")
@@ -174,6 +186,14 @@ def main() -> None:
             polls.append((poll, questions))
         db.flush()
 
+        # Each poll's responses arrive between its creation and now (or its closing
+        # date), with opinion drifting by up to ±30% over that time
+        windows = []
+        for poll, _ in polls:
+            end = min(now, poll.closes_at)
+            drift = rng.uniform(-0.3, 0.3)
+            windows.append((poll.created_at, (end - poll.created_at).total_seconds(), drift))
+
         unusable = hash_password(secrets.token_urlsafe(32))
         for i in range(1, args.responses + 1):
             voter = User(
@@ -186,12 +206,13 @@ def main() -> None:
             )
             db.add(voter)
             db.flush()
-            for (poll, questions), turnout in zip(polls, TURNOUT):
+            for (poll, questions), turnout, (start, span, drift) in zip(polls, TURNOUT, windows):
                 if rng.random() > turnout:
                     continue
+                t = rng.random()
                 answers = []
                 for question, (_, options) in zip(poll.questions, questions):
-                    weights = [w for _, _, w in options]
+                    weights = drifted([w for _, _, w in options], drift, t)
                     option = rng.choices(question.options, weights=weights)[0]
                     answers.append(Answer(question_id=question.id, option_id=option.id))
                 db.add(Response(
@@ -202,6 +223,7 @@ def main() -> None:
                     state=voter.state,
                     education=rng.choice(EDUCATION_LEVELS),
                     occupation=rng.choice(OCCUPATIONS),
+                    created_at=start + timedelta(seconds=span * t),
                     answers=answers,
                 ))
         db.commit()

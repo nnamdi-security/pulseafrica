@@ -16,6 +16,14 @@ class GroupResult(CamelModel):
     options: list[OptionResult]
 
 
+class TrendPoint(CamelModel):
+    """Option counts for the responses received on one day (UTC)."""
+
+    date: str  # YYYY-MM-DD
+    total: int
+    options: list[OptionResult]
+
+
 class QuestionResult(CamelModel):
     question_id: int
     text: str
@@ -24,6 +32,10 @@ class QuestionResult(CamelModel):
     by_state: list[GroupResult]
     by_age_range: list[GroupResult]
     by_gender: list[GroupResult]
+    # Only respondents who chose to answer these optional questions
+    by_education: list[GroupResult]
+    by_occupation: list[GroupResult]
+    trend: list[TrendPoint]
 
 
 class PollResults(CamelModel):

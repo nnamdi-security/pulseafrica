@@ -56,7 +56,7 @@ python -m app.seed                  # 10 polls + 300 demo voters' responses
 python -m app.seed --responses 0    # polls only
 ```
 
-This creates the polls that the original static `polls.html` showed. Each demo voter's answers are random, weighted towards the percentages the static cards displayed, so the pages have realistic numbers. Demo voters are inactive accounts with unusable passwords, so nobody can sign in as them. The seed runs only on a database with no polls.
+This creates the polls that the original static `polls.html` showed. Each demo voter's answers are random, weighted towards the percentages the static cards displayed, so the pages have realistic numbers. Responses are spread over the time each poll has been open, and opinion drifts a little over that time, so the results trend charts aren't flat. Demo voters are inactive accounts with unusable passwords, so nobody can sign in as them. The seed runs only on a database with no polls.
 
 To start again from scratch: `alembic downgrade base && alembic upgrade head && python -m app.seed`.
 
@@ -148,7 +148,7 @@ JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript fronten
 | GET | `/api/polls/{id}` | — | One poll with its questions and options, plus `hasResponded` (`true` / `false` when signed in, `null` when not) |
 | POST | `/api/polls` | Admin | Create a poll with questions and options |
 | POST | `/api/responses` | User | Submit answers to an active poll (once per user) |
-| GET | `/api/results/{pollId}` | — | Counts and percentages, overall and by state / age range / gender |
+| GET | `/api/results/{pollId}` | — | Counts and percentages per question: overall, by state / age range / gender / education / occupation, and per day (`trend`) |
 
 Drafts are hidden from everyone except admins. A poll's `category` must be one of `presidency`, `governors`, `economy`, `security`, `education`, `healthcare` or `governance` (the filter buttons on `polls.html`).
 
@@ -217,11 +217,16 @@ Drafts are hidden from everyone except admins. A poll's `category` must be one o
       ],
       "byState": [{ "group": "ENUGU STATE", "total": 2, "options": [ ... ] }],
       "byAgeRange": [ ... ],
-      "byGender": [ ... ]
+      "byGender": [ ... ],
+      "byEducation": [ ... ],
+      "byOccupation": [ ... ],
+      "trend": [{ "date": "2026-10-18", "total": 4, "options": [ ... ] }]
     }
   ]
 }
 ```
+
+`byEducation` and `byOccupation` only count respondents who answered those optional questions. `trend` has one entry per day (UTC) with responses, oldest first.
 
 These numbers are **raw, unweighted counts**. Weighting by age, gender and state population, as `methodology.html` describes, is a later step.
 
@@ -254,6 +259,8 @@ Every page also loads [`../nav-auth.js`](../nav-auth.js) after `api.js`. It repl
 `login.html` is wired up: sign in, create account (which signs the new user straight in), duplicate-email and wrong-password errors, and a "server unreachable" message. The password reset form is still simulated because there's no reset endpoint yet. `login.html?next=poll.html%3Fid%3D3` returns the user to that page after signing in; only page names on this site are accepted.
 
 `polls.html` loads every poll once with `GET /api/polls`, then filters, sorts and paginates in the browser. `poll.html?id=…` builds one screen per question from `GET /api/polls/{id}`, pre-fills age range and state from the account, and submits to `POST /api/responses`. People who aren't signed in, who have already responded, or who open a closed poll see a message instead of the questions.
+
+`results.html?id=…` combines `GET /api/polls/{id}` and `GET /api/results/{id}`; with no id it shows the poll with the most responses. Each question's options are split into positive, neutral and negative groups by position (first half, middle option, last half), which drives the headline figures and every "share" bar. Groups with fewer than 5 responses are faded and left out of the state rankings. Charts are drawn only when their tab is visible, and if Chart.js can't load from its CDN the chart boxes say so instead of staying blank.
 
 ---
 

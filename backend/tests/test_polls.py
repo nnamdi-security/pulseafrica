@@ -170,3 +170,18 @@ def test_optional_demographics(client, admin_headers, citizen_headers):
     poll = create_poll(client, admin_headers)
     assert submit(client, citizen_headers, poll, education="Postgraduate", occupation="Nurse").status_code == 422
     assert submit(client, citizen_headers, poll, education="Bachelor's degree", occupation="Student").status_code == 201
+
+
+def test_results_optional_demographics_and_trend(client, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    submit(client, citizen_headers, poll, choice=0, education="Postgraduate", occupation="Student")
+    submit(client, admin_headers, poll, choice=1)  # no education / occupation
+
+    economy = client.get(f"/api/results/{poll['id']}").json()["questions"][0]
+    assert [(g["group"], g["total"]) for g in economy["byEducation"]] == [("Postgraduate", 1)]
+    assert [(g["group"], g["total"]) for g in economy["byOccupation"]] == [("Student", 1)]
+
+    [today] = economy["trend"]
+    assert len(today["date"]) == 10 and today["date"][4] == "-"
+    assert today["total"] == 2
+    assert [o["count"] for o in today["options"]] == [1, 1, 0]

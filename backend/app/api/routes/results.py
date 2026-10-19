@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload
 
 from app.api.deps import DbSession
 from app.models import Answer, Poll, PollStatus, Question, Response
-from app.schemas.results import GroupResult, OptionResult, PollResults, QuestionResult
+from app.schemas.results import GroupResult, OptionResult, PollResults, QuestionResult, TrendPoint
 
 router = APIRouter(prefix="/results", tags=["results"])
 
@@ -57,12 +57,22 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
             .group_by(Answer.question_id, column, Answer.option_id)
         )
         for question_id, group, option_id, count in rows:
-            by_group[question_id][group][option_id] = count
+            if group is not None:  # optional demographics left blank
+                by_group[question_id][str(group)][option_id] = count
         return by_group
 
     by_state = breakdown(Response.state)
     by_age_range = breakdown(Response.age_range)
     by_gender = breakdown(Response.gender)
+    by_education = breakdown(Response.education)
+    by_occupation = breakdown(Response.occupation)
+    # Day of each response in UTC. func.date() gives a date on Postgres and a
+    # "YYYY-MM-DD" string on SQLite (which stores UTC); breakdown() turns both into
+    # the string. Postgres would otherwise use the session's time zone.
+    created = Response.created_at
+    if db.get_bind().dialect.name == "postgresql":
+        created = func.timezone("UTC", created)
+    by_day = breakdown(func.date(created))
 
     def groups(by_group: dict, question: Question) -> list[GroupResult]:
         return [
@@ -79,6 +89,12 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
             by_state=groups(by_state, question),
             by_age_range=groups(by_age_range, question),
             by_gender=groups(by_gender, question),
+            by_education=groups(by_education, question),
+            by_occupation=groups(by_occupation, question),
+            trend=[
+                TrendPoint(date=g.group, total=g.total, options=g.options)
+                for g in groups(by_day, question)  # sorted by group, i.e. by date
+            ],
         )
         for question in poll.questions
     ]

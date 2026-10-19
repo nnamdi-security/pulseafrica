@@ -2886,6 +2886,61 @@ footer {
   border: 1px solid rgba(200, 151, 58, 0.3);
 }
 
+.results-badge-closed {
+  background: rgba(107, 114, 128, 0.2);
+  color: #c4c8cf;
+  border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+/* Poll + question pickers (results.html script) */
+.results-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: -8px 0 28px;
+}
+
+.results-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 0 1 360px;
+}
+
+.results-picker[hidden] {
+  display: none;
+}
+
+.results-picker label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 232, 0.55);
+}
+
+.results-picker select {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #F5F0E8;
+  background: rgba(245, 240, 232, 0.06);
+  border: 1px solid rgba(245, 240, 232, 0.18);
+  border-radius: 5px;
+  padding: 9px 12px;
+  text-overflow: ellipsis;
+}
+
+.results-picker select:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: 1px;
+}
+
+.results-picker select option {
+  color: #0A1628;
+}
+
 /* Headline stat strip */
 .results-stat-strip {
   display: flex;
@@ -3302,6 +3357,125 @@ footer {
   font-size: 12px;
   color: #6B7280;
   line-height: 1.7;
+}
+
+.results-meth-note a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.results-panel[hidden],
+.results-tabs[hidden],
+.results-notice[hidden],
+.results-stat[hidden],
+.results-stat-divider[hidden] {
+  display: none;
+}
+
+/* Let grid columns shrink below their content so long labels truncate */
+.results-row-2col > * {
+  min-width: 0;
+}
+
+/* Long labels (question text) sit above their bar */
+.results-hbar-row.is-stacked {
+  flex-wrap: wrap;
+  row-gap: 5px;
+}
+
+.results-hbar-row.is-stacked .results-hbar-label {
+  width: 100%;
+}
+
+.results-hbar-row.is-current .results-hbar-label {
+  color: #0A1628;
+  font-weight: 600;
+}
+
+.results-hbar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Groups with too few responses to read much into */
+.results-hbar-row.is-low-sample,
+.state-heat-cell.is-low-sample {
+  opacity: 0.45;
+}
+
+.results-empty {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* Loading / error / not found / no responses */
+.results-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.results-notice > i {
+  font-size: 22px;
+  color: #C8973A;
+  margin-top: 1px;
+}
+
+.results-notice.is-warn > i {
+  color: #A32D2D;
+}
+
+.results-notice .ti-loader-2 {
+  animation: ty-spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .results-notice .ti-loader-2 {
+    animation: none;
+  }
+}
+
+.results-notice-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #0A1628;
+  margin-bottom: 4px;
+}
+
+.results-notice-text {
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.results-notice-text a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.results-notice-text .polls-retry {
+  margin-left: 6px;
+}
+
+/* Chart.js failed to load (it comes from a CDN) */
+.results-chart-wrap[data-chart-missing]::after {
+  content: attr(data-chart-missing);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6B7280;
+  background: #f9f7f4;
+  border-radius: 6px;
 }
 
 /* ============================================================
