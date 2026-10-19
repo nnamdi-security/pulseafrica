@@ -16,9 +16,11 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 - **`polls.html`**: the poll directory, with live counts, filters, sorting and search
 - **`poll.html`**: taking a poll (`poll.html?id=1`), from sign-in through to the thank-you screen
 - **`results.html`**: the results dashboard (`results.html?id=1`), with overview, demographic, state and trend tabs
+- **`index.html`**: the home page's featured result, platform stats, featured polls and results by category
+- **The ticker** on every page shows live headline results and platform figures. Until they load, or if the API is down, it shows a neutral line about the platform instead of numbers.
 - **The nav** on every page shows the signed-in user's name and a Sign out button
 
-The home page and the ticker still show static placeholder numbers hard-coded into the HTML.
+No page shows hard-coded poll numbers any more.
 
 ---
 
@@ -55,6 +57,7 @@ pulseafrica/
 ├── style.css           Single shared stylesheet for all pages
 ├── api.js              Shared API client: fetch helper, token storage, auth calls
 ├── nav-auth.js         Shows the signed-in user's name + Sign out in the nav
+├── ticker.js           Fills the ticker on every page from the API
 └── backend/            FastAPI + PostgreSQL API (see backend/README.md)
 ```
 
@@ -153,7 +156,7 @@ The connected pages need the backend running. Open the page through Live Server 
 - [x] Wire login / register to the auth API (`api.js`)
 - [x] Wire polls directory and single poll pages to the API
 - [x] Wire the results dashboard (`results.html?id=…`) to the API
-- [ ] Wire the home page and ticker to the API
+- [x] Wire the home page and ticker to the API
 - [x] Sign-in state in the nav (user's name, sign out) via `nav-auth.js`
 - [ ] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates

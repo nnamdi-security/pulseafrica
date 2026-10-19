@@ -174,6 +174,12 @@
     // → counts and percentages, overall and by state / age range / gender
     getResults: function (pollId) {
       return request('GET', '/results/' + encodeURIComponent(pollId));
+    },
+
+    // → { activePolls, closedPolls, totalResponses, registeredUsers,
+    //     statesCovered, responsesLast7Days, trendingPollId }
+    getStats: function () {
+      return request('GET', '/stats');
     }
   };
 })();

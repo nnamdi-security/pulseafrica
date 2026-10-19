@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, polls, responses, results
+from app.api.routes import auth, polls, responses, results, stats
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for router in (auth.router, polls.router, responses.router, results.router):
+for router in (auth.router, polls.router, responses.router, results.router, stats.router):
     app.include_router(router, prefix="/api")
 
 

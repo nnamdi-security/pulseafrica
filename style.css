@@ -69,6 +69,17 @@ img {
   to   { transform: translateX(-50%); }
 }
 
+/* No scrolling for people who ask for less motion: the strip can be scrolled by hand */
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    overflow-x: auto;
+  }
+
+  .ticker-inner {
+    animation: none;
+  }
+}
+
 .tick-item {
   display: inline-flex;
   align-items: center;
@@ -464,8 +475,11 @@ img {
   font-family: 'Space Mono', monospace;
   font-size: 10px;
   color: rgba(245, 240, 232, 0.5);
-  width: 76px;
+  width: 116px;
   flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mini-bar-track {
@@ -675,6 +689,25 @@ img {
   background: #C8973A;
 }
 
+/* Loading / empty / error message in the featured polls grid (index.html) */
+.home-state {
+  grid-column: 1 / -1;
+  padding: 40px 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #6B7280;
+  background: #fff;
+  border: 0.5px dashed rgba(10, 22, 40, 0.18);
+  border-radius: 8px;
+}
+
+.home-state a,
+.ring-meta-sub a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .poll-cta {
   font-size: 13px;
   color: #0A1628;
@@ -863,6 +896,12 @@ img {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Category rows on the home page link to their poll's results */
+a.sector-row:hover .sector-name,
+a.sector-row:focus-visible .sector-name {
+  color: #F5F0E8;
 }
 
 .sector-name {
