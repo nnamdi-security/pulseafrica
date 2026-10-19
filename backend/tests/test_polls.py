@@ -302,3 +302,15 @@ def test_reopening_a_past_due_poll_needs_a_new_closing_date(client, db, admin_he
     res = client.patch(f"/api/polls/{poll['id']}", json={"status": "active", "closesAt": later}, headers=admin_headers)
     assert res.status_code == 200
     assert res.json()["status"] == "active"
+
+
+def test_search_treats_wildcards_literally(client, admin_headers):
+    """BE-01: `%` and `_` in a search term match only themselves."""
+    create_poll(client, admin_headers, title="Fuel price up 50%")
+    create_poll(client, admin_headers, title="Road_works budget")
+    create_poll(client, admin_headers, title="Water supply")
+    titles = lambda q: sorted(p["title"] for p in client.get("/api/polls", params={"search": q}).json())
+    assert titles("%") == ["Fuel price up 50%"]
+    assert titles("_") == ["Road_works budget"]
+    assert titles("\\") == []
+    assert titles("a") == ["Road_works budget", "Water supply"]

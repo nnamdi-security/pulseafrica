@@ -122,6 +122,15 @@ def test_list_users_with_filters(client, admin_headers, citizen_headers):
     assert client.get("/api/admin/users?limit=2&offset=2", headers=admin_headers).json()["total"] == 3
 
 
+def test_user_search_treats_wildcards_literally(client, admin_headers):
+    """BE-01: probe P5's `%` matched every user."""
+    register_and_login(client, email="ada_obi@example.com", fullName="Ada Obi")
+    register_and_login(client, email="adaxobi@example.com", fullName="Ada X Obi")
+    search = lambda q: [u["email"] for u in client.get("/api/admin/users", params={"search": q}, headers=admin_headers).json()["items"]]
+    assert search("%") == []
+    assert search("ada_obi") == ["ada_obi@example.com"]
+
+
 def test_suspend_and_reactivate(client, admin_headers, citizen_headers):
     users = client.get("/api/admin/users", headers=admin_headers).json()["items"]
     citizen = next(u for u in users if u["role"] == "citizen")

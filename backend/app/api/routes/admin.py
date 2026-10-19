@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 
 from app.api.deps import AdminUser, DbSession
-from app.api.rules import effective_status, ensure_another_active_admin
+from app.api.rules import contains, effective_status, ensure_another_active_admin
 from app.models import Poll, PollStatus, Response, User, UserRole
 from app.schemas.admin import (
     AdminOverview,
@@ -99,8 +99,8 @@ def list_users(
     """Users matching the filters, newest first, with how many polls each has answered."""
     conditions = []
     if search:
-        pattern = f"%{search.strip()}%"
-        conditions.append(or_(User.full_name.ilike(pattern), User.email.ilike(pattern)))
+        term = search.strip()
+        conditions.append(or_(contains(User.full_name, term), contains(User.email, term)))
     if role:
         conditions.append(User.role == role)
     if status_filter:
