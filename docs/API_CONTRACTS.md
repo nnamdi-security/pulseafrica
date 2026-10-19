@@ -73,13 +73,13 @@ Clients should show `detail` strings: they're written to be user-safe.
 - **Questions:** can only be replaced while a poll has **zero responses**. Replacing them creates new question and option ids.
 - **Back to draft:** a poll with responses can't return to `draft`.
 - **Opening:** setting `active` (on create or update), or changing `closesAt` on an active poll, requires `closesAt` to be in the future or `null`.
-- **Not enforced:** responses after `closesAt` on an `active` poll are still accepted ([INT-01](AUDIT.md#int-01)).
+- **Closing date:** `POST /responses` refuses an `active` poll whose `closesAt` has passed with 409 `"This poll is closed"`. The poll's `status` field is **not** derived from the date yet, so it can still read `active` ([INT-01](AUDIT.md#int-01), decision INT-01a).
 
 ### Responses
 
 | Method | Path | Auth | Request | Success | Errors |
 |---|---|---|---|---|---|
-| POST | `/responses` | user | `{pollId, ageRange, gender, state, education?, occupation?, answers: [{questionId, optionId}]}` | 201 `{id, pollId, createdAt}` | 404 unknown or draft poll · 409 `"This poll is closed"` · 409 `"You have already responded to this poll"` · 422 every question must be answered exactly once, with an option that belongs to it |
+| POST | `/responses` | user | `{pollId, ageRange, gender, state, education?, occupation?, answers: [{questionId, optionId}]}` | 201 `{id, pollId, createdAt}` | 404 unknown or draft poll · 409 `"This poll is closed"` (status `closed`, or `closesAt` has passed) · 409 `"You have already responded to this poll"` · 422 every question must be answered exactly once, with an option that belongs to it |
 
 Demographics are **self-reported for each response**. They can differ from the profile, which only pre-fills them in `poll.html`.
 

@@ -21,7 +21,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Fixed (M1) |
 | [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Fixed (M1) |
 | [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Confirmed (inspection) |
-| [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Reproduced |
+| [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Partly fixed (M1): responses refused; effective status awaits INT-01a |
 | [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Reproduced |
 | [PRIV-02](#priv-02) | HIGH | Privacy / honesty | Pages promise answers are "never linked to your identity", but the schema links them | Confirmed (inspection) |
 | [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Confirmed (inspection) |
@@ -122,6 +122,8 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** results keep changing after the published close, which undermines "final results" and the "Closed" labels.
 - **Recommended fix:** reject responses when `closes_at <= now` (409, "This poll has closed"). Either derive an *effective status* in the API, or close polls with a scheduled job. Add tests.
 - **Verification status:** Reproduced.
+- **Resolution (M1, part 1):** `POST /api/responses` now answers 409 "This poll is closed" once `closes_at` has passed, and the results don't change (tests in `test_polls.py`, run on SQLite and Postgres). The date check is shared with `_check_can_open` through `closing_date_passed` in `app/api/rules.py`.
+- **Still open (part 2):** lists, detail, stats, the admin overview and `/auth/me/responses` still report such a poll as `active`. Deriving an effective status waits on owner decision INT-01a.
 
 <a id="priv-01"></a>
 ### PRIV-01: Public results expose groups of one (HIGH)

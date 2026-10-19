@@ -82,7 +82,7 @@ Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them
 
 - **HIGH:**
   - SEC-03 (no rate limiting);
-  - INT-01 (responses accepted after the closing date);
+  - INT-01 part 2 (a poll past its closing date still *shows* as active; responses are refused; waits on decision INT-01a);
   - PRIV-01 (groups of one in public results);
   - PRIV-02 (privacy copy contradicts the schema);
   - METH-01 (synthetic data undisclosed).

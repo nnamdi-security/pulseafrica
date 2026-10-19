@@ -1,5 +1,7 @@
 """Business rules that more than one route enforces."""
 
+from datetime import datetime, timezone
+
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -18,3 +20,11 @@ def ensure_another_active_admin(db: Session, user: User) -> None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="There must always be at least one active admin."
         )
+
+
+def closing_date_passed(closes_at: datetime | None) -> bool:
+    if closes_at is None:
+        return False
+    if closes_at.tzinfo is None:  # SQLite hands back naive UTC datetimes
+        closes_at = closes_at.replace(tzinfo=timezone.utc)
+    return closes_at <= datetime.now(timezone.utc)

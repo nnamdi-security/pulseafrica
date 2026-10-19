@@ -42,7 +42,7 @@ Background and the current gaps: [docs/SECURITY.md](../../docs/SECURITY.md) and 
 
 - **One response per user per poll:** keep the database constraint, and keep mapping `IntegrityError` to 409. Don't bypass it with bulk inserts outside `app/seed.py`.
 - **Complete answers:** every question answered exactly once, with an option belonging to it.
-- **Locked questions:** they can't change once a poll has responses; a poll with responses can't return to draft; responses must not be accepted after closing (INT-01 is the known gap).
+- **Locked questions:** they can't change once a poll has responses; a poll with responses can't return to draft; responses must not be accepted after closing (`closing_date_passed` in `app/api/rules.py`).
 - **Synthetic data:** never present it as genuine. The seed only runs on empty databases. Any demo deployment must disclose it (METH-01).
 - **No unsupported claims:** no statistics or methodology claims (weighting, margins of error, representativeness) that the code doesn't implement (METH-02).
 

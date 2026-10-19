@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta, timezone
+
+from app.models import Poll
+from tests.conftest import register_and_login
+
 POLL_PAYLOAD = {
     "title": "Presidential approval — Q4",
     "description": "How is President Okonkwo doing?",
@@ -185,3 +190,30 @@ def test_results_optional_demographics_and_trend(client, admin_headers, citizen_
     assert len(today["date"]) == 10 and today["date"][4] == "-"
     assert today["total"] == 2
     assert [o["count"] for o in today["options"]] == [1, 1, 0]
+
+
+def _move_closing_date(db, poll, delta):
+    # The API won't set a past closing date on an active poll, so move it directly.
+    row = db.get(Poll, poll["id"])
+    row.closes_at = datetime.now(timezone.utc) + delta
+    db.commit()
+
+
+def test_responses_refused_once_the_closing_date_has_passed(client, db, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    other = register_and_login(client, email="other@example.com")
+    assert submit(client, other, poll).status_code == 201
+    before = client.get(f"/api/results/{poll['id']}").json()
+
+    _move_closing_date(db, poll, timedelta(seconds=-1))
+    res = submit(client, citizen_headers, poll)
+    assert res.status_code == 409
+    assert res.json() == {"detail": "This poll is closed"}
+    assert client.get(f"/api/results/{poll['id']}").json() == before
+
+
+def test_responses_accepted_before_the_closing_date(client, db, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    _move_closing_date(db, poll, timedelta(minutes=1))
+    assert submit(client, citizen_headers, poll).status_code == 201
+    assert client.get(f"/api/results/{poll['id']}").json()["totalResponses"] == 1
