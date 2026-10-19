@@ -16,7 +16,7 @@ There's no need for one for routine features or bug fixes that follow the existi
 ## Process
 
 1. **Copy the template** below into `docs/decisions/NNNN-short-title.md`, using the next free number with four digits.
-2. Set **Status: Proposed** and open a PR. Pending owner decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner) (D1–D11).
+2. Set **Status: Proposed** and open a PR. Pending owner decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner) (D1–D18).
 3. **The project owner approves**, and the status becomes **Accepted** with the date. Implementation PRs link to the record.
 4. **Never edit an accepted record's decision.** To change course, write a new record with **Status: Accepted, supersedes NNNN**, and mark the old one **Superseded by NNNN**.
 
@@ -54,6 +54,10 @@ What becomes easier, what becomes harder, what must now be done.
 | [0006](0006-results-released-in-steps.md) | Results released in steps of 10; breakdowns after close (D10) | Accepted (2026-10-19) |
 | [0007](0007-totals-only-wording.md) | "Totals Only" replaces the "Anonymous" badge and ticker (D9) | Accepted (2026-10-19) |
 | [0008](0008-required-ci-checks.md) | CI checks required for merging (D11) | Accepted (2026-10-19) |
+| [0009](0009-rate-limiting.md) | Rate limiting in the API, counted in Postgres; SEC-09 accepted (D12, D13, D18) | Accepted (2026-10-19) |
+| [0010](0010-token-version-revocation.md) | Sign-out and password changes revoke tokens (D14) | Accepted (2026-10-19) |
+| [0011](0011-cookie-session-and-csrf.md) | Cookie sessions on the API, with a CSRF header; pages keep bearer (D15, D16) | Accepted (2026-10-19) |
+| [0012](0012-asset-integrity.md) | Integrity hashes on CDN files (D17) | Accepted (2026-10-19) |
 
 The remaining pending decisions (D5–D7) are in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 
