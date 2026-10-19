@@ -116,7 +116,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance criteria:** every quantitative claim on a public page is either true or labelled as planned. If weighting is implemented: unit-tested against hand-computed examples, with raw and weighted figures both available.
 - **Risks:** statistical errors presented as authoritative. Mitigation: label the method, keep raw figures visible, and peer-review the maths.
 
-## M5: Frontend foundation (COMPLETED, pending merge)
+## M5: Frontend foundation (COMPLETED)
 
 - **Progress:** approved 2026-10-19 with decisions D5–D7 and D25–D30 ([0016–0019](decisions/README.md)), per the [Milestone 5 plan](https://claude.ai/code/artifact/584a2743-417c-43a7-8726-64872dfdd638), and built in one PR:
   - `frontend/`: Next.js 16 (App Router), React 19, TypeScript strict, pnpm, Tailwind CSS 4 with the design tokens as the whole theme, re-themed shadcn/ui Button, `next/font`, `@tabler/icons-react`;
@@ -124,7 +124,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
   - `lib/api/client.ts`, types generated from `python -m app.export_openapi`, TanStack Query hooks;
   - the legacy-URL redirect scaffold (307) with hash and `next` mapping;
   - 50 Vitest tests, 26 browser checks in the existing suite (decision 0018), the "Frontend" workflow, shell screenshots for review.
-- **Deviation:** the 150 KB JavaScript budget (D27) is below what Next.js and React load on their own (about 172 KB gzipped); the build uses 250 KB, pending the owner's choice (D31).
+- **Deviation:** the 150 KB JavaScript budget (D27) is below what Next.js and React load on their own (about 172 KB gzipped); the owner raised it to 250 KB (D31, [0020](decisions/0020-javascript-budget.md)).
 - **Left for the owner:** the side-by-side screenshot review on the PR, and adding "Frontend" to branch protection once it's green on `main` (D28).
 
 - **Objective:** a Next.js app skeleton that looks like PulseAfrica and talks to FastAPI correctly.
@@ -221,6 +221,6 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D28 | ~~Frontend check required~~ **Decided 2026-10-19:** yes, once green on `main`; the owner sets branch protection ([0018](decisions/0018-frontend-checks.md)) | M5 |
 | D29 | ~~Footer placeholder links~~ **Decided 2026-10-19:** real links only ([0019](decisions/0019-footer-links.md)) | M5 |
 | D30 | ~~Where the new frontend runs~~ **Decided 2026-10-19:** `frontend/`, local and CI only in M5 ([0016](decisions/0016-nextjs-frontend.md)) | M5 |
-| D31 | JavaScript budget, revised: 250 KB (recommended), 200 KB, or report only ([proposed 0020](decisions/0020-javascript-budget.md)) | M5 |
+| D31 | ~~JavaScript budget, revised~~ **Decided 2026-10-19:** 250 KB gzipped per route, enforced ([0020](decisions/0020-javascript-budget.md)) | M5 |
 
 Record each decision in [`docs/decisions/`](decisions/README.md) when it's made.

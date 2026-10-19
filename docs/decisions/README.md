@@ -65,7 +65,7 @@ What becomes easier, what becomes harder, what must now be done.
 | [0017](0017-icons-and-text-contrast.md) | Tabler icons, and readable text in the new frontend (D6, D7) | Accepted (2026-10-19) |
 | [0018](0018-frontend-checks.md) | Checks for the new frontend: the Python browser suite, a 150 KB budget, a required workflow (D26, D27, D28) | Accepted (2026-10-19) |
 | [0019](0019-footer-links.md) | Real links only in the new footer (D29) | Accepted (2026-10-19) |
-| [0020](0020-javascript-budget.md) | A JavaScript budget Next.js can meet: 250 KB (D31) | Proposed |
+| [0020](0020-javascript-budget.md) | A JavaScript budget Next.js can meet: 250 KB (D31) | Accepted |
 
 Pending decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 

@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 // Decision 0018 set 150 KB, below what Next.js and React load on their own (about 172 KB);
-// 250 KB is the proposed replacement (decision 0020, waiting on the owner).
+// decision 0020 raised it to 250 KB.
 const BUDGET_KB = 250;
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const appDir = join(root, '.next', 'server', 'app');
