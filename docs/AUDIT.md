@@ -25,15 +25,15 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Fixed (M1) |
 | [PRIV-02](#priv-02) | HIGH | Privacy / honesty | Pages promise answers are "never linked to your identity", but the schema links them | Fixed (M1) |
 | [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Fixed (M1) |
-| [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Partly fixed (M3: API side) |
+| [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Partly fixed (M3: API side; M5: `frontend/` uses only the cookie) |
 | [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Fixed (M3) |
 | [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
 | [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed for the API (M3) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Fixed (M3; fonts excepted) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Fixed (M4) |
 | [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
-| [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Confirmed (inspection) |
-| [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Reproduced (computed) |
+| [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Fixed in `frontend/` (M5); open on the static pages until cutover |
+| [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Fixed in `frontend/` (M5, D7); open on the static pages until cutover |
 | [TEST-01](#test-01) | MEDIUM | Testing | No frontend or end-to-end tests and no CI | Fixed (M2) |
 | [DEP-01](#dep-01) | MEDIUM | Deployment | No production configuration (server, proxy headers, logging, deploy files) | Confirmed (inspection) |
 | [SEC-09](#sec-09) | LOW | Security | Registration reveals whether an email is already registered | Accepted (M3) |
@@ -275,6 +275,8 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Recommended fix:** in the current stack, introduce CSS custom properties and a shared `ui.js` for helpers. Longer term, migrate to shared components (Milestones 5–8, approval required).
 - **Verification status:** Confirmed (inspection; counts by `grep`).
 
+- **Resolution (M5, partial):** [decision 0016](decisions/0016-nextjs-frontend.md). In `frontend/` the shell exists once (`src/app/layout.tsx`), the tokens are the Tailwind theme, and the fixed lists come from `GET /api/reference`. The static pages keep their copies until they're retired at cutover (Milestone 8).
+
 <a id="fe-03"></a>
 ### FE-03: Contrast failures and very small text (MEDIUM)
 
@@ -288,6 +290,8 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** labels and data captions are hard to read for low-vision users, and fail WCAG AA.
 - **Recommended fix:** add a darker *text* gold (e.g. the existing `#7a4c08`, ≈ 7:1 on white) for small text on light backgrounds, keeping `#C8973A` for marks, accents and dark surfaces. Set a 10–11px minimum for labels. This is a visual change, so it needs design approval.
 - **Verification status:** Reproduced (ratios computed with the WCAG formula; selectors found by `grep`).
+
+- **Resolution (M5, partial):** decision D7 ([0017](decisions/0017-icons-and-text-contrast.md)). `frontend/` uses `gold-ink` for small text on light surfaces, nothing under 10px, and at least `parchment/50` (4.77:1) for faint text on navy; `e2e/test_frontend_shell.py` runs axe's contrast rule on it at 1280px and 390px. The static pages are unchanged and still exclude the rule.
 
 <a id="test-01"></a>
 ### TEST-01: No frontend or end-to-end tests, and no CI (MEDIUM)

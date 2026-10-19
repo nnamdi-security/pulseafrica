@@ -20,9 +20,10 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 | Frontend | Static HTML5 + one CSS file + vanilla JS (no build). Chart.js 4.4.1 (results only), Tabler Icons, Google Fonts via CDN | repo root: 9 `*.html`, `style.css`, `api.js`, `nav-auth.js`, `ticker.js`, `images/` |
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
-| Tests | pytest + FastAPI `TestClient` (143 tests); Python Playwright browser suite (82 tests) | `backend/tests/`, `e2e/` |
+| New frontend (foundation) | Next.js 16 App Router, React 19, TypeScript strict, Tailwind CSS 4 (theme = design tokens), shadcn/ui re-themed, TanStack Query, `@tabler/icons-react`, pnpm, Node 24 | `frontend/` |
+| Tests | pytest + FastAPI `TestClient` (145 tests); Python Playwright browser suite (108 tests, 26 of them on `frontend/`); Vitest (50 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
 
-**A Next.js frontend is PROPOSED, not implemented.** Don't create `frontend/`, add Node tooling, or write React/Next.js code unless the user has approved a migration milestone (M5–M8 in [docs/ROADMAP.md](docs/ROADMAP.md)). Use the `frontend-migration` skill only then.
+**The Next.js migration is approved ([decision 0016](docs/decisions/0016-nextjs-frontend.md)).** Milestone 5 built `frontend/`'s foundation: the shell (ticker, nav, footer), tokens, API client and checks. **No page has moved yet:** the static pages at the repo root are still what users get, and `frontend/` isn't deployed. Moving pages is Milestones 6–8, with the `frontend-migration` skill; until a page moves, fix bugs in the static page.
 
 ## Repository map
 
@@ -39,6 +40,9 @@ backend/app/api/       routes/{auth,polls,responses,results,stats,admin}.py, dep
 backend/app/schemas/   Pydantic contracts (CamelModel → camelCase JSON)
 backend/app/models/    SQLAlchemy models   backend/app/core/  config, security, constants
 backend/app/seed.py    demo data (empty databases only)   backend/app/create_admin.py
+backend/app/export_openapi.py   prints the OpenAPI schema (for frontend/'s generated types)
+frontend/              Next.js app (M5: shell only): src/app, src/components/{ui,layout},
+                       src/lib/api (client, generated schema.d.ts, queries), src/styles/globals.css
 docs/                  product, architecture, audit, API, DB, security, testing, roadmap…
 .claude/rules/         path-scoped rules     .claude/skills/   workflows
 ```
@@ -74,8 +78,13 @@ alembic check                              # models match migrations?
 python -m app.create_admin you@example.com
 # frontend (repo root): VS Code Live Server on :5500, or
 python -m http.server 5500 --bind 127.0.0.1
+# new frontend (frontend/; Node 24, corepack enable)
+pnpm install && pnpm dev                   # :3000, /api proxied to :8000
+pnpm lint && pnpm typecheck && pnpm test   # ESLint, tsc, Vitest
+pnpm build && pnpm budget                  # production build; JavaScript budget per route
+pnpm api:types                             # regenerate src/lib/api/schema.d.ts after a backend schema change
 # browser tests (e2e/; own venv: pip install -r requirements.txt && python -m playwright install chromium)
-E2E_POSTGRES_URL=postgresql://pulseafrica:pulseafrica@localhost:5432/postgres pytest   # creates and drops its own database; needs ports 8000 and 5500 free
+E2E_POSTGRES_URL=postgresql://pulseafrica:pulseafrica@localhost:5432/postgres pytest   # creates and drops its own database; needs ports 8000, 5500 and 3000 free; frontend/ tests run if it's built
 ```
 
 ## Known open issues
@@ -83,7 +92,7 @@ E2E_POSTGRES_URL=postgresql://pulseafrica:pulseafrica@localhost:5432/postgres py
 Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them **only** when a task covers them.
 
 - **HIGH:** none open (SEC-03, rate limiting, fixed in M3).
-- **MEDIUM:** SEC-04 for the current pages (the token stays in Web Storage until a frontend uses the M3 session cookie); SEC-07 for the static pages (their CSP is set by the host, M9).
+- **MEDIUM:** SEC-04 for the current pages (the token stays in Web Storage until the pages move to `frontend/`, which uses only the cookie); SEC-07 for the static pages (their CSP is set by the host, M9); FE-02 and FE-03 on the static pages (fixed in `frontend/`, retired at cutover).
 - METH-02 was fixed in M4. About's team biographies, funding model and 2024–2025 timeline figures are unreviewed copy, left for M9 ([decision 0013](docs/decisions/0013-unweighted-results-and-methodology-copy.md)).
 
 ## Workflow and definition of done

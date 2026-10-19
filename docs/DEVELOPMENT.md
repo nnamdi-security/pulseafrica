@@ -7,7 +7,7 @@ Everything here runs locally. There's no hosted environment yet.
 - **Python 3.11+.** The audit baseline used 3.13.16.
 - **Docker** (for PostgreSQL 16), or a local PostgreSQL 16.
 - **A static file server** for the frontend: VS Code **Live Server** (port 5500), or `python -m http.server`.
-- **No Node.js is needed** for the current frontend.
+- **No Node.js is needed** for the current frontend. The new Next.js frontend in `frontend/` needs **Node 24** and **pnpm** ([frontend/README.md](../frontend/README.md)).
 
 ## Backend setup (from `backend/`)
 
@@ -40,6 +40,17 @@ python -m http.server 5500 --bind 127.0.0.1    # then open http://127.0.0.1:5500
 - **API address:** pages call `http://localhost:8000/api`. To point them elsewhere, set `window.PULSE_API_BASE = 'https://…/api'` in a `<script>` *before* `api.js`.
 - **Load order on every page:** `api.js` → `nav-auth.js` → `ticker.js` → the page's inline script.
 
+## New frontend setup (`frontend/`, Milestone 5 onwards)
+
+```bash
+cd frontend
+corepack enable                      # once: provides the pnpm version pinned in package.json
+pnpm install
+pnpm dev                             # http://localhost:3000; /api/* is proxied to localhost:8000
+```
+
+Only the shared shell (ticker, nav, footer) exists so far; the pages move in Milestones 6–8. Commands and conventions: [frontend/README.md](../frontend/README.md).
+
 ## Everyday commands
 
 | Task | Command (directory) |
@@ -51,6 +62,7 @@ python -m http.server 5500 --bind 127.0.0.1    # then open http://127.0.0.1:5500
 | Check models vs migrations | `alembic check` |
 | Current migration | `alembic current` |
 | Make a user admin | `python -m app.create_admin email@example.com` |
+| Regenerate the frontend's API types after a schema change | `pnpm api:types` (`frontend/`), then commit `src/lib/api/schema.d.ts` |
 | Reset a **local, disposable** database | `alembic downgrade base && alembic upgrade head && python -m app.seed`. **Destroys all data; never on a shared database** |
 
 ## Debugging

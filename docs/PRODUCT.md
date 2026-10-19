@@ -77,4 +77,4 @@ Owner approval is required for each; see [ROADMAP.md](ROADMAP.md).
 | Decision | Options |
 |---|---|
 | **Synthetic data by environment** ([METH-01](AUDIT.md#meth-01)) | Whether the demo deployment is the only deployment (disclosure decided: [0004](decisions/0004-demonstration-data-disclosure.md)) |
-| **Frontend migration to Next.js** | See [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md) |
+| ~~Frontend migration to Next.js~~ | **Decided 2026-10-19:** Option A ([0016](decisions/0016-nextjs-frontend.md)); foundation built in Milestone 5 |

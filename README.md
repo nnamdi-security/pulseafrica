@@ -4,7 +4,7 @@
 
 PulseAfrica lets citizens participate in public opinion polls, rate the performance of public leaders, and view transparent, methodology-backed results — in the spirit of YouGov or Pew Research Center, scoped for a solo full-stack developer to build end to end.
 
-This repository contains the frontend (HTML, CSS, vanilla JS, no framework) and the backend API (Python, FastAPI, PostgreSQL) in [`backend/`](backend/). Every page in the original brief exists and runs on the API. It is a work in progress: see [`docs/ROADMAP.md`](docs/ROADMAP.md) and the open findings in [`docs/AUDIT.md`](docs/AUDIT.md).
+This repository contains the frontend (HTML, CSS, vanilla JS, no framework), the backend API (Python, FastAPI, PostgreSQL) in [`backend/`](backend/), and the foundation of the Next.js frontend that will replace the static pages, in [`frontend/`](frontend/README.md). Every page in the original brief exists and runs on the API. It is a work in progress: see [`docs/ROADMAP.md`](docs/ROADMAP.md) and the open findings in [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ---
 
@@ -36,7 +36,7 @@ No page shows hard-coded poll numbers any more.
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Colours, type, components, accessibility |
 | [`docs/SECURITY.md`](docs/SECURITY.md) · [`docs/AUDIT.md`](docs/AUDIT.md) | Security model; prioritised audit findings |
 | [`docs/TESTING.md`](docs/TESTING.md) · [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Tests and baseline; local setup; deployment plan |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/FRONTEND_MIGRATION.md`](docs/FRONTEND_MIGRATION.md) · [`docs/decisions/`](docs/decisions/README.md) | Milestones and owner decisions; the proposed Next.js migration; decision records |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/FRONTEND_MIGRATION.md`](docs/FRONTEND_MIGRATION.md) · [`docs/decisions/`](docs/decisions/README.md) | Milestones and owner decisions; the Next.js migration (foundation in [`frontend/`](frontend/README.md)); decision records |
 
 ---
 

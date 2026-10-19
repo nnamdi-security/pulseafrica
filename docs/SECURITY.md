@@ -69,7 +69,7 @@ Fixed in Milestone 3: SEC-03 (rate limits), SEC-05 (revocation), SEC-10 (docs of
 
 ## Recommended authentication architecture
 
-This applies if the frontend migration is approved. **The backend half is implemented (Milestone 3):** the cookie, the CSRF header, logout and the token version below all exist; only a frontend that uses them is missing.
+The migration is approved ([decision 0016](decisions/0016-nextjs-frontend.md)). **The backend half is implemented (Milestone 3):** the cookie, the CSRF header, logout and the token version below all exist. **`frontend/` uses them (Milestone 5):** same-origin `/api` through a Next.js rewrite, the cookie only, the CSRF header on writes, and sign-out that clears the cache. The static pages still use bearer tokens until they move.
 
 ### Why not "just move the JWT into a cookie"
 
