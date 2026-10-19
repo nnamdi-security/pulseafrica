@@ -1,4 +1,4 @@
-"""Fixed reference values shared with the frontend forms (login.html, poll.html)."""
+"""Fixed reference values. The pages read them from GET /api/reference (DB-03) rather than keeping copies."""
 
 STATES = [
     "ABA STATE", "ADOKA STATE", "AFEMI IGODOMIGODO STATE", "AHOADA STATE",
@@ -17,8 +17,17 @@ AGE_RANGES = ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"]
 
 GENDERS = ["Male", "Female"]
 
-# Poll categories — the filter buttons on polls.html use these exact keys
-CATEGORIES = ["presidency", "governors", "economy", "security", "education", "healthcare", "governance"]
+# Poll categories, with the names pages show for them. The filter buttons on polls.html use these exact keys.
+CATEGORY_NAMES = {
+    "presidency": "Presidency",
+    "governors": "Governors",
+    "economy": "Economy",
+    "security": "Security",
+    "education": "Education",
+    "healthcare": "Healthcare",
+    "governance": "Governance",
+}
+CATEGORIES = list(CATEGORY_NAMES)
 
 # Optional demographics asked on poll.html
 EDUCATION_LEVELS = [

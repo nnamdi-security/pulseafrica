@@ -157,14 +157,8 @@
             <div class="demo-field">
               <label for="dem-age">Age range</label>
               <div class="demo-select-wrap">
-                <select id="dem-age" required>
+                <select id="dem-age" required data-reference="ageRanges">
                   <option value="">Select…</option>
-                  <option>18–24</option>
-                  <option>25–34</option>
-                  <option>35–44</option>
-                  <option>45–54</option>
-                  <option>55–64</option>
-                  <option>65+</option>
                 </select>
               </div>
             </div>
@@ -172,10 +166,8 @@
             <div class="demo-field">
               <label for="dem-gender">Gender</label>
               <div class="demo-select-wrap">
-                <select id="dem-gender" required>
+                <select id="dem-gender" required data-reference="genders">
                   <option value="">Select…</option>
-                  <option>Male</option>
-                  <option>Female</option>
                 </select>
               </div>
             </div>
@@ -183,48 +175,8 @@
             <div class="demo-field">
               <label for="dem-state">State of residence</label>
               <div class="demo-select-wrap">
-                <select id="dem-state" required>
+                <select id="dem-state" required data-reference="states">
                   <option value="">Select your state…</option>
-                  <option>ABA STATE</option>
-                  <option>ADOKA STATE</option>
-                  <option>AFEMI IGODOMIGODO STATE</option>
-                  <option>AHOADA STATE</option>
-                  <option>AKPAKIP ORO STATE</option>
-                  <option>ALANSO STATE</option>
-                  <option>ALAUDO STATE</option>
-                  <option>ANIOMA STATE</option>
-                  <option>BRANEM STATE</option>
-                  <option>CALABAR STATE</option>
-                  <option>EBONYI STATE</option>
-                  <option>EBUBE STATE</option>
-                  <option>EDDA STATE</option>
-                  <option>ENUGU STATE</option>
-                  <option>EPIE STATE</option>
-                  <option>ESAN IGODOMIGODO STATE</option>
-                  <option>EZEANI STATE</option>
-                  <option>IDEN IGODOMIGODO STATE</option>
-                  <option>IDUNG IBON STATE</option>
-                  <option>IGALA STATE</option>
-                  <option>IGBANI STATE</option>
-                  <option>IKA STATE</option>
-                  <option>IKEMBA STATE</option>
-                  <option>IKOM STATE</option>
-                  <option>IKWUMESIA STATE</option>
-                  <option>ITTAI STATE</option>
-                  <option>IWERE STATE</option>
-                  <option>IWHUNROHA STATE</option>
-                  <option>ODUMEGWU STATE</option>
-                  <option>OGBIA/IZON STATE</option>
-                  <option>OGOJA STATE</option>
-                  <option>OHABUEYI STATE</option>
-                  <option>OHAUKWU STATE</option>
-                  <option>OKIGWE STATE</option>
-                  <option>OMAMBALA STATE</option>
-                  <option>ORLU STATE</option>
-                  <option>OWERRI STATE</option>
-                  <option>QUA STATE</option>
-                  <option>SOUTH ATLANTIC STATE</option>
-                  <option>URHOBO/ISOKO STATE</option>
                 </select>
               </div>
             </div>
@@ -232,14 +184,8 @@
             <div class="demo-field">
               <label for="dem-edu">Education level <span class="demo-optional">(optional)</span></label>
               <div class="demo-select-wrap">
-                <select id="dem-edu">
+                <select id="dem-edu" data-reference="educationLevels">
                   <option value="">Prefer not to say</option>
-                  <option>No formal education</option>
-                  <option>Primary school</option>
-                  <option>Secondary school</option>
-                  <option>Vocational / technical</option>
-                  <option>Bachelor's degree</option>
-                  <option>Postgraduate</option>
                 </select>
               </div>
             </div>
@@ -247,17 +193,8 @@
             <div class="demo-field demo-field-full">
               <label for="dem-occ">Occupation <span class="demo-optional">(optional)</span></label>
               <div class="demo-select-wrap">
-                <select id="dem-occ">
+                <select id="dem-occ" data-reference="occupations">
                   <option value="">Select…</option>
-                  <option>Agriculture / farming</option>
-                  <option>Trade / commerce</option>
-                  <option>Civil service</option>
-                  <option>Private sector employee</option>
-                  <option>Self-employed / entrepreneur</option>
-                  <option>Student</option>
-                  <option>Unemployed</option>
-                  <option>Retired</option>
-                  <option>Prefer not to say</option>
                 </select>
               </div>
             </div>
@@ -401,10 +338,6 @@
     /* ── Poll from the API ──
        poll.html?id=3 loads GET /api/polls/3, builds one screen per question,
        then the demographics step, and submits to POST /api/responses. */
-    const CATEGORY_NAMES = {
-      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
-      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
-    };
     const DAY_MS = 24 * 60 * 60 * 1000;
 
     const pollId = new URLSearchParams(location.search).get('id');
@@ -579,7 +512,7 @@
         (live
           ? '<span class="pph-badge pph-badge-live"><span class="pph-live-dot" aria-hidden="true"></span>Live</span>'
           : '<span class="pph-badge pph-badge-closed">Closed</span>') +
-        '<span class="pph-badge pph-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>';
+        '<span class="pph-badge pph-badge-cat">' + escapeHtml(PulseLive.categoryName(poll.category)) + '</span>';
 
       document.getElementById('infoResponses').textContent = plural(poll.responseCount, 'response') + ' so far';
       document.getElementById('infoMinutes').textContent =
@@ -751,8 +684,9 @@
         return;
       }
       showStatus({ tone: 'info', icon: 'loader-2', heading: 'Loading poll…' });
-      PulseAPI.getPoll(pollId).then(function (data) {
-        poll = data;
+      /* The lists fill the demographic selects before the account's answers are pre-filled */
+      Promise.all([PulseAPI.getPoll(pollId), PulseLive.ready]).then(function (data) {
+        poll = data[0];
         renderInfo();
         if (poll.status !== 'active') return showClosed();
         if (poll.hasResponded === true) return showAlreadyResponded();

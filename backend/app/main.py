@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.deps import DbSession
-from app.api.routes import admin, auth, polls, responses, results, stats
+from app.api.routes import admin, auth, polls, reference, responses, results, stats
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging, request_id
 
@@ -84,7 +84,9 @@ def create_app(settings: Settings) -> FastAPI:
             headers={**security_headers(request.url.path), "X-Request-ID": request_id.get()},
         )
 
-    for router in (auth.router, polls.router, responses.router, results.router, stats.router, admin.router):
+    for router in (
+        auth.router, polls.router, responses.router, results.router, stats.router, reference.router, admin.router
+    ):
         app.include_router(router, prefix="/api")
 
     @app.get("/api/health", tags=["health"])

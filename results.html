@@ -404,13 +404,10 @@
     /* ── Results from the API ──
        results.html?id=3 shows poll 3; with no id it shows the poll with the most
        responses. Every figure is computed from GET /api/results/{id}. */
-    const CATEGORY_NAMES = {
-      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
-      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
-    };
-    const AGE_ORDER = ['18–24', '25–34', '35–44', '45–54', '55–64', '65+'];
-    const EDUCATION_ORDER = ['No formal education', 'Primary school', 'Secondary school',
-      'Vocational / technical', "Bachelor's degree", 'Postgraduate'];
+    /* Display order of the age and education groups, from GET /api/reference. Without it,
+       age ranges still sort correctly as text ('18–24' … '65+'). */
+    let ageOrder = null;
+    let educationOrder = null;
     let minGroup = 10;         /* the server's minimum group size (results.minGroupSize) */
     const DAY_MS = 24 * 60 * 60 * 1000;
     const MONO = "'Space Mono', monospace";
@@ -630,7 +627,7 @@
           ? '<span class="results-badge results-badge-live"><span class="results-live-dot" aria-hidden="true"></span>Live &middot; ' +
               plural(results.totalResponses, 'response') + '</span>'
           : '<span class="results-badge results-badge-closed">Closed &middot; ' + plural(results.totalResponses, 'response') + '</span>') +
-        '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>' +
+        '<span class="results-badge results-badge-cat">' + escapeHtml(PulseLive.categoryName(poll.category)) + '</span>' +
         (results.isSynthetic ? '<span class="results-badge results-badge-cat">Demo data</span>' : '');
       document.getElementById('resDemoNotice').hidden = !results.isSynthetic;
       renderHeldNotice();
@@ -763,12 +760,14 @@
         '. Groups with fewer than ' + minGroup + ' responses are not shown.';
       document.querySelectorAll('[data-share-sub]').forEach(function (el) { el.textContent = results.breakdownsHeld ? '' : shareSub; });
 
-      document.getElementById('ageBars').innerHTML = groupBars(question.byAgeRange, question.withheld.byAgeRange, AGE_ORDER);
+      const ageGroups = ageOrder || question.byAgeRange.map(function (g) { return g.group; }).sort();
+      const educationGroups = educationOrder || question.byEducation.map(function (g) { return g.group; }).sort();
+      document.getElementById('ageBars').innerHTML = groupBars(question.byAgeRange, question.withheld.byAgeRange, ageGroups);
       document.getElementById('genderBars').innerHTML = groupBars(question.byGender, question.withheld.byGender);
-      document.getElementById('educationBars').innerHTML = groupBars(question.byEducation, question.withheld.byEducation, EDUCATION_ORDER);
+      document.getElementById('educationBars').innerHTML = groupBars(question.byEducation, question.withheld.byEducation, educationGroups);
       document.getElementById('occupationBars').innerHTML = groupBars(question.byOccupation, question.withheld.byOccupation);
 
-      const ages = AGE_ORDER.map(function (age) {
+      const ages = ageGroups.map(function (age) {
         return question.byAgeRange.find(function (g) { return g.group === age; }) || { group: age, total: 0, options: [] };
       });
       const pos = ages.map(function (g) { return g.total ? Math.round(shareOf(g.options, 'approve')) : null; });
@@ -780,7 +779,7 @@
       drawChart('groupedBarChart', {
         type: 'bar',
         data: {
-          labels: AGE_ORDER,
+          labels: ageGroups,
           datasets: [
             { label: positiveLabel(question), data: pos, backgroundColor: '#2D6A4F', borderRadius: 3 },
             { label: negLabel, data: neg, backgroundColor: '#A32D2D', borderRadius: 3 }
@@ -798,7 +797,7 @@
                  ticks: Object.assign({ callback: function (v) { return v + '%'; } }, axisTicks), border: { display: false } }
           }
         }
-      }, results.breakdownsHeld ? HELD : 'Bar chart by age group. ' + AGE_ORDER.map(function (a, i) {
+      }, results.breakdownsHeld ? HELD : 'Bar chart by age group. ' + ageGroups.map(function (a, i) {
         return a + ': ' + (pos[i] === null ? 'no responses' : pos[i] + '% ' + positiveLabel(question).toLowerCase() + ', ' + neg[i] + '% ' + negLabel.toLowerCase());
       }).join('; ') + '.');
     }
@@ -1027,9 +1026,13 @@
 
     function loadResults(id) {
       showNotice({ icon: 'loader-2', title: 'Loading results…' });
-      return Promise.all([PulseAPI.getPoll(id), PulseAPI.getResults(id)]).then(function (data) {
+      return Promise.all([PulseAPI.getPoll(id), PulseAPI.getResults(id), PulseLive.ready]).then(function (data) {
         poll = data[0];
         results = data[1];
+        if (data[2]) {
+          ageOrder = data[2].ageRanges;
+          educationOrder = data[2].educationLevels;
+        }
         minGroup = results.minGroupSize;
         questionIndex = 0;
         renderHeader();
