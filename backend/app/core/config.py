@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", extra="ignore")
 
     app_name: str = "PulseAfrica API"
+    # "production" turns off the API docs, adds HSTS and requires https CORS origins.
+    environment: Literal["development", "production"] = "development"
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     database_url: str = "postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica"
 
     jwt_secret_key: str  # required: there is deliberately no default
@@ -50,6 +53,14 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
+
+    @model_validator(mode="after")
+    def production_origins(self) -> "Settings":
+        if self.environment == "production":
+            insecure = [origin for origin in self.cors_origins if not origin.startswith("https://")]
+            if insecure:
+                raise ValueError(f"In production, CORS_ORIGINS must all use https. Not allowed: {', '.join(insecure)}")
+        return self
 
 
 @lru_cache
