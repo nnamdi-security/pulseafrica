@@ -11,6 +11,7 @@ def test_stats_on_empty_database(client):
         "statesCovered": 0,
         "responsesLast7Days": 0,
         "trendingPollId": None,
+        "syntheticPolls": 0,
     }
 
 
@@ -34,3 +35,4 @@ def test_stats_count_public_polls_and_responses(client, admin_headers, citizen_h
     assert stats["responsesLast7Days"] == 3
     assert stats["trendingPollId"] == busy["id"]
     assert draft["id"] != stats["trendingPollId"]
+    assert stats["syntheticPolls"] == 0

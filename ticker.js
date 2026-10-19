@@ -137,8 +137,11 @@
       if (categoryItems[i]) items.push(categoryItems[i]);
       if (statItems[i]) items.push(statItems[i]);
     }
+    /* Seeded figures are labelled wherever they appear (METH-01) */
+    if (s.syntheticPolls) items.unshift({ label: 'Demonstration data', value: 'Simulated responses', warn: true });
     render(items);
-    inner.closest('.ticker').setAttribute('aria-label', 'Live platform figures');
+    inner.closest('.ticker').setAttribute('aria-label',
+      s.syntheticPolls ? 'Live platform figures, including demonstration data' : 'Live platform figures');
   }).catch(function () {
     /* Keep the neutral placeholder rather than show stale or invented numbers */
   });

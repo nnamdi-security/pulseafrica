@@ -98,6 +98,10 @@
 
       <div class="poll-sb-section">
         <div class="poll-sb-label">Results so far &middot; Question 1</div>
+        <p class="demo-notice poll-demo-notice" id="pollDemoNotice" role="note" hidden>
+          <i class="ti ti-flask" aria-hidden="true"></i>
+          <span><strong>Demonstration data.</strong> This poll’s responses are simulated, not real opinion research.</span>
+        </p>
         <div class="poll-preview-bars" id="pollPreview">
           <p class="poll-sb-about">Loading…</p>
         </div>
@@ -141,7 +145,7 @@
         <div class="poll-q-card">
           <div class="poll-q-num">Final step &middot; Demographic information</div>
           <h2 class="poll-q-text" tabindex="-1">A few details to help us weight the data accurately</h2>
-          <p class="poll-q-sub">This information is used only for statistical weighting. It is never linked to your individual responses.</p>
+          <p class="poll-q-sub">This information is stored with your response and only published as totals for groups of at least 10 people.</p>
 
           <div class="poll-submit-error" id="submitError" role="alert" hidden>
             <i class="ti ti-alert-circle" aria-hidden="true"></i>
@@ -262,7 +266,7 @@
 
           <div class="demo-privacy-note" role="note">
             <i class="ti ti-lock" aria-hidden="true"></i>
-            <p>Your demographic data is used solely for statistical weighting to ensure poll results represent all 40 states and 450 tribes proportionally. Your identity is never disclosed or linked to your answers.</p>
+            <p>Your answers are stored with your account so each person is counted once. They are never published, shown to other users or included in results except as totals. Results aren't weighted yet; weighting to represent all 40 states is planned.</p>
           </div>
 
           <div class="poll-nav-row" style="margin-top: 20px;">
@@ -585,9 +589,13 @@
         : 'No closing date set';
       document.getElementById('pollAbout').textContent = poll.description;
 
+      document.getElementById('pollDemoNotice').hidden = !poll.isSynthetic;
       const preview = document.getElementById('pollPreview');
       if (!poll.responseCount) {
         preview.innerHTML = '<p class="poll-sb-about">No responses yet.</p>';
+      } else if (!poll.preview.length) {
+        /* The API holds back percentages until enough people have answered */
+        preview.innerHTML = '<p class="poll-sb-about">Results appear once enough people have answered, to protect respondents’ privacy.</p>';
       } else {
         preview.innerHTML = poll.preview.map(function (o, i) {
           const pct = Math.round(o.percent);
@@ -666,7 +674,7 @@
       return Promise.all([PulseAPI.getPoll(poll.id), PulseAPI.getResults(poll.id)]).then(function (data) {
         const updated = data[0];
         const results = data[1];
-        const states = results.questions.length ? results.questions[0].byState.length : 0;
+        const states = results.statesCovered;
         document.getElementById('thanksText').textContent =
           'Your voice has been added to the national data record. You are one of ' +
           plural(updated.responseCount, 'citizen') + ' who have taken part in this poll, from ' +

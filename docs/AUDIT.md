@@ -21,17 +21,17 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Fixed (M1) |
 | [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Fixed (M1) |
 | [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Confirmed (inspection) |
-| [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Partly fixed (M1): responses refused; effective status awaits INT-01a |
-| [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Reproduced |
-| [PRIV-02](#priv-02) | HIGH | Privacy / honesty | Pages promise answers are "never linked to your identity", but the schema links them | Confirmed (inspection) |
-| [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Confirmed (inspection) |
+| [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Fixed (M1) |
+| [PRIV-01](#priv-01) | HIGH | Privacy | Public results expose groups of one, revealing individual answers | Fixed (M1) |
+| [PRIV-02](#priv-02) | HIGH | Privacy / honesty | Pages promise answers are "never linked to your identity", but the schema links them | Fixed (M1) |
+| [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Fixed (M1) |
 | [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Potential risk |
 | [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Reproduced |
 | [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
 | [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Reproduced (API) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Confirmed (inspection) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Confirmed (inspection) |
-| [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Confirmed (inspection) |
+| [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
 | [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Confirmed (inspection) |
 | [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Reproduced (computed) |
 | [TEST-01](#test-01) | MEDIUM | Testing | No frontend or end-to-end tests and no CI | Confirmed (inspection) |
@@ -123,7 +123,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Recommended fix:** reject responses when `closes_at <= now` (409, "This poll has closed"). Either derive an *effective status* in the API, or close polls with a scheduled job. Add tests.
 - **Verification status:** Reproduced.
 - **Resolution (M1, part 1, commit `63fe6c1`):** `POST /api/responses` now answers 409 "This poll is closed" once `closes_at` has passed, and the results don't change (tests in `test_polls.py`, run on SQLite and Postgres). The date check is shared with `_check_can_open` through `closing_date_passed` in `app/api/rules.py`.
-- **Still open (part 2):** lists, detail, stats, the admin overview and `/auth/me/responses` still report such a poll as `active`. Deriving an effective status waits on owner decision INT-01a.
+- **Resolution (M1, part 2, commit `bc8ffd2`):** owner decision INT-01a ([0002](decisions/0002-effective-poll-status.md)). Lists, detail, the `status` filter, `/api/stats` (counts and trending poll), the admin overview and `/auth/me/responses` report such a poll as `closed`, through `effective_status` / `has_effective_status` in `app/api/rules.py`. Nothing rewrites the stored column; reopening needs a later closing date.
 
 <a id="priv-01"></a>
 ### PRIV-01: Public results expose groups of one (HIGH)
@@ -138,6 +138,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - Give admins raw counts through an admin endpoint if they need them.
   - Document the rule in the methodology.
 - **Verification status:** Reproduced.
+- **Resolution (M1, commit `834af4e`):** owner decisions D4 and D4a ([0001](decisions/0001-minimum-public-group-size.md)): *k* = 10. Groups and trend periods under 10 are withheld on the server, with secondary suppression so no breakdown or trend leaves a remainder of 1–9 responses; polls under 10 responses show totals only, and get no list preview. Probe P3 now shows no group for the single respondent's state (`tests/test_results.py`, including a randomised remainder check, on SQLite and Postgres). The trend is grouped by day, week or month on the server. `results.html`, `poll.html`, `polls.html` and `index.html` use `minGroupSize`, `statesCovered` and the withheld counts. **Still open:** someone watching the live results while a known person answers can see which group moved; cell suppression can't prevent that, and it needs a separate decision (delayed or batched results). Admins have no raw-results endpoint.
 
 <a id="priv-02"></a>
 ### PRIV-02: "Never linked to your identity" contradicts the schema (HIGH)
@@ -159,6 +160,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 
   Option 1 is the safe immediate step.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M1, commits `e8769f5` and `3913180`):** owner decisions D1 and D2 ([0003](decisions/0003-privacy-and-methodology-copy.md)), option 1. The five sentences above, two more with the same claim (`login.html` registration note, `poll.html` privacy note), the methodology FAQ question and the sign-in panel's "Anonymous by design" point now say answers are stored with the account and only published as totals; weighting is described as planned. A search for "never linked" across the HTML finds nothing. **Not changed (needs a copy decision):** the "Anonymous Data" footer badge and "Anonymous by design" ticker placeholder on all 9 pages, and the "Anonymous and independent" heading on `index.html`.
 
 <a id="meth-01"></a>
 ### METH-01: Synthetic data is indistinguishable from real responses (HIGH)
@@ -172,6 +174,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - Show a persistent "Demonstration data" notice wherever such figures appear.
   - Exclude synthetic data from any non-demo environment.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M1, commit `8f3689d`):** owner decision D3 ([0004](decisions/0004-demonstration-data-disclosure.md)). `polls.is_synthetic` (migration `0003`, which backfills polls answered by demo accounts and prints them) is set by the seed and exposed as `isSynthetic` on polls and results and `syntheticPolls` on stats. The home page, ticker, polls list, poll page and results page show a "Demonstration data" notice wherever such figures appear. Hiding demo polls by environment waits for Milestone 9.
 
 <a id="sec-04"></a>
 ### SEC-04: Bearer tokens are kept in Web Storage (MEDIUM)
@@ -250,6 +253,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** users are told something false, and a locked-out user can't recover their account.
 - **Recommended fix:** short term, replace the reset form with an honest message ("Password reset isn't available yet — contact an administrator") and remove the verification hint. Long term, build reset and verification (see the roadmap).
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M1, commit `3913180`):** the reset view now says password reset isn't available and to contact an administrator; it has no form and sends no request (checked in a browser at 1280px and 390px). The sign-up hint and the sign-in panel no longer promise email verification. Building reset and verification remains on the roadmap.
 
 <a id="fe-02"></a>
 ### FE-02: Copy-pasted page shell, helpers and reference data (MEDIUM)
@@ -429,8 +433,8 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 | "start of the Phase 2 backend" | `README.md:7` | Backend is feature-complete for the current scope (19 endpoints, 43 tests) |
 | "[ ] Replace placeholder data with real database queries" | `README.md` roadmap | Done: no page shows hard-coded poll figures |
 | Results are weighted, with margins of error, minimum sample 1,000, stratified sampling | `methodology.html`, `index.html` | Raw counts only (METH-02) |
-| Answers never linked to identity | 5 pages | Linked by `responses.user_id` (PRIV-02) |
-| Verification link / reset email | `login.html` | Not implemented (FE-01) |
+| Answers never linked to identity | 5 pages | Linked by `responses.user_id` (PRIV-02); copy corrected in M1 |
+| Verification link / reset email | `login.html` | Not implemented (FE-01); the promises were removed in M1 |
 | Brief: About page includes an FAQ | `MULTI PAGE WEBSITE PROMPT.md` §6 | The FAQ lives on `methodology.html`; `about.html` only links to "FAQ" (`href="#"`) |
 | Brief: "Testimonials (optional)" | §1 | Not implemented (optional) |
 | Brief: questions have a `questionType` | Database design | Only single-choice questions exist; no type column |

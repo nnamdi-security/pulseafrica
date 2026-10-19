@@ -227,6 +227,12 @@
     <!-- ── MAIN CONTENT ── -->
     <main class="polls-main" aria-label="Poll listings">
 
+      <!-- Shown when any poll holds seeded demonstration data (METH-01) -->
+      <p class="demo-notice polls-demo-notice" id="demoNotice" role="note" hidden>
+        <i class="ti ti-flask" aria-hidden="true"></i>
+        <span><strong>Demonstration data.</strong> Polls marked “Demo data” show simulated responses created to demonstrate PulseAfrica. They are not real opinion research.</span>
+      </p>
+
       <div class="polls-toolbar">
         <span class="polls-results-count" id="resultsCount" aria-live="polite">Loading polls…</span>
         <select class="polls-view-select" aria-label="Filter polls by status" id="viewSelect">
@@ -420,9 +426,14 @@
     }
 
     function sentimentHTML(poll) {
-      if (!poll.responseCount || !poll.preview.length) {
+      if (!poll.responseCount) {
         return '<p class="poll-card-empty-preview">No responses yet' +
                (poll.status === 'active' ? ' — be the first to share your view.' : '.') + '</p>';
+      }
+      if (!poll.preview.length) {
+        /* The API holds back percentages until enough people have answered */
+        return '<p class="poll-card-empty-preview">' + plural(poll.responseCount, 'response') +
+               ' so far. Results appear once enough people have answered.</p>';
       }
       const buckets = sentimentBuckets(poll.preview);
       const summary = buckets.map(function (b) { return b.percent + '% ' + b.label.toLowerCase(); }).join(', ');
@@ -463,8 +474,9 @@
       return '<article class="poll-card-item' + (live ? '' : ' is-closed') + (featured ? ' poll-card-featured' : '') + '">' +
         '<div class="poll-card-head">' +
           '<div class="poll-card-meta-row">' +
-            '<span class="poll-cat-label cat-' + category + '">' + CATEGORY_NAMES[category] +
+            '<span class="poll-card-tags"><span class="poll-cat-label cat-' + category + '">' + CATEGORY_NAMES[category] +
               (featured ? ' &middot; Featured' : '') + '</span>' +
+              (poll.isSynthetic ? '<span class="demo-tag">Demo data</span>' : '') + '</span>' +
             badge +
           '</div>' +
           '<' + titleTag + ' class="poll-card-title">' + escapeHtml(poll.title) + '</' + titleTag + '>' +
@@ -550,6 +562,7 @@
       const categories = {};
       allPolls.forEach(function (p) { categories[p.category] = (categories[p.category] || 0) + 1; });
 
+      document.getElementById('demoNotice').hidden = !allPolls.some(function (p) { return p.isSynthetic; });
       document.getElementById('statActive').textContent = active;
       document.getElementById('statClosed').textContent = allPolls.length - active;
       document.getElementById('statResponses').innerHTML = compactNumber(responses);

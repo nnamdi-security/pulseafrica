@@ -66,30 +66,30 @@
         </h1>
         <p class="auth-aside-sub">
           An account lets us guarantee one response per citizen per poll — the
-          foundation of every number we publish. Your answers are never linked
-          to your identity.
+          foundation of every number we publish. Your answers are stored with
+          your account, and are only ever published as totals.
         </p>
 
         <ul class="auth-points" role="list">
           <li class="auth-point">
             <div class="auth-point-icon" aria-hidden="true"><i class="ti ti-user-check"></i></div>
             <div>
-              <h2 class="auth-point-title">Verified participation</h2>
-              <p class="auth-point-text">Email verification and duplicate detection keep every poll to one response per person.</p>
+              <h2 class="auth-point-title">One response per person</h2>
+              <p class="auth-point-text">Each account can answer a poll once, so every poll counts one response per person.</p>
             </div>
           </li>
           <li class="auth-point">
             <div class="auth-point-icon" aria-hidden="true"><i class="ti ti-lock"></i></div>
             <div>
-              <h2 class="auth-point-title">Anonymous by design</h2>
-              <p class="auth-point-text">Responses are stored separately from account details. We publish only aggregate results.</p>
+              <h2 class="auth-point-title">Published only as totals</h2>
+              <p class="auth-point-text">Your answers are stored with your account so you're counted once. We publish only aggregate results.</p>
             </div>
           </li>
           <li class="auth-point">
             <div class="auth-point-icon" aria-hidden="true"><i class="ti ti-map-pin"></i></div>
             <div>
-              <h2 class="auth-point-title">Representative data</h2>
-              <p class="auth-point-text">Your state and age range let us weight results fairly across all 40 states.</p>
+              <h2 class="auth-point-title">Results by state and age</h2>
+              <p class="auth-point-text">Your state and age range let us break results down across all 40 states. Weighting is planned.</p>
             </div>
           </li>
         </ul>
@@ -201,7 +201,7 @@
                 <i class="ti ti-mail" aria-hidden="true"></i>
                 <input type="email" id="reg-email" name="email" autocomplete="email" placeholder="you@example.com" aria-describedby="reg-email-hint reg-email-error" required />
               </div>
-              <p class="auth-hint" id="reg-email-hint">We'll send a verification link. Your email is never published.</p>
+              <p class="auth-hint" id="reg-email-hint">Your email is never published.</p>
               <p class="auth-error" id="reg-email-error"></p>
             </div>
 
@@ -320,7 +320,7 @@
 
           <div class="auth-privacy-note" role="note">
             <i class="ti ti-shield-lock" aria-hidden="true"></i>
-            <p>State and age range are used only for statistical weighting. They are never published individually or linked to your poll answers. <a href="methodology.html">How we weight results</a></p>
+            <p>State and age range are never published individually; results only show them as totals for groups of at least 10 people. Results aren't weighted yet; weighting is planned. <a href="methodology.html">How weighting will work</a></p>
           </div>
 
           <p class="auth-switch">
@@ -334,25 +334,9 @@
             <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to sign in
           </a>
           <div class="auth-head">
-            <h2 class="auth-h2">Reset your password</h2>
-            <p class="auth-sub">Enter the email you registered with and we'll send you a reset link.</p>
+            <h2 class="auth-h2" id="reset-title" tabindex="-1">Reset your password</h2>
+            <p class="auth-sub">Password reset isn't available yet. Contact an administrator to regain access to your account.</p>
           </div>
-
-          <form class="auth-form" id="reset-form" novalidate>
-            <div class="auth-field">
-              <label for="reset-email">Email address</label>
-              <div class="auth-input-wrap">
-                <i class="ti ti-mail" aria-hidden="true"></i>
-                <input type="email" id="reset-email" name="email" autocomplete="email" placeholder="you@example.com" aria-describedby="reset-email-error" required />
-              </div>
-              <p class="auth-error" id="reset-email-error"></p>
-            </div>
-
-            <button class="auth-submit" type="submit">
-              <span class="auth-submit-label">Send reset link</span>
-              <i class="ti ti-arrow-right" aria-hidden="true"></i>
-            </button>
-          </form>
         </div>
 
         <!-- ========== VIEW: SUCCESS (shared) ========== -->
@@ -493,7 +477,7 @@
         const name = link.dataset.viewLink;
         history.replaceState(null, '', '#' + name);
         showView(name);
-        const firstInput = document.querySelector('#view-' + name + ' input');
+        const firstInput = document.querySelector('#view-' + name + ' input, #view-' + name + ' h2[tabindex="-1"]');
         if (firstInput) firstInput.focus();
       });
     });
@@ -594,11 +578,6 @@
       'reg-terms': function (v, input) {
         return input.checked ? '' : 'You must confirm you are 18+ and accept the terms to register.';
       },
-      'reset-email': function (v) {
-        if (!v.trim()) return 'Enter your email address.';
-        if (!EMAIL_RE.test(v.trim())) return 'Enter a valid email address, e.g. name@example.com.';
-        return '';
-      }
     };
 
     function validateInput(input) {
@@ -708,11 +687,8 @@
 
     /* ---------- Submission ----------
        Sign in and Create account call the FastAPI backend through api.js.
-       Password reset has no backend endpoint yet, so it still uses a
-       short simulated delay. */
-    function simulateRequest() {
-      return new Promise(function (resolve) { setTimeout(resolve, 900); });
-    }
+       Password reset has no backend endpoint yet, so the reset view only
+       says so (FE-01). */
 
     function setLoading(form, loading) {
       const btn = form.querySelector('.auth-submit');
@@ -908,18 +884,6 @@
       document.getElementById('login-password').focus();
     });
 
-    handleSubmit(document.getElementById('reset-form'), null, function (form) {
-      return simulateRequest().then(function () {
-        const email = form.querySelector('#reset-email').value.trim();
-        showSuccess({
-          title: 'Check your inbox',
-          text: 'If an account exists for that address, a password reset link is on its way. The link expires in 30 minutes.',
-          meta: 'Reset link requested for ' + email,
-          showBack: true
-        });
-        resetForm(form);
-      });
-    }, function () {});
   </script>
 
 </body>

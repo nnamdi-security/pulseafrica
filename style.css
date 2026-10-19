@@ -6376,3 +6376,86 @@ input[type="search"].admin-input {
     width: 100%;
   }
 }
+
+/* ============================================================
+   DEMONSTRATION DATA — index.html, polls.html, poll.html, results.html
+   Shown wherever seeded (synthetic) figures appear (METH-01)
+   ============================================================ */
+.demo-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(200, 151, 58, 0.08);
+  border: 1px solid rgba(200, 151, 58, 0.35);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #0A1628;
+}
+
+.demo-notice i {
+  font-size: 16px;
+  color: #7a4c08;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.demo-notice strong {
+  font-weight: 500;
+  color: #7a4c08;
+}
+
+/* On navy surfaces (the home page hero card) */
+.demo-notice.is-dark {
+  background: rgba(200, 151, 58, 0.1);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
+.demo-notice.is-dark i,
+.demo-notice.is-dark strong {
+  color: #C8973A;
+}
+
+.demo-notice[hidden] {
+  display: none;
+}
+
+.demo-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7a4c08;
+  border: 1px solid rgba(200, 151, 58, 0.45);
+  border-radius: 3px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.home-demo-notice {
+  margin-bottom: 24px;
+}
+
+.hero-demo-notice {
+  margin-top: 16px;
+}
+
+.polls-demo-notice {
+  margin-bottom: 16px;
+}
+
+.poll-demo-notice {
+  margin-bottom: 12px;
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
+.poll-card-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}

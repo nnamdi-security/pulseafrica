@@ -147,6 +147,12 @@
        ============================================================ -->
   <div class="results-dashboard">
 
+    <!-- Seeded demonstration data (METH-01) -->
+    <p class="demo-notice results-card-full" id="resDemoNotice" role="note" hidden>
+      <i class="ti ti-flask" aria-hidden="true"></i>
+      <span><strong>Demonstration data.</strong> These results come from simulated respondents created to demonstrate PulseAfrica. They are not real opinion research.</span>
+    </p>
+
     <!-- Loading / error / not found / no responses yet -->
     <div class="results-card results-card-full results-notice" id="resNotice" role="status">
       <i class="ti ti-loader-2" aria-hidden="true"></i>
@@ -399,7 +405,7 @@
     const AGE_ORDER = ['18–24', '25–34', '35–44', '45–54', '55–64', '65+'];
     const EDUCATION_ORDER = ['No formal education', 'Primary school', 'Secondary school',
       'Vocational / technical', "Bachelor's degree", 'Postgraduate'];
-    const MIN_SAMPLE = 5;      /* groups smaller than this are faded and left out of rankings */
+    let minGroup = 10;         /* the server's minimum group size (results.minGroupSize) */
     const DAY_MS = 24 * 60 * 60 * 1000;
     const MONO = "'Space Mono', monospace";
 
@@ -502,7 +508,7 @@
 
     /* ── Bars ── */
     function barRow(opts) {
-      const faded = opts.n !== undefined && opts.n < MIN_SAMPLE;
+      const faded = opts.n !== undefined && opts.n < minGroup;
       const title = opts.title || (opts.label + ': ' + opts.valueText + (opts.n !== undefined ? ' (' + plural(opts.n, 'response') + ')' : ''));
       return '<div class="results-hbar-row' + (opts.stacked ? ' is-stacked' : '') + (faded ? ' is-low-sample' : '') +
           (opts.current ? ' is-current' : '') + '" role="listitem" title="' + escapeHtml(title) + '">' +
@@ -518,8 +524,16 @@
       return '<p class="results-empty">' + escapeHtml(message) + '</p>';
     }
 
+    /* The server leaves out groups too small to publish (and, when needed, the next
+       smallest, so they can't be worked out by subtraction). Say how many. */
+    function withheldNote(withheld, noun) {
+      if (!withheld.groups) return '';
+      return emptyBars(plural(withheld.groups, 'smaller ' + noun) + ' not shown, to protect respondents’ privacy ' +
+        '(each ' + noun + ' needs at least ' + minGroup + ' responses).');
+    }
+
     /* Positive share for each demographic group, coloured against the overall figure */
-    function groupBars(groups, order) {
+    function groupBars(groups, withheld, order) {
       const question = currentQuestion();
       const overall = shareOf(question.options, 'approve');
       let rows = groups.slice();
@@ -528,11 +542,11 @@
       } else {
         rows.sort(function (a, b) { return shareOf(b.options, 'approve') - shareOf(a.options, 'approve'); });
       }
-      if (!rows.length) return emptyBars('No responses in this group yet.');
+      if (!rows.length) return withheld.groups ? withheldNote(withheld, 'group') : emptyBars('No responses in this group yet.');
       return rows.map(function (g) {
         const share = shareOf(g.options, 'approve');
         return barRow({ label: g.group, width: share, color: compareColor(share, overall), valueText: pct(share), n: g.total });
-      }).join('');
+      }).join('') + withheldNote(withheld, 'group');
     }
 
     /* ── Charts ── */
@@ -590,7 +604,9 @@
           ? '<span class="results-badge results-badge-live"><span class="results-live-dot" aria-hidden="true"></span>Live &middot; ' +
               plural(results.totalResponses, 'response') + '</span>'
           : '<span class="results-badge results-badge-closed">Closed &middot; ' + plural(results.totalResponses, 'response') + '</span>') +
-        '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>';
+        '<span class="results-badge results-badge-cat">' + (CATEGORY_NAMES[poll.category] || 'Poll') + '</span>' +
+        (results.isSynthetic ? '<span class="results-badge results-badge-cat">Demo data</span>' : '');
+      document.getElementById('resDemoNotice').hidden = !results.isSynthetic;
 
       const picker = document.getElementById('questionPicker');
       document.getElementById('questionPickerWrap').hidden = results.questions.length < 2;
@@ -607,6 +623,7 @@
       const pos = groups[0];
       const neg = groups[groups.length - 1];
       const neu = groups.length === 3 ? groups[1] : null;
+      const shown = question.total && !results.resultsWithheld;
 
       function sub(bucket) {
         return bucket.members.length > 1
@@ -614,20 +631,20 @@
           : 'of respondents';
       }
 
-      document.getElementById('statPos').textContent = question.total ? pct(pos.percent) : '–';
+      document.getElementById('statPos').textContent = shown ? pct(pos.percent) : '–';
       document.getElementById('statPosLabel').textContent = approval ? 'Overall approval' : pos.label;
       document.getElementById('statPosSub').textContent = sub(pos);
-      document.getElementById('statNeg').textContent = question.total ? pct(neg.percent) : '–';
+      document.getElementById('statNeg').textContent = shown ? pct(neg.percent) : '–';
       document.getElementById('statNegLabel').textContent = approval ? 'Disapproval' : neg.label;
       document.getElementById('statNegSub').textContent = sub(neg);
       document.querySelectorAll('[data-neutral]').forEach(function (el) { el.hidden = !neu; });
       if (neu) {
-        document.getElementById('statNeu').textContent = question.total ? pct(neu.percent) : '–';
+        document.getElementById('statNeu').textContent = shown ? pct(neu.percent) : '–';
         document.getElementById('statNeuLabel').textContent = neu.label;
       }
 
       document.getElementById('statTotal').textContent = results.totalResponses.toLocaleString();
-      document.getElementById('statTotalSub').textContent = 'From ' + question.byState.length + ' of 40 states';
+      document.getElementById('statTotalSub').textContent = 'From ' + results.statesCovered + ' of 40 states';
 
       const live = poll.status === 'active';
       const close = document.getElementById('statClose');
@@ -716,13 +733,13 @@
       const name = shareName(question);
       const shareSub = name.charAt(0).toUpperCase() + name.slice(1) + ' (' + positive + ') in each group. ' +
         'Colour compares each group with the overall ' + pct(overall) +
-        '; faded groups have fewer than ' + MIN_SAMPLE + ' responses.';
+        '. Groups with fewer than ' + minGroup + ' responses are not shown.';
       document.querySelectorAll('[data-share-sub]').forEach(function (el) { el.textContent = shareSub; });
 
-      document.getElementById('ageBars').innerHTML = groupBars(question.byAgeRange, AGE_ORDER);
-      document.getElementById('genderBars').innerHTML = groupBars(question.byGender);
-      document.getElementById('educationBars').innerHTML = groupBars(question.byEducation, EDUCATION_ORDER);
-      document.getElementById('occupationBars').innerHTML = groupBars(question.byOccupation);
+      document.getElementById('ageBars').innerHTML = groupBars(question.byAgeRange, question.withheld.byAgeRange, AGE_ORDER);
+      document.getElementById('genderBars').innerHTML = groupBars(question.byGender, question.withheld.byGender);
+      document.getElementById('educationBars').innerHTML = groupBars(question.byEducation, question.withheld.byEducation, EDUCATION_ORDER);
+      document.getElementById('occupationBars').innerHTML = groupBars(question.byOccupation, question.withheld.byOccupation);
 
       const ages = AGE_ORDER.map(function (age) {
         return question.byAgeRange.find(function (g) { return g.group === age; }) || { group: age, total: 0, options: [] };
@@ -767,24 +784,27 @@
 
       document.getElementById('heatmapLabel').textContent = byVolume.length > 20
         ? 'State heatmap — top 20 states by response volume'
-        : 'State heatmap — all ' + plural(byVolume.length, 'state') + ' with responses';
+        : 'State heatmap — ' + plural(byVolume.length, 'state') + ' with at least ' + minGroup + ' responses';
       document.getElementById('stateHeatmap').innerHTML = shown.length
         ? shown.map(function (g) {
             const share = shareOf(g.options, 'approve');
             const label = g.group + ': ' + pct(share) + ' ' + positiveLabel(question).toLowerCase() + ', ' + plural(g.total, 'response');
-            return '<div class="state-heat-cell' + (g.total < MIN_SAMPLE ? ' is-low-sample' : '') + '" role="listitem"' +
+            return '<div class="state-heat-cell" role="listitem"' +
               ' style="background:' + compareColor(share, overall) + ';" title="' + escapeHtml(label) + '" aria-label="' + escapeHtml(label) + '">' +
               '<div class="state-heat-name">' + escapeHtml(g.group.replace(/ STATE$/, '')) + '</div>' +
               '<div class="state-heat-pct">' + pct(share) + '</div>' +
             '</div>';
           }).join('')
-        : emptyBars('No responses yet.');
+        : emptyBars(question.withheld.byState.groups
+            ? 'No state has enough responses to show yet (each needs at least ' + minGroup + ').'
+            : 'No responses yet.');
 
-      const ranked = question.byState.filter(function (g) { return g.total >= MIN_SAMPLE; })
+      const ranked = question.byState
         .map(function (g) { return { group: g.group, total: g.total, share: shareOf(g.options, 'approve') }; })
         .sort(function (a, b) { return b.share - a.share || b.total - a.total; });
-      document.getElementById('rankSub').textContent = 'Ranked by ' + shareName(question) + '. Only states with at least ' +
-        MIN_SAMPLE + ' responses are ranked (' + ranked.length + ' of ' + question.byState.length + ').';
+      document.getElementById('rankSub').textContent = 'Ranked by ' + shareName(question) + '. To protect respondents’ privacy, ' +
+        'only states with at least ' + minGroup + ' responses are shown (' + ranked.length + ' of ' +
+        plural(results.statesCovered, 'state') + ' with responses).';
       document.getElementById('topHeading').textContent = 'Top 5 — highest ' + shareName(question);
       document.getElementById('bottomHeading').textContent = 'Bottom 5 — lowest ' + shareName(question);
 
@@ -804,31 +824,21 @@
     }
 
     /* ── Trend ──
-       The API gives counts per day; polls open longer than three weeks are
-       grouped by week (starting Monday) so each point has enough responses. */
+       The API groups responses by day, or by week (starting Monday) or month for
+       longer polls (results.trendInterval), and leaves out periods with too few
+       responses to publish. */
     function periods(trend) {
-      if (!trend.length) return [];
-      const first = new Date(trend[0].date + 'T00:00:00Z');
-      const last = new Date(trend[trend.length - 1].date + 'T00:00:00Z');
-      const weekly = (last - first) / DAY_MS > 21;
-      const map = {};
-      trend.forEach(function (day) {
-        let key = day.date;
-        if (weekly) {
-          const d = new Date(day.date + 'T00:00:00Z');
-          d.setUTCDate(d.getUTCDate() - (d.getUTCDay() + 6) % 7);
-          key = d.toISOString().slice(0, 10);
-        }
-        if (!map[key]) map[key] = { start: key, total: 0, counts: day.options.map(function () { return 0; }) };
-        map[key].total += day.total;
-        day.options.forEach(function (o, i) { map[key].counts[i] += o.count; });
+      return trend.map(function (p) {
+        return { start: p.date, total: p.total, unit: results.trendInterval,
+                 pos: shareOf(p.options, 'approve'), neg: shareOf(p.options, 'disapprove') };
       });
-      return Object.keys(map).sort().map(function (key) {
-        const p = map[key];
-        const options = p.counts.map(function (c) { return { count: c }; });
-        return { start: p.start, total: p.total, weekly: weekly,
-                 pos: shareOf(options, 'approve'), neg: shareOf(options, 'disapprove') };
-      });
+    }
+
+    function periodLabel(p) {
+      if (p.unit === 'month') {
+        return new Date(p.start + 'T00:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+      }
+      return (p.unit === 'week' ? 'w/c ' : '') + shortDate(p.start);
     }
 
     /* Positive share in the earlier and later half of a question's responses */
@@ -854,20 +864,23 @@
       const groups = buckets(question.options);
       const posLabel = groups[0].label;
       const negLabel = groups[groups.length - 1].label;
-      const unit = series.length && series[0].weekly ? 'week' : 'day';
+      const unit = results.trendInterval;
+      const hidden = question.withheld.trend.groups;
 
-      document.getElementById('trendLabel').textContent = (unit === 'week' ? 'Weekly' : 'Daily') + ' trend';
-      document.getElementById('trendSub').textContent = series.length
+      document.getElementById('trendLabel').textContent = { day: 'Daily', week: 'Weekly', month: 'Monthly' }[unit] + ' trend';
+      document.getElementById('trendSub').textContent = (series.length
         ? '“' + posLabel + '” vs “' + negLabel + '” share among the responses received each ' + unit +
-          ' · ' + shortDate(series[0].start) + ' – ' + shortDate(question.trend[question.trend.length - 1].date)
-        : 'No responses yet.';
+          ' · ' + periodLabel(series[0]) + ' – ' + periodLabel(series[series.length - 1])
+        : hidden ? 'No ' + unit + ' has enough responses to show yet.' : 'No responses yet.') +
+        (hidden ? (series.length ? '. ' : ' ') + plural(hidden, unit) + ' with fewer than ' + minGroup + ' responses ' +
+          (hidden === 1 ? 'is' : 'are') + ' not shown, to protect respondents’ privacy.' : '');
       document.getElementById('trendLegend').innerHTML =
         '<span class="results-legend-item"><span style="display:inline-block;width:22px;height:2px;background:#2D6A4F;vertical-align:middle;"></span> ' +
           escapeHtml(posLabel) + '</span>' +
         '<span class="results-legend-item"><span style="display:inline-block;width:22px;height:0;border-top:2px dashed #A32D2D;vertical-align:middle;"></span> ' +
           escapeHtml(negLabel) + '</span>';
 
-      const labels = series.map(function (p) { return (unit === 'week' ? 'w/c ' : '') + shortDate(p.start); });
+      const labels = series.map(periodLabel);
       drawChart('trendChart', {
         type: 'line',
         data: {
@@ -921,15 +934,15 @@
       const name = shareName(question);
       const totals = series.map(function (p) { return p.total; }).sort(function (a, b) { return a - b; });
       const typical = totals.length ? totals[Math.floor(totals.length / 2)] : 0;
-      const solid = series.filter(function (p) { return p.total >= Math.max(MIN_SAMPLE, typical / 2); });
+      const solid = series.filter(function (p) { return p.total >= Math.max(minGroup, typical / 2); });
       const items = [];
-      function when(p) { return (p.weekly ? 'Week of ' : '') + shortDate(p.start); }
+      function when(p) { return p.unit === 'week' ? 'Week of ' + shortDate(p.start) : periodLabel(p); }
       function moment(p, dot, date, text) { items.push({ start: p.start, dot: dot, date: date, text: text }); }
       if (series.length) {
         const first = series[0];
         const busiest = series.reduce(function (a, b) { return b.total > a.total ? b : a; });
         const latest = series[series.length - 1];
-        moment(first, 'neutral', shortDate(first.start), 'First responses received');
+        moment(first, 'neutral', when(first), hidden ? 'First ' + unit + ' shown' : 'First responses received');
         if (solid.length > 1) {
           const peak = solid.reduce(function (a, b) { return b.pos > a.pos ? b : a; });
           const low = solid.reduce(function (a, b) { return b.pos < a.pos ? b : a; });
@@ -989,6 +1002,7 @@
       return Promise.all([PulseAPI.getPoll(id), PulseAPI.getResults(id)]).then(function (data) {
         poll = data[0];
         results = data[1];
+        minGroup = results.minGroupSize;
         questionIndex = 0;
         renderHeader();
         renderStats();
@@ -998,6 +1012,16 @@
             html: poll.status === 'active'
               ? 'Results appear here as soon as people respond. <a href="poll.html?id=' + poll.id + '">Be the first to take this poll</a>.'
               : 'This poll closed without any responses.'
+          });
+          return;
+        }
+        if (results.resultsWithheld) {
+          showNotice({
+            icon: 'lock', title: 'Not enough responses to show results yet',
+            html: 'To protect respondents’ privacy, results appear once at least ' + minGroup + ' people have answered. ' +
+              (poll.status === 'active'
+                ? '<a href="poll.html?id=' + poll.id + '">Take this poll</a> to help it get there.'
+                : 'This poll closed with ' + plural(results.totalResponses, 'response') + ', too few to publish.')
           });
           return;
         }

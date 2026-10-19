@@ -124,6 +124,11 @@
 
         <!-- Every answer option for the featured question -->
         <div class="mini-bars" id="heroBars"></div>
+
+        <p class="demo-notice is-dark hero-demo-notice" id="heroDemoNotice" role="note" hidden>
+          <i class="ti ti-flask" aria-hidden="true"></i>
+          <span><strong>Demonstration data.</strong> Simulated responses, not real opinion research.</span>
+        </p>
       </div>
 
     </div>
@@ -168,6 +173,12 @@
       to the national data record.
     </p>
 
+    <!-- Shown when the platform holds seeded demonstration data (METH-01) -->
+    <p class="demo-notice home-demo-notice" id="homeDemoNotice" role="note" hidden>
+      <i class="ti ti-flask" aria-hidden="true"></i>
+      <span><strong>Demonstration data.</strong> Figures on this page include simulated responses created to demonstrate PulseAfrica. They are not real opinion research.</span>
+    </p>
+
     <!-- The three live polls with the most responses (filled in by the script below) -->
     <div class="polls-grid" id="featuredPolls" aria-busy="true">
       <p class="home-state">Loading polls…</p>
@@ -210,8 +221,8 @@
         <div class="step-num" aria-label="Step 3">03</div>
         <h3 class="step-title">Answer honestly</h3>
         <p class="step-desc">
-          Respond to structured questions. Responses are anonymous by default
-          and never linked to your identity.
+          Respond to structured questions. Your answers are stored with your
+          account so you're counted once, and are only ever published as totals.
         </p>
       </div>
 
@@ -468,6 +479,7 @@
       document.getElementById('homeVoices').innerHTML = compactNumber(stats.registeredUsers);
       document.getElementById('homeActive').textContent = stats.activePolls;
       document.getElementById('homeStates').textContent = stats.statesCovered;
+      document.getElementById('homeDemoNotice').hidden = !stats.syntheticPolls;
     }
 
     /* Hero card: the biggest live presidency poll, or else the biggest live poll */
@@ -477,6 +489,7 @@
       document.getElementById('heroTakePoll').href = 'poll.html?id=' + poll.id;
       document.getElementById('heroResults').href = 'results.html?id=' + poll.id;
       document.getElementById('heroCardLabel').textContent = PulseLive.shortTitle(poll.title) + ' — live';
+      document.getElementById('heroDemoNotice').hidden = !poll.isSynthetic;
       card.setAttribute('aria-label', 'Featured poll result: ' + poll.title);
 
       const percent = h ? Math.round(h.percent) : 0;
@@ -485,14 +498,18 @@
       document.getElementById('heroRingLabel').textContent = h ? percent + '%' : '–';
 
       const question = results.questions[0];
+      /* Below the minimum group size the API withholds percentages */
+      const waiting = !h && results.resultsWithheld && results.totalResponses > 0;
       document.getElementById('heroMetaTitle').textContent = h
         ? (h.approval ? 'Overall approval' : shareName(h).charAt(0).toUpperCase() + shareName(h).slice(1))
-        : 'No responses yet';
+        : waiting ? plural(results.totalResponses, 'response') + ' so far' : 'No responses yet';
       document.getElementById('heroMetaSub').innerHTML = h
-        ? 'Based on ' + plural(results.totalResponses, 'response') + '<br>From ' + question.byState.length + ' of 40 states'
-        : '<a href="poll.html?id=' + poll.id + '">Be the first to respond</a>';
+        ? 'Based on ' + plural(results.totalResponses, 'response') + '<br>From ' + results.statesCovered + ' of 40 states'
+        : waiting
+          ? 'Results appear once ' + results.minGroupSize + ' people have answered. <a href="poll.html?id=' + poll.id + '">Take the poll</a>'
+          : '<a href="poll.html?id=' + poll.id + '">Be the first to respond</a>';
 
-      document.getElementById('heroBars').innerHTML = question.options.map(function (o, i) {
+      document.getElementById('heroBars').innerHTML = (results.resultsWithheld ? [] : question.options).map(function (o, i) {
         const pct = Math.round(o.percent);
         return '<div class="mini-bar-row" title="' + escapeHtml(o.text + ': ' + pct + '% (' + plural(o.count, 'response') + ')') + '">' +
           '<span class="mini-bar-label">' + escapeHtml(o.text) + '</span>' +

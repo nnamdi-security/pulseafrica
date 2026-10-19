@@ -38,9 +38,10 @@ polls.created_by_id ──> users.id   (nullable; SET NULL when that user is del
 | `description` | text | |
 | `category` | varchar(64), **indexed** | one of `CATEGORIES` (app only) |
 | `status` | enum `poll_status` (`draft`, `active`, `closed`), **indexed** | default `draft` |
-| `closes_at` | timestamptz, nullable | enforced on submission: no responses once it has passed ([INT-01](AUDIT.md#int-01)); `status` isn't changed automatically |
+| `closes_at` | timestamptz, nullable | once it has passed, responses are refused and the API reports the poll as `closed` ([INT-01](AUDIT.md#int-01)); the stored `status` isn't changed |
 | `created_by_id` | FK → `users.id`, `ON DELETE SET NULL` | |
 | `created_at` | timestamptz | `server_default now()` |
+| `is_synthetic` | boolean, not null | `server_default false`; `true` for seeded demonstration polls (migration `0003`, [METH-01](AUDIT.md#meth-01)) |
 
 ### `questions` and `options`
 
@@ -86,7 +87,8 @@ One row per person per poll. It holds the demographics *as reported at submissio
 | File | Revision | Change |
 |---|---|---|
 | `alembic/versions/0001_initial_schema.py` | `b25877c8f6ad` | All six tables, the two enums, every index and constraint. The downgrade also drops the enum types |
-| `alembic/versions/0002_response_education_occupation.py` | `95431265aad4` (head) | Adds the nullable `responses.education` and `responses.occupation` |
+| `alembic/versions/0002_response_education_occupation.py` | `95431265aad4` | Adds the nullable `responses.education` and `responses.occupation` |
+| `alembic/versions/0003_poll_is_synthetic.py` | `9a1a4b1d975d` (head) | Adds `polls.is_synthetic`, and marks existing polls that `@demo.pulseafrica.example` accounts answered, printing each one. The downgrade drops the column |
 
 The filenames were renamed for readability; the revision ids inside them are what Alembic uses.
 
@@ -120,7 +122,7 @@ The filenames were renamed for readability; the revision ids inside them are wha
 - **Linked answers:** answers are linkable to accounts through `responses.user_id`. The link is necessary for one-response-per-user and for deleting an account's data. Public copy currently says otherwise ([PRIV-02](AUDIT.md#priv-02)).
 - **Demographics:** state and age range are personal data; gender, education and occupation are optional for each response.
 - **Who sees what:**
-  - **Public:** only aggregates. Small groups are not yet suppressed ([PRIV-01](AUDIT.md#priv-01)).
+  - **Public:** only aggregates. Groups and trend periods under 10 responses are withheld, and polls under 10 responses show totals only ([PRIV-01](AUDIT.md#priv-01)). Someone watching the live results while a known person answers could still see which group moved; that needs a separate decision.
   - **Admins:** see emails and per-user response *counts*, but no endpoint returns any individual's answers.
-- **Synthetic data:** seeded demo accounts use `@demo.pulseafrica.example` emails and have unknown passwords. Their responses aren't flagged as synthetic ([METH-01](AUDIT.md#meth-01)).
+- **Synthetic data:** seeded demo accounts use `@demo.pulseafrica.example` emails and have unknown passwords. The polls they answer are flagged `is_synthetic`, and the pages label them as demonstration data ([METH-01](AUDIT.md#meth-01)).
 - **No retention policy:** data is kept until the account or poll is deleted. Production backups and retention aren't defined yet ([DEPLOYMENT.md](DEPLOYMENT.md)).

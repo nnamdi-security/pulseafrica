@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.core.security import create_access_token, hash_password
 from app.models import User, UserRole
 
 # Uses in-memory SQLite by default so tests run with no setup.
@@ -23,7 +24,9 @@ if TEST_DATABASE_URL.startswith("sqlite"):
         TEST_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
 else:
-    engine = create_engine(TEST_DATABASE_URL)
+    # The tables (and their enum types) are recreated for every test, so psycopg's automatically
+    # prepared statements would point at dropped types ("cached plan must not change result type").
+    engine = create_engine(TEST_DATABASE_URL, connect_args={"prepare_threshold": None})
 
 TestingSession = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
@@ -77,3 +80,19 @@ def admin_headers(client, db):
     user.role = UserRole.admin
     db.commit()
     return headers
+
+
+_UNUSED_PASSWORD_HASH = hash_password("not-used-to-sign-in")
+
+
+def make_citizens(db, count: int, prefix: str = "respondent") -> list[dict[str, str]]:
+    """Auth headers for `count` new citizens. They're inserted directly, sharing one password
+    hash, because registering dozens of users through the API makes privacy tests slow."""
+    users = [
+        User(full_name=f"Respondent {i}", email=f"{prefix}{i}@example.com", hashed_password=_UNUSED_PASSWORD_HASH,
+             state="ENUGU STATE", age_range="25–34")
+        for i in range(count)
+    ]
+    db.add_all(users)
+    db.commit()
+    return [{"Authorization": f"Bearer {create_access_token(user.id)}"} for user in users]

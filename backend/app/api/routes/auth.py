@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import delete, select, update
 
 from app.api.deps import CurrentUser, DbSession
-from app.api.rules import ensure_another_active_admin
+from app.api.rules import effective_status, ensure_another_active_admin
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import Answer, Poll, Response, User
 from app.schemas.user import (
@@ -106,7 +106,7 @@ def my_responses(db: DbSession, user: CurrentUser) -> list[MyResponse]:
             poll_id=poll.id,
             poll_title=poll.title,
             category=poll.category,
-            poll_status=poll.status.value,
+            poll_status=effective_status(poll).value,
             closes_at=poll.closes_at,
             responded_at=responded_at,
         )

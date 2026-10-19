@@ -11,3 +11,5 @@ class PlatformStats(CamelModel):
     responses_last_7_days: int
     # The live poll with the most responses in the last 7 days (None if there were none)
     trending_poll_id: int | None
+    # Public polls holding demonstration data; pages label the figures when this isn't 0
+    synthetic_polls: int

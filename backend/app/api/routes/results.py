@@ -1,14 +1,29 @@
 from collections import defaultdict
+from datetime import date, timedelta
 
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import DbSession
+from app.core.constants import MIN_GROUP_SIZE
 from app.models import Answer, Poll, PollStatus, Question, Response
-from app.schemas.results import GroupResult, OptionResult, PollResults, QuestionResult, TrendPoint
+from app.schemas.results import (
+    GroupResult,
+    OptionResult,
+    PollResults,
+    QuestionResult,
+    TrendPoint,
+    Withheld,
+    WithheldGroups,
+)
 
 router = APIRouter(prefix="/results", tags=["results"])
+
+# Polls whose responses span more days than this have their trend grouped by week, then by month
+DAILY_TREND_MAX_DAYS = 21
+WEEKLY_TREND_MAX_DAYS = 182
+INTERVALS = ["day", "week", "month"]
 
 
 def _option_results(question: Question, counts: dict[int, int]) -> list[OptionResult]:
@@ -24,6 +39,43 @@ def _option_results(question: Question, counts: dict[int, int]) -> list[OptionRe
     ]
 
 
+def _shown_groups(by_group: dict[str, dict[int, int]], total: int) -> tuple[list[str], Withheld]:
+    """The groups that are safe to publish (PRIV-01, decision 0001).
+
+    Groups under MIN_GROUP_SIZE are withheld. If the responses left out would then add up to
+    between 1 and MIN_GROUP_SIZE - 1, they could be recovered by subtracting the shown groups
+    from the overall counts, so the smallest shown group is withheld too, until the remainder
+    is 0 or at least MIN_GROUP_SIZE. The remainder includes people who skipped an optional question.
+    """
+    sizes = {group: sum(counts.values()) for group, counts in by_group.items()}
+    shown = {group for group, size in sizes.items() if size >= MIN_GROUP_SIZE}
+
+    def remainder() -> int:
+        return total - sum(sizes[group] for group in shown)
+
+    while shown and 0 < remainder() < MIN_GROUP_SIZE:
+        shown.remove(min(shown, key=lambda group: (sizes[group], group)))
+    return sorted(shown), Withheld(groups=len(sizes) - len(shown), responses=remainder())
+
+
+def _trend_interval(days: list[str]) -> str:
+    if not days:
+        return "day"
+    span = (date.fromisoformat(max(days)) - date.fromisoformat(min(days))).days
+    if span <= DAILY_TREND_MAX_DAYS:
+        return "day"
+    return "week" if span <= WEEKLY_TREND_MAX_DAYS else "month"
+
+
+def _period_start(day: str, interval: str) -> str:
+    d = date.fromisoformat(day)
+    if interval == "week":
+        d -= timedelta(days=d.weekday())  # Monday
+    elif interval == "month":
+        d = d.replace(day=1)
+    return d.isoformat()
+
+
 @router.get("/{poll_id}", response_model=PollResults)
 def poll_results(poll_id: int, db: DbSession) -> PollResults:
     poll = db.scalar(
@@ -35,6 +87,9 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
 
     total_responses = db.scalar(select(func.count()).where(Response.poll_id == poll_id)) or 0
+    states_covered = db.scalar(
+        select(func.count(func.distinct(Response.state))).where(Response.poll_id == poll_id)
+    ) or 0
 
     # Overall answer counts per option: overall[question_id][option_id] = count
     overall: dict[int, dict[int, int]] = defaultdict(dict)
@@ -74,29 +129,78 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
         created = func.timezone("UTC", created)
     by_day = breakdown(func.date(created))
 
-    def groups(by_group: dict, question: Question) -> list[GroupResult]:
-        return [
-            GroupResult(group=group, total=sum(c.values()), options=_option_results(question, c))
-            for group, c in sorted(by_group[question.id].items())
-        ]
+    # Long polls are grouped by week or month, and so is a poll whose days are too small to show
+    # at least two of them, so periods can reach the minimum size. Suppression then applies to the
+    # periods that are published. Everyone answers every question, so the first question decides.
+    def periods(interval: str) -> dict:
+        by_period: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        for question_id, days in by_day.items():
+            for day, counts in days.items():
+                for option_id, count in counts.items():
+                    by_period[question_id][_period_start(day, interval)][option_id] += count
+        return by_period
 
-    questions = [
-        QuestionResult(
+    interval = _trend_interval([day for days in by_day.values() for day in days])
+    by_period = periods(interval)
+    if poll.questions:
+        first = poll.questions[0].id
+        for coarser in INTERVALS[INTERVALS.index(interval):]:
+            candidate = periods(coarser)
+            if len(_shown_groups(candidate[first], sum(overall[first].values()))[0]) >= 2:
+                interval, by_period = coarser, candidate
+                break
+
+    withheld_all = total_responses < MIN_GROUP_SIZE
+
+    def groups(by_group: dict, question: Question) -> tuple[list[GroupResult], Withheld]:
+        counts = by_group[question.id]
+        if withheld_all:
+            return [], Withheld(groups=len(counts), responses=sum(overall[question.id].values()))
+        shown, withheld = _shown_groups(counts, sum(overall[question.id].values()))
+        return [
+            GroupResult(group=group, total=sum(counts[group].values()), options=_option_results(question, counts[group]))
+            for group in shown
+        ], withheld
+
+    def question_result(question: Question) -> QuestionResult:
+        states, states_withheld = groups(by_state, question)
+        ages, ages_withheld = groups(by_age_range, question)
+        genders, genders_withheld = groups(by_gender, question)
+        education, education_withheld = groups(by_education, question)
+        occupations, occupations_withheld = groups(by_occupation, question)
+        periods, periods_withheld = groups(by_period, question)  # sorted by group, i.e. by date
+        options = _option_results(question, overall[question.id])
+        if withheld_all:
+            options = [o.model_copy(update={"count": None, "percent": None}) for o in options]
+        return QuestionResult(
             question_id=question.id,
             text=question.text,
             total=sum(overall[question.id].values()),
-            options=_option_results(question, overall[question.id]),
-            by_state=groups(by_state, question),
-            by_age_range=groups(by_age_range, question),
-            by_gender=groups(by_gender, question),
-            by_education=groups(by_education, question),
-            by_occupation=groups(by_occupation, question),
-            trend=[
-                TrendPoint(date=g.group, total=g.total, options=g.options)
-                for g in groups(by_day, question)  # sorted by group, i.e. by date
-            ],
+            options=options,
+            by_state=states,
+            by_age_range=ages,
+            by_gender=genders,
+            by_education=education,
+            by_occupation=occupations,
+            trend=[TrendPoint(date=p.group, total=p.total, options=p.options) for p in periods],
+            withheld=WithheldGroups(
+                by_state=states_withheld,
+                by_age_range=ages_withheld,
+                by_gender=genders_withheld,
+                by_education=education_withheld,
+                by_occupation=occupations_withheld,
+                trend=periods_withheld,
+            ),
         )
-        for question in poll.questions
-    ]
 
-    return PollResults(poll_id=poll.id, title=poll.title, total_responses=total_responses, questions=questions)
+    return PollResults(
+        poll_id=poll.id,
+        title=poll.title,
+        is_synthetic=poll.is_synthetic,
+        total_responses=total_responses,
+        min_group_size=MIN_GROUP_SIZE,
+        results_withheld=withheld_all,
+        states_covered=states_covered,
+        trend_interval=interval,
+        questions=[question_result(question) for question in poll.questions],
+    )

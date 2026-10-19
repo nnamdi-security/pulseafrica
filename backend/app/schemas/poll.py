@@ -78,6 +78,8 @@ class PollSummary(CamelModel):
     status: PollStatus
     closes_at: datetime | None
     created_at: datetime
+    # Demonstration data (from the seed), not genuine responses
+    is_synthetic: bool
     response_count: int = 0
     question_count: int = 0
     # Answer split for the poll's first question, for the cards' sentiment bar
