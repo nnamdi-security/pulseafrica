@@ -8,6 +8,10 @@ drops the database again. Nothing else is touched.
 
 E2E_POSTGRES_URL names any database on the server the suite may connect to in order to
 create and drop its own; the role needs CREATEDB.
+
+The new Next.js frontend (decisions 0016 and 0018) is tested by the same suite. If it has
+been built (`cd frontend && pnpm build`), it is started on 127.0.0.1:3000 and its tests run;
+otherwise they are skipped, unless E2E_REQUIRE_FRONTEND=1 (as in CI) makes that an error.
 """
 
 import json
@@ -27,8 +31,11 @@ from playwright.sync_api import Page, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 BACKEND = ROOT / "backend"
+FRONTEND = ROOT / "frontend"
 API = "http://localhost:8000/api"
 SITE = "http://127.0.0.1:5500"
+# The Next.js app; its /api/* is proxied to the API above (frontend/next.config.ts)
+APP = "http://127.0.0.1:3000"
 PASSWORD = "secret123"
 
 expect.set_options(timeout=10_000)
@@ -111,13 +118,23 @@ def stack(tmp_path_factory):
         for step in (["alembic", "upgrade", "head"], ["app.seed"]):
             subprocess.run([sys.executable, "-m", *step], cwd=BACKEND, env=env, check=True, capture_output=True)
 
-        for label, command, cwd, url in [
-            ("api", ["uvicorn", "app.main:app", "--host", "localhost", "--port", "8000"], BACKEND, API + "/health"),
-            ("site", ["http.server", "5500", "--bind", "127.0.0.1"], ROOT, SITE + "/index.html"),
-        ]:
+        servers = [
+            ("api", [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "localhost", "--port", "8000"],
+             BACKEND, API + "/health"),
+            ("site", [sys.executable, "-m", "http.server", "5500", "--bind", "127.0.0.1"], ROOT, SITE + "/index.html"),
+        ]
+        frontend_built = (FRONTEND / ".next" / "BUILD_ID").exists()
+        if frontend_built:
+            servers.append(("app", [str(FRONTEND / "node_modules" / ".bin" / "next"), "start", "-H", "127.0.0.1",
+                                    "-p", "3000"], FRONTEND, APP + "/"))
+        elif os.environ.get("E2E_REQUIRE_FRONTEND") == "1":
+            pytest.exit("E2E_REQUIRE_FRONTEND=1 but frontend/ isn't built. Run `pnpm build` in frontend/.", returncode=4)
+
+        for label, command, cwd, url in servers:
             log = logs / f"{label}.log"
             process = subprocess.Popen(
-                [sys.executable, "-m", *command], cwd=cwd, env=env, stdout=log.open("w"), stderr=subprocess.STDOUT
+                command, cwd=cwd, env={**env, "NEXT_TELEMETRY_DISABLED": "1"}, stdout=log.open("w"),
+                stderr=subprocess.STDOUT,
             )
             processes.append(process)
             _wait_for(url, process, log)
@@ -125,13 +142,21 @@ def stack(tmp_path_factory):
         admin = register("admin", fullName="Tunde Bakare")
         subprocess.run([sys.executable, "-m", "app.create_admin", admin.email], cwd=BACKEND, env=env, check=True,
                        capture_output=True)
-        yield {"admin": admin}
+        yield {"admin": admin, "frontend": frontend_built}
     finally:
         for process in processes:
             process.terminate()
             process.wait(timeout=10)
         with psycopg.connect(server, autocommit=True) as conn:
             conn.execute(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)')
+
+
+@pytest.fixture
+def app_url(stack) -> str:
+    """The Next.js frontend's address; its tests are skipped when it hasn't been built."""
+    if not stack["frontend"]:
+        pytest.skip("frontend/ isn't built (cd frontend && pnpm build)")
+    return APP
 
 
 @pytest.fixture

@@ -26,3 +26,6 @@ Thumbs.db
 
 # Browser test traces (e2e/)
 test-results/
+
+# Shell screenshots for review (e2e/test_frontend_shell.py)
+e2e/screenshots/
