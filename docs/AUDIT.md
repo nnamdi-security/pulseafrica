@@ -85,7 +85,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - Resolve `.env` relative to the `backend/` directory.
   - Add a startup test for the guard.
 - **Verification status:** Reproduced.
-- **Resolution (M1):** fixed. `jwt_secret_key` has no default; settings refuse a missing key, `change-me`, or one under 32 bytes, with an error naming the generate command. `.env` is read from `backend/` regardless of the working directory. Tests: `tests/test_config.py`.
+- **Resolution (M1, commit `da8fe54`):** fixed. `jwt_secret_key` has no default; settings refuse a missing key, `change-me`, or one under 32 bytes, with an error naming the generate command. `.env` is read from `backend/` regardless of the working directory. Tests: `tests/test_config.py`.
 
 <a id="sec-02"></a>
 ### SEC-02: Passwords over 72 bytes crash with a 500 (HIGH)
@@ -101,7 +101,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - In `verify_password`, treat over-length input as a failed match.
   - Add tests for 72/73-byte and multi-byte passwords.
 - **Verification status:** Reproduced.
-- **Resolution (M1):** fixed. `NewPassword` rejects more than 72 UTF-8 bytes with a 422 that says so (the old 128-character cap is replaced by the byte cap). `verify_password` treats over-length input as a failed match, so login gives 401 and the password re-checks give 403. The register and change-password placeholders now read "8 to 72 characters". Tests in `test_auth.py` and `test_account.py`.
+- **Resolution (M1, commit `0592cb9`):** fixed. `NewPassword` rejects more than 72 UTF-8 bytes with a 422 that says so (the old 128-character cap is replaced by the byte cap). `verify_password` treats over-length input as a failed match, so login gives 401 and the password re-checks give 403. The register and change-password placeholders now read "8 to 72 characters". Tests in `test_auth.py` and `test_account.py`.
 
 <a id="sec-03"></a>
 ### SEC-03: No rate limiting or lockout (HIGH)
@@ -122,7 +122,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** results keep changing after the published close, which undermines "final results" and the "Closed" labels.
 - **Recommended fix:** reject responses when `closes_at <= now` (409, "This poll has closed"). Either derive an *effective status* in the API, or close polls with a scheduled job. Add tests.
 - **Verification status:** Reproduced.
-- **Resolution (M1, part 1):** `POST /api/responses` now answers 409 "This poll is closed" once `closes_at` has passed, and the results don't change (tests in `test_polls.py`, run on SQLite and Postgres). The date check is shared with `_check_can_open` through `closing_date_passed` in `app/api/rules.py`.
+- **Resolution (M1, part 1, commit `63fe6c1`):** `POST /api/responses` now answers 409 "This poll is closed" once `closes_at` has passed, and the results don't change (tests in `test_polls.py`, run on SQLite and Postgres). The date check is shared with `_check_can_open` through `closing_date_passed` in `app/api/rules.py`.
 - **Still open (part 2):** lists, detail, stats, the admin overview and `/auth/me/responses` still report such a poll as `active`. Deriving an effective status waits on owner decision INT-01a.
 
 <a id="priv-01"></a>
@@ -201,7 +201,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** nobody can manage polls or users until someone runs `python -m app.create_admin` on the server.
 - **Recommended fix:** apply the same last-active-admin guard (409) in `delete_account`, and add a test.
 - **Verification status:** Reproduced.
-- **Resolution (M1):** fixed. `DELETE /api/auth/me` now answers 409 "There must always be at least one active admin." for the last active admin, after the password check. The guard lives in `app/api/rules.py` and is shared with `PATCH /api/admin/users/{id}`. **Known remaining race:** two admins deleting or demoting each other at the same instant could both pass the count; the PATCH path had the same race before this fix, and it's accepted for now.
+- **Resolution (M1, commit `89b28a3`):** fixed. `DELETE /api/auth/me` now answers 409 "There must always be at least one active admin." for the last active admin, after the password check. The guard lives in `app/api/rules.py` and is shared with `PATCH /api/admin/users/{id}`. **Known remaining race:** two admins deleting or demoting each other at the same instant could both pass the count; the PATCH path had the same race before this fix, and it's accepted for now.
 
 <a id="sec-07"></a>
 ### SEC-07: No security headers (MEDIUM)
@@ -388,7 +388,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - **`.gitignore`:** only `backend/.gitignore` exists, so files like `__pycache__` or a root-level `.env` could be committed by mistake.
 - **Recommended fix:** correct the README statements (done in this branch, see below). Add a root `.gitignore` in Milestone 1, since it's a repository-hygiene change rather than documentation.
 - **Verification status:** Confirmed (inspection).
-- **Resolution (M1):** fixed. The README was corrected in Milestone 0; a root `.gitignore` now covers `.env` files, Python caches and virtualenvs, `node_modules/`, and editor and OS files. No tracked file became ignored.
+- **Resolution (M1, commit `db7322d`):** fixed. The README was corrected in Milestone 0; a root `.gitignore` now covers `.env` files, Python caches and virtualenvs, `node_modules/`, and editor and OS files. No tracked file became ignored.
 
 <a id="be-04"></a>
 ### BE-04: Admins can't preview draft results (IMPROVEMENT)
