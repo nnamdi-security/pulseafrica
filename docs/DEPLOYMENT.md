@@ -6,7 +6,7 @@
 
 | Assumption | Where | Production implication |
 |---|---|---|
-| The API runs from `backend/` and reads `backend/.env` | `core/config.py` | Set **real environment variables**; don't rely on `.env` files. Add the fail-closed secret check first ([SEC-01](AUDIT.md#sec-01)) |
+| The API runs from `backend/` and reads `backend/.env` | `core/config.py` | Set **real environment variables**; don't rely on `.env` files. The API refuses to start without a strong `JWT_SECRET_KEY` ([SEC-01](AUDIT.md#sec-01)) |
 | The frontend calls `http://localhost:8000/api` | `api.js` | Set `window.PULSE_API_BASE` in every page, or serve the API at `/api` on the same origin and change the default to `/api` |
 | CORS allows `localhost:5500` only | `CORS_ORIGINS` | Set it to the real frontend origin. With a same-origin setup, CORS isn't needed |
 | `uvicorn --reload`, one process | `backend/README.md` | Run without reload, with several workers behind a proxy, and trust the forwarded headers |
@@ -46,7 +46,7 @@ The README's original plan (Vercel + Render + managed Postgres) is reasonable fo
 | Variable | Dev default | Production |
 |---|---|---|
 | `DATABASE_URL` | `postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica` | Managed Postgres URL with `sslmode=require` |
-| `JWT_SECRET_KEY` | `.env` value; **falls back to `change-me`** (SEC-01) | Required, strong, unique per environment |
+| `JWT_SECRET_KEY` | `.env` value; required, 32+ bytes, never `change-me` (enforced at startup) | Required, strong, unique per environment |
 | `JWT_EXPIRE_MINUTES` | 60 | 15–60 |
 | `CORS_ORIGINS` | Live Server origins | The frontend origin(s) only, or none if same-origin |
 | *(proposed)* `ENVIRONMENT`, `DOCS_ENABLED`, `DEMO_MODE`, `LOG_LEVEL` | — | `production`, `false`, `false`, `info` |

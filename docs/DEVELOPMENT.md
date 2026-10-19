@@ -24,7 +24,7 @@ python -m app.seed                   # OPTIONAL demo data; refuses to run if any
 uvicorn app.main:app --reload        # http://localhost:8000, docs at /docs
 ```
 
-> **Always start the API from `backend/`.** Settings read `.env` from the *current directory*. Started anywhere else, the API silently uses the insecure default secret ([SEC-01](AUDIT.md#sec-01)).
+> **`JWT_SECRET_KEY` is required.** The API, Alembic, `app.seed` and `app.create_admin` refuse to start if it is missing, still `change-me`, or shorter than 32 bytes; the error names the command above. Settings read `backend/.env` whichever directory you start from, and real environment variables override it.
 
 **The first admin:** register through the site or `/docs`, then run `python -m app.create_admin you@example.com`. After that, admins can promote others from `admin.html`.
 
@@ -59,7 +59,7 @@ python -m http.server 5500 --bind 127.0.0.1    # then open http://127.0.0.1:5500
 |---|---|
 | Pages say "We couldn't reach the PulseAfrica server" | The API isn't running on `:8000`; or the page was opened via `file://`, or from an origin not in `CORS_ORIGINS` |
 | `psycopg.OperationalError: connection refused` | Postgres isn't running: `docker compose up -d` in `backend/` |
-| Every request returns 401 after restarting the API | `JWT_SECRET_KEY` changed, or the API was started from another directory (so it picked a different secret). Sign in again |
+| Every request returns 401 after restarting the API | `JWT_SECRET_KEY` changed. Sign in again |
 | 500 on register or login | A password over 72 bytes ([SEC-02](AUDIT.md#sec-02)) |
 | `alembic check` reports differences | A model changed without a migration |
 | Results show groups faded | Fewer than 5 responses in that group (by design) |

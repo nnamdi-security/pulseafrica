@@ -55,7 +55,7 @@ docs/                  product, architecture, audit, API, DB, security, testing,
    - Breaking changes need every consumer (all pages and `api.js`) updated in the same PR. See [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md).
 5. **Escape all API text** before `innerHTML` (`escapeHtml`), or use `textContent`.
 6. **Privacy:** never expose an individual's answers; treat small demographic groups as sensitive.
-7. **No secrets in git:** no `.env`, tokens or credentials. Start the API **from `backend/`** (settings read `.env` from the current directory).
+7. **No secrets in git:** no `.env`, tokens or credentials. Settings read `backend/.env` from any directory, and the API refuses to start without a strong `JWT_SECRET_KEY`.
 8. **Never run destructive commands against a database you didn't create for the purpose:** `alembic downgrade`, `app.seed`, a `TEST_DATABASE_URL` pointing at real data, or `DROP`.
 
 Rules by area: [frontend](.claude/rules/frontend.md) · [backend](.claude/rules/backend.md) · [security](.claude/rules/security.md) · [testing](.claude/rules/testing.md) · [workflow](.claude/rules/workflow.md).
@@ -80,7 +80,6 @@ python -m http.server 5500 --bind 127.0.0.1
 
 Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them **only** when a task covers them.
 
-- **CRITICAL:** SEC-01 (default JWT secret fallback).
 - **HIGH:**
   - SEC-02 (over-72-byte passwords → 500);
   - SEC-03 (no rate limiting);

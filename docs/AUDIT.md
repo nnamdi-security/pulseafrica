@@ -18,7 +18,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 
 | ID | Priority | Area | Finding | Status |
 |---|---|---|---|---|
-| [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Reproduced |
+| [SEC-01](#sec-01) | CRITICAL | Security | A missing JWT secret falls back to the public default `"change-me"`, so anyone can forge tokens | Fixed (M1) |
 | [SEC-02](#sec-02) | HIGH | Security / reliability | Passwords over 72 bytes crash register, login and change-password with a 500 | Reproduced |
 | [SEC-03](#sec-03) | HIGH | Security | No rate limiting or lockout on any auth endpoint | Confirmed (inspection) |
 | [INT-01](#int-01) | HIGH | Poll integrity | Polls keep accepting responses after their closing date | Reproduced |
@@ -85,6 +85,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - Resolve `.env` relative to the `backend/` directory.
   - Add a startup test for the guard.
 - **Verification status:** Reproduced.
+- **Resolution (M1):** fixed. `jwt_secret_key` has no default; settings refuse a missing key, `change-me`, or one under 32 bytes, with an error naming the generate command. `.env` is read from `backend/` regardless of the working directory. Tests: `tests/test_config.py`.
 
 <a id="sec-02"></a>
 ### SEC-02: Passwords over 72 bytes crash with a 500 (HIGH)

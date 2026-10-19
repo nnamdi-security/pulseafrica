@@ -1,5 +1,8 @@
 import os
 
+# The API refuses to start without a strong secret, so set a test-only one before the app is imported.
+os.environ["JWT_SECRET_KEY"] = "test-only-secret-not-for-real-use-0123456789"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
