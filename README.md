@@ -4,7 +4,7 @@
 
 PulseAfrica lets citizens participate in public opinion polls, rate the performance of public leaders, and view transparent, methodology-backed results — in the spirit of YouGov or Pew Research Center, scoped for a solo full-stack developer to build end to end.
 
-This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no framework) and the start of the **Phase 2 backend** (Python, FastAPI, PostgreSQL) in [`backend/`](backend/). It is a work in progress.
+This repository contains the frontend (HTML, CSS, vanilla JS, no framework) and the backend API (Python, FastAPI, PostgreSQL) in [`backend/`](backend/). Every page in the original brief exists and runs on the API. It is a work in progress: see [`docs/ROADMAP.md`](docs/ROADMAP.md) and the open findings in [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ---
 
@@ -23,6 +23,20 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 - **The nav** on every page shows the signed-in user's name and a Sign out button
 
 No page shows hard-coded poll numbers any more.
+
+---
+
+## Documentation
+
+| | |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Instructions for Claude Code sessions (rules in [`.claude/rules/`](.claude/rules/), workflows in [`.claude/skills/`](.claude/skills/)) |
+| [`docs/PRODUCT.md`](docs/PRODUCT.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | What PulseAfrica is, and how it's built |
+| [`docs/API_CONTRACTS.md`](docs/API_CONTRACTS.md) · [`docs/DATABASE.md`](docs/DATABASE.md) | Every endpoint; the schema and migrations |
+| [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Colours, type, components, accessibility |
+| [`docs/SECURITY.md`](docs/SECURITY.md) · [`docs/AUDIT.md`](docs/AUDIT.md) | Security model; prioritised audit findings |
+| [`docs/TESTING.md`](docs/TESTING.md) · [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Tests and baseline; local setup; deployment plan |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/FRONTEND_MIGRATION.md`](docs/FRONTEND_MIGRATION.md) · [`docs/decisions/`](docs/decisions/README.md) | Milestones and owner decisions; the proposed Next.js migration; decision records |
 
 ---
 
@@ -162,7 +176,7 @@ The connected pages need the backend running. Open the page through Live Server 
 - [x] Wire the results dashboard (`results.html?id=…`) to the API
 - [x] Wire the home page and ticker to the API
 - [x] Sign-in state in the nav (user's name, sign out) via `nav-auth.js`
-- [ ] Replace placeholder data with real database queries
+- [x] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates
 
 **Phase 4 — Deployment**
