@@ -46,8 +46,11 @@ What becomes easier, what becomes harder, what must now be done.
 
 | # | Decision | Status |
 |---|---|---|
-| — | No decision records have been written yet. | — |
+| [0001](0001-minimum-public-group-size.md) | Minimum public group size of 10, and hide overall percentages below it (D4, D4a) | Accepted (2026-10-19) |
+| [0002](0002-effective-poll-status.md) | Polls past their closing date show as Closed (INT-01a) | Accepted (2026-10-19) |
+| [0003](0003-privacy-and-methodology-copy.md) | Correct the privacy copy and relabel weighting as planned (D1, D2) | Accepted (2026-10-19) |
+| [0004](0004-demonstration-data-disclosure.md) | Flag and disclose demonstration data (D3) | Accepted (2026-10-19) |
 
-The pending decisions are D1–D7 in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
+The remaining pending decisions (D5–D7) are in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 
 **Earlier choices.** Some choices were made before this log existed, for example replacing the planned Node.js/Express/MongoDB backend with FastAPI and PostgreSQL (commit `3df4063`, which updated the README and the original brief). They're visible in git history. Record one retrospectively only if it's revisited, citing that commit as evidence, rather than reconstructing reasoning that wasn't written down at the time.
