@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DbSession
-from app.api.rules import closing_date_passed
+from app.api.rules import effective_status
 from app.models import Answer, Poll, PollStatus, Question, Response
 from app.schemas.response import ResponseCreate, ResponseOut
 
@@ -20,8 +20,8 @@ def submit_response(payload: ResponseCreate, db: DbSession, user: CurrentUser) -
     )
     if poll is None or poll.status == PollStatus.draft:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
-    # Nothing closes polls on their date, so a past closing date also counts as closed.
-    if poll.status != PollStatus.active or closing_date_passed(poll.closes_at):
+    # A past closing date also counts as closed
+    if effective_status(poll) != PollStatus.active:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This poll is closed")
 
     # Every question must be answered exactly once, with an option that belongs to it.

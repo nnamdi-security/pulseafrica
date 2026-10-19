@@ -73,7 +73,7 @@ Clients should show `detail` strings: they're written to be user-safe.
 - **Questions:** can only be replaced while a poll has **zero responses**. Replacing them creates new question and option ids.
 - **Back to draft:** a poll with responses can't return to `draft`.
 - **Opening:** setting `active` (on create or update), or changing `closesAt` on an active poll, requires `closesAt` to be in the future or `null`.
-- **Closing date:** `POST /responses` refuses an `active` poll whose `closesAt` has passed with 409 `"This poll is closed"`. The poll's `status` field is **not** derived from the date yet, so it can still read `active` ([INT-01](AUDIT.md#int-01), decision INT-01a).
+- **Closing date ([INT-01](AUDIT.md#int-01), [decision 0002](decisions/0002-effective-poll-status.md)):** a poll stored as `active` whose `closesAt` has passed is reported as `closed`: in `status` on every poll, in the `status` filter, in `/stats`, the admin overview and `/auth/me/responses`. `POST /responses` refuses it with 409 `"This poll is closed"`. Nothing rewrites the stored status, so reopening it needs a later `closesAt` (or `null`), otherwise the PATCH gets the 422 above.
 
 ### Responses
 

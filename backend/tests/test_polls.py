@@ -255,3 +255,40 @@ def test_simultaneous_duplicate_submissions_store_one_response(client, admin_hea
     assert codes == [201, 409]
     assert len(sessions) == 2
     assert client.get(f"/api/results/{poll['id']}").json()["totalResponses"] == 1
+
+
+def test_a_poll_past_its_closing_date_reports_closed(client, db, admin_headers, citizen_headers):
+    # Decision INT-01a: an active poll whose closing date has passed shows as closed everywhere.
+    due = create_poll(client, admin_headers, title="Past due")
+    live = create_poll(client, admin_headers, title="Still open")
+    submit(client, citizen_headers, due)
+    _move_closing_date(db, due, timedelta(seconds=-1))
+    _move_closing_date(db, live, timedelta(minutes=1))
+
+    statuses = {p["title"]: p["status"] for p in client.get("/api/polls").json()}
+    assert statuses == {"Past due": "closed", "Still open": "active"}
+    assert client.get(f"/api/polls/{due['id']}").json()["status"] == "closed"
+    assert [p["title"] for p in client.get("/api/polls?status=closed").json()] == ["Past due"]
+    assert [p["title"] for p in client.get("/api/polls?status=active").json()] == ["Still open"]
+
+    stats = client.get("/api/stats").json()
+    assert (stats["activePolls"], stats["closedPolls"]) == (1, 1)
+    assert stats["trendingPollId"] is None  # the only poll with responses has closed
+
+    overview = client.get("/api/admin/overview", headers=admin_headers).json()
+    assert (overview["activePolls"], overview["closedPolls"]) == (1, 1)
+    assert {p["title"]: p["status"] for p in overview["polls"]} == statuses
+
+    [mine] = client.get("/api/auth/me/responses", headers=citizen_headers).json()
+    assert mine["pollStatus"] == "closed"
+
+
+def test_reopening_a_past_due_poll_needs_a_new_closing_date(client, db, admin_headers):
+    poll = create_poll(client, admin_headers)
+    _move_closing_date(db, poll, timedelta(seconds=-1))
+    res = client.patch(f"/api/polls/{poll['id']}", json={"status": "active"}, headers=admin_headers)
+    assert res.status_code == 422
+    later = (datetime.now(timezone.utc) + timedelta(days=3)).isoformat()
+    res = client.patch(f"/api/polls/{poll['id']}", json={"status": "active", "closesAt": later}, headers=admin_headers)
+    assert res.status_code == 200
+    assert res.json()["status"] == "active"

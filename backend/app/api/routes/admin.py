@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 
 from app.api.deps import AdminUser, DbSession
-from app.api.rules import ensure_another_active_admin
+from app.api.rules import effective_status, ensure_another_active_admin
 from app.models import Poll, PollStatus, Response, User, UserRole
 from app.schemas.admin import (
     AdminOverview,
@@ -29,7 +29,6 @@ def overview(db: DbSession, admin: AdminUser) -> AdminOverview:
 
     users = dict(db.execute(select(User.is_active, func.count()).group_by(User.is_active)).all())
     admins = db.scalar(select(func.count()).where(User.role == UserRole.admin)) or 0
-    polls_by_status = dict(db.execute(select(Poll.status, func.count()).group_by(Poll.status)).all())
 
     # Responses per poll, in total and in the last week
     totals = dict(db.execute(select(Response.poll_id, func.count()).group_by(Response.poll_id)).all())
@@ -63,7 +62,7 @@ def overview(db: DbSession, admin: AdminUser) -> AdminOverview:
     participation = sorted(
         (
             PollParticipation(
-                id=p.id, title=p.title, category=p.category, status=p.status, closes_at=p.closes_at,
+                id=p.id, title=p.title, category=p.category, status=effective_status(p), closes_at=p.closes_at,
                 response_count=totals.get(p.id, 0), responses_last_7_days=recent.get(p.id, 0),
             )
             for p in polls
@@ -77,9 +76,9 @@ def overview(db: DbSession, admin: AdminUser) -> AdminOverview:
         suspended_users=users.get(False, 0),
         admins=admins,
         total_polls=len(polls),
-        draft_polls=polls_by_status.get(PollStatus.draft, 0),
-        active_polls=polls_by_status.get(PollStatus.active, 0),
-        closed_polls=polls_by_status.get(PollStatus.closed, 0),
+        draft_polls=sum(p.status == PollStatus.draft for p in participation),
+        active_polls=sum(p.status == PollStatus.active for p in participation),
+        closed_polls=sum(p.status == PollStatus.closed for p in participation),
         total_responses=sum(totals.values()),
         responses_last_7_days=sum(recent.values()),
         daily_responses=daily,

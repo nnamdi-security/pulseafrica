@@ -5,7 +5,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import AdminUser, DbSession, OptionalUser
-from app.api.rules import closing_date_passed
+from app.api.rules import closing_date_passed, effective_status, has_effective_status
 from app.core.constants import MIN_GROUP_SIZE
 from app.models import Answer, Option, Poll, PollStatus, Question, Response, User, UserRole
 from app.schemas.poll import PollCreate, PollOut, PollSummary, PollUpdate, PreviewOption, QuestionIn
@@ -53,6 +53,7 @@ def _stats(db: Session, polls: list[Poll]) -> dict[int, dict]:
                 for o, c in zip(question.options, counts)
             ]
         stats[poll.id] = {
+            "status": effective_status(poll),
             "response_count": response_counts.get(poll.id, 0),
             "question_count": len(poll.questions),
             "preview": preview,
@@ -75,7 +76,7 @@ def list_polls(
     if category:
         query = query.where(Poll.category == category)
     if status_filter:
-        query = query.where(Poll.status == status_filter)
+        query = query.where(has_effective_status(status_filter))
     if search:
         query = query.where(Poll.title.ilike(f"%{search}%"))
     polls = list(db.scalars(query))
