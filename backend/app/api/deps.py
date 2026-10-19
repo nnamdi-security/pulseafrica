@@ -20,11 +20,13 @@ def get_optional_user(
     """The logged-in user if a valid token was sent, otherwise None."""
     if credentials is None:
         return None
-    user_id = decode_access_token(credentials.credentials)
-    if user_id is None:
+    claims = decode_access_token(credentials.credentials)
+    if claims is None:
         return None
+    user_id, token_version = claims
     user = db.get(User, user_id)
-    return user if user and user.is_active else None
+    # A raised version means the user signed out, changed password or was suspended or demoted since.
+    return user if user and user.is_active and user.token_version == token_version else None
 
 
 def get_current_user(user: Annotated[User | None, Depends(get_optional_user)]) -> User:

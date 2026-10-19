@@ -23,4 +23,6 @@ class User(Base):
     age_range: Mapped[str] = mapped_column(String(16))
     role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="user_role"), default=UserRole.citizen)
     is_active: Mapped[bool] = mapped_column(default=True)
+    # Carried in every token as `ver`; raising it revokes all earlier tokens (SEC-05, decision 0010).
+    token_version: Mapped[int] = mapped_column(default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

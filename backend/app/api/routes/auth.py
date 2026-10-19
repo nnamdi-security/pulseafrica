@@ -50,7 +50,14 @@ def login(payload: UserLogin, db: DbSession, request: Request) -> Token:
     if user is None or not verify_password(payload.password, user.hashed_password) or not user.is_active:
         ratelimit.record(db, ratelimit.FAILED_LOGINS_PER_ACCOUNT, email)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
-    return Token(access_token=create_access_token(user.id))
+    return Token(access_token=create_access_token(user.id, user.token_version))
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(db: DbSession, user: CurrentUser) -> None:
+    """Signs the user out everywhere: every token issued so far stops working (decision 0010)."""
+    user.token_version += 1
+    db.commit()
 
 
 @router.get("/me", response_model=UserOut)
@@ -81,6 +88,7 @@ def _check_password(db: DbSession, user: User, password: str) -> None:
 def change_password(payload: PasswordChange, db: DbSession, user: CurrentUser) -> None:
     _check_password(db, user, payload.current_password)
     user.hashed_password = hash_password(payload.new_password)
+    user.token_version += 1  # a stolen token stops working once the password changes (SEC-05)
     db.commit()
 
 

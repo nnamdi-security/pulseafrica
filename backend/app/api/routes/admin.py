@@ -145,6 +145,9 @@ def update_user(user_id: int, payload: AdminUserUpdate, db: DbSession, admin: Ad
     if removes_admin:
         ensure_another_active_admin(db, user)
 
+    # Suspension and demotion take effect at once, rather than when the user's tokens expire.
+    if payload.is_active is False or (payload.role == UserRole.citizen and user.role == UserRole.admin):
+        user.token_version += 1
     if payload.is_active is not None:
         user.is_active = payload.is_active
     if payload.role is not None:

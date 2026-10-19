@@ -95,4 +95,4 @@ def make_citizens(db, count: int, prefix: str = "respondent") -> list[dict[str, 
     ]
     db.add_all(users)
     db.commit()
-    return [{"Authorization": f"Bearer {create_access_token(user.id)}"} for user in users]
+    return [{"Authorization": f"Bearer {create_access_token(user.id, user.token_version)}"} for user in users]

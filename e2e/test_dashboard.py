@@ -47,6 +47,9 @@ def test_history_profile_password_and_delete(page: Page, citizen, console_errors
     password.get_by_role("button", name="Change password").click()
     expect(page.locator("#password-alert")).to_contain_text("Your password has been changed.")
     assert api("POST", "/auth/login", {"email": citizen.email, "password": "newsecret1"})[0] == 200
+    # The change revoked the old token (decision 0010); the page signed in again and stays signed in.
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 401
+    expect(page.get_by_role("button", name="Sign out")).to_be_visible()
 
     delete = page.locator("#delete-form")
     delete.get_by_label("Enter your password to confirm").fill("newsecret1")

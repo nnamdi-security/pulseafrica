@@ -148,7 +148,14 @@
       });
     },
 
-    logout: clearToken,
+    // Signs out here at once, and asks the API to revoke every token of this user
+    // (decision 0010). A failed request leaves the old token to expire on its own.
+    logout: function () {
+      const token = getToken();
+      clearToken();
+      if (!token) return Promise.resolve();
+      return request('POST', '/auth/logout', undefined, { token: token }).catch(function () {});
+    },
 
     // changes: any of { fullName, state, ageRange } → the updated user (also cached)
     updateProfile: function (changes) {
@@ -158,10 +165,21 @@
       });
     },
 
-    // Rejects with status 403 if currentPassword is wrong
+    // Rejects with status 403 if currentPassword is wrong.
+    // A password change revokes every earlier token (decision 0010), so this signs
+    // in again with the new password to keep the user signed in on this page.
     changePassword: function (currentPassword, newPassword, confirmPassword) {
+      const user = getCachedUser();
+      let remember = false;
+      try { remember = tokenStore() === localStorage; } catch (e) { /* storage blocked */ }
       return request('POST', '/auth/me/password', {
         currentPassword: currentPassword, newPassword: newPassword, confirmPassword: confirmPassword
+      }).then(function () {
+        if (!user) { clearToken(); return; }
+        return request('POST', '/auth/login', { email: user.email, password: newPassword }).then(function (data) {
+          saveToken(data.accessToken, remember);
+          cacheUser(user);
+        }, function () { clearToken(); });
       });
     },
 
