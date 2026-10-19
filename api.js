@@ -150,6 +150,34 @@
 
     logout: clearToken,
 
+    // changes: any of { fullName, state, ageRange } → the updated user (also cached)
+    updateProfile: function (changes) {
+      return request('PATCH', '/auth/me', changes).then(function (user) {
+        cacheUser(user);
+        return user;
+      });
+    },
+
+    // Rejects with status 403 if currentPassword is wrong
+    changePassword: function (currentPassword, newPassword, confirmPassword) {
+      return request('POST', '/auth/me/password', {
+        currentPassword: currentPassword, newPassword: newPassword, confirmPassword: confirmPassword
+      });
+    },
+
+    // Deletes the account and its responses, then signs out locally.
+    // Rejects with status 403 if the password is wrong.
+    deleteAccount: function (password) {
+      return request('DELETE', '/auth/me', { password: password }).then(function () {
+        clearToken();
+      });
+    },
+
+    // → [{ pollId, pollTitle, category, pollStatus, closesAt, respondedAt }], newest first
+    myResponses: function () {
+      return request('GET', '/auth/me/responses');
+    },
+
     // query: { category, status, search } → list of polls
     listPolls: function (query) {
       const params = new URLSearchParams();

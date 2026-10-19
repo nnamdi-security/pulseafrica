@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Your PulseAfrica dashboard: your profile, the polls you have taken part in, and your account settings." />
+  <title>Your dashboard — PulseAfrica</title>
+  <meta name="robots" content="noindex" />
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+
+  <!-- Shared stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       TICKER BAR
+       ============================================================ -->
+  <div class="ticker" aria-label="About PulseAfrica">
+    <!-- Neutral placeholder; ticker.js swaps in live figures from the API -->
+    <div class="ticker-inner" data-ticker>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">PulseAfrica</span><span class="tick-val">Independent civic opinion research</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Coverage</span><span class="tick-val">40 states &middot; 450 tribes</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Responses</span><span class="tick-val">Anonymous by design</span></div>
+      <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Methodology</span><span class="tick-val">Open and published</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Affiliation</span><span class="tick-val">No party, no government</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html" class="logo" aria-label="PulseAfrica home">
+      <span class="logo-pulse">Pulse</span>
+      <div class="logo-sep" aria-hidden="true"></div>
+      <span class="logo-africa">Africa</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="polls.html">Polls</a></li>
+      <li><a href="results.html">Results</a></li>
+      <li><a href="methodology.html">Methodology</a></li>
+      <li><a href="about.html">About</a></li>
+      <li data-nav-auth><a href="login.html">Sign in</a></li>
+    </ul>
+    <button class="nav-cta" type="button">Share Your Voice</button>
+    <button class="nav-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" id="navToggle">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ============================================================
+       PAGE HEADER
+       ============================================================ -->
+  <div class="page-head dash-head" aria-label="Your dashboard">
+    <div class="page-head-label">Your dashboard</div>
+    <h1 id="dashGreeting">Your dashboard</h1>
+    <p class="page-head-sub">
+      Your profile, the polls you've taken part in, and your account settings.
+    </p>
+
+    <div class="page-head-stats" id="dashStats">
+      <div>
+        <div class="ph-stat-num" id="statAnswered">–</div>
+        <div class="ph-stat-label">Polls answered</div>
+      </div>
+      <div class="ph-stat-divider"></div>
+      <div>
+        <div class="ph-stat-num" id="statWaiting">–</div>
+        <div class="ph-stat-label">Live polls waiting</div>
+      </div>
+      <div class="ph-stat-divider"></div>
+      <div>
+        <div class="ph-stat-num" id="statSince">–</div>
+        <div class="ph-stat-label">Member since</div>
+      </div>
+      <div class="ph-stat-divider"></div>
+      <div>
+        <div class="ph-stat-num" id="statState">–</div>
+        <div class="ph-stat-label">Your state</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TABS
+       ============================================================ -->
+  <div class="results-tabs" role="tablist" aria-label="Dashboard sections" id="dashTabs" hidden>
+    <button class="results-tab active" role="tab" aria-selected="true"  aria-controls="panel-overview" id="tab-overview" data-tab="overview" type="button">Overview</button>
+    <button class="results-tab"        role="tab" aria-selected="false" aria-controls="panel-history"  id="tab-history"  data-tab="history"  type="button" tabindex="-1">Participation history</button>
+    <button class="results-tab"        role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" data-tab="settings" type="button" tabindex="-1">Account settings</button>
+  </div>
+
+  <main class="results-dashboard dash-page" aria-label="Dashboard">
+
+    <!-- Loading / signed out / account deleted / error -->
+    <div class="results-card results-card-full results-notice" id="dashNotice" role="status">
+      <i class="ti ti-loader-2" aria-hidden="true"></i>
+      <div>
+        <div class="results-notice-title">Loading your dashboard…</div>
+        <p class="results-notice-text"></p>
+      </div>
+    </div>
+
+    <!-- ── TAB PANEL: Overview ── -->
+    <div class="results-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" hidden>
+      <div class="results-row-2col">
+
+        <section class="results-card" aria-labelledby="profileHeading">
+          <div class="results-card-label" id="profileHeading">Profile</div>
+          <dl class="dash-profile">
+            <div><dt>Name</dt><dd id="profName"></dd></div>
+            <div><dt>Email</dt><dd id="profEmail"></dd></div>
+            <div><dt>State of residence</dt><dd id="profState"></dd></div>
+            <div><dt>Age range</dt><dd id="profAge"></dd></div>
+            <div><dt>Member since</dt><dd id="profSince"></dd></div>
+            <div><dt>Account type</dt><dd id="profRole"></dd></div>
+          </dl>
+          <a href="#settings" class="dash-link" data-tab-link="settings">
+            <i class="ti ti-pencil" aria-hidden="true"></i> Edit profile
+          </a>
+        </section>
+
+        <section class="results-card" aria-labelledby="waitingHeading">
+          <div class="results-card-label" id="waitingHeading">Live polls waiting for you</div>
+          <p class="results-card-sub" id="waitingSub"></p>
+          <ul class="dash-list" id="waitingList"></ul>
+          <a href="polls.html" class="dash-link">
+            <i class="ti ti-layout-grid" aria-hidden="true"></i> Browse all polls
+          </a>
+        </section>
+
+      </div>
+
+      <section class="results-card results-card-full" aria-labelledby="recentHeading">
+        <div class="results-card-label" id="recentHeading">Recent activity</div>
+        <ul class="dash-list" id="recentList"></ul>
+        <a href="#history" class="dash-link" data-tab-link="history" id="recentAll">
+          <i class="ti ti-history" aria-hidden="true"></i> See your full history
+        </a>
+      </section>
+    </div>
+
+    <!-- ── TAB PANEL: Participation history ── -->
+    <div class="results-panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <section class="results-card results-card-full" aria-labelledby="historyHeading">
+        <div class="dash-card-head">
+          <div>
+            <div class="results-card-label" id="historyHeading">Participation history</div>
+            <p class="results-card-sub" id="historySub"></p>
+          </div>
+          <div class="dash-filter" role="group" aria-label="Filter by poll status">
+            <button type="button" class="dash-filter-btn active" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" class="dash-filter-btn" data-filter="active" aria-pressed="false">Live</button>
+            <button type="button" class="dash-filter-btn" data-filter="closed" aria-pressed="false">Closed</button>
+          </div>
+        </div>
+        <ul class="dash-list dash-history" id="historyList"></ul>
+      </section>
+
+      <div class="results-meth-note" role="note">
+        <i class="ti ti-lock" aria-hidden="true"></i>
+        <p>This list shows which polls you took part in and when. How you answered is never shown here or anywhere else: results are only ever published as totals.</p>
+      </div>
+    </div>
+
+    <!-- ── TAB PANEL: Account settings ── -->
+    <div class="results-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+      <div class="results-row-2col">
+
+        <!-- Profile -->
+        <section class="results-card" aria-labelledby="editHeading">
+          <div class="results-card-label" id="editHeading">Profile details</div>
+          <p class="results-card-sub">Your state and age range pre-fill each poll's demographics step.</p>
+
+          <div class="auth-alert" id="profile-alert" role="alert" hidden>
+            <i class="ti ti-alert-circle" aria-hidden="true"></i>
+            <p class="auth-alert-text"></p>
+          </div>
+
+          <form class="auth-form dash-form" id="profile-form" novalidate>
+            <div class="auth-field">
+              <label for="set-name">Full name</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-user" aria-hidden="true"></i>
+                <input type="text" id="set-name" name="fullName" autocomplete="name" aria-describedby="set-name-error" required />
+              </div>
+              <p class="auth-error" id="set-name-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="set-email">Email address</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-mail" aria-hidden="true"></i>
+                <input type="email" id="set-email" readonly aria-describedby="set-email-hint" />
+              </div>
+              <p class="auth-hint" id="set-email-hint">Your email can't be changed yet. It's never published.</p>
+            </div>
+
+            <div class="auth-row">
+              <div class="auth-field">
+                <label for="set-state">State of residence</label>
+                <div class="auth-select-wrap">
+                  <select id="set-state" name="state" aria-describedby="set-state-error" required>
+                    <option value="">Select your state…</option>
+                    <option>ABA STATE</option>
+                    <option>ADOKA STATE</option>
+                    <option>AFEMI IGODOMIGODO STATE</option>
+                    <option>AHOADA STATE</option>
+                    <option>AKPAKIP ORO STATE</option>
+                    <option>ALANSO STATE</option>
+                    <option>ALAUDO STATE</option>
+                    <option>ANIOMA STATE</option>
+                    <option>BRANEM STATE</option>
+                    <option>CALABAR STATE</option>
+                    <option>EBONYI STATE</option>
+                    <option>EBUBE STATE</option>
+                    <option>EDDA STATE</option>
+                    <option>ENUGU STATE</option>
+                    <option>EPIE STATE</option>
+                    <option>ESAN IGODOMIGODO STATE</option>
+                    <option>EZEANI STATE</option>
+                    <option>IDEN IGODOMIGODO STATE</option>
+                    <option>IDUNG IBON STATE</option>
+                    <option>IGALA STATE</option>
+                    <option>IGBANI STATE</option>
+                    <option>IKA STATE</option>
+                    <option>IKEMBA STATE</option>
+                    <option>IKOM STATE</option>
+                    <option>IKWUMESIA STATE</option>
+                    <option>ITTAI STATE</option>
+                    <option>IWERE STATE</option>
+                    <option>IWHUNROHA STATE</option>
+                    <option>ODUMEGWU STATE</option>
+                    <option>OGBIA/IZON STATE</option>
+                    <option>OGOJA STATE</option>
+                    <option>OHABUEYI STATE</option>
+                    <option>OHAUKWU STATE</option>
+                    <option>OKIGWE STATE</option>
+                    <option>OMAMBALA STATE</option>
+                    <option>ORLU STATE</option>
+                    <option>OWERRI STATE</option>
+                    <option>QUA STATE</option>
+                    <option>SOUTH ATLANTIC STATE</option>
+                    <option>URHOBO/ISOKO STATE</option>
+                  </select>
+                </div>
+                <p class="auth-error" id="set-state-error"></p>
+              </div>
+
+              <div class="auth-field">
+                <label for="set-age">Age range</label>
+                <div class="auth-select-wrap">
+                  <select id="set-age" name="ageRange" aria-describedby="set-age-error" required>
+                    <option value="">Select…</option>
+                    <option>18–24</option>
+                    <option>25–34</option>
+                    <option>35–44</option>
+                    <option>45–54</option>
+                    <option>55–64</option>
+                    <option>65+</option>
+                  </select>
+                </div>
+                <p class="auth-error" id="set-age-error"></p>
+              </div>
+            </div>
+
+            <button class="auth-submit" type="submit">
+              <span class="auth-submit-label">Save changes</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- Password -->
+        <section class="results-card" aria-labelledby="passwordHeading">
+          <div class="results-card-label" id="passwordHeading">Change password</div>
+          <p class="results-card-sub">You'll stay signed in on this device.</p>
+
+          <div class="auth-alert" id="password-alert" role="alert" hidden>
+            <i class="ti ti-alert-circle" aria-hidden="true"></i>
+            <p class="auth-alert-text"></p>
+          </div>
+
+          <form class="auth-form dash-form" id="password-form" novalidate>
+            <div class="auth-field">
+              <label for="pw-current">Current password</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-lock" aria-hidden="true"></i>
+                <input type="password" id="pw-current" autocomplete="current-password" aria-describedby="pw-current-error" required />
+                <button class="auth-reveal" type="button" aria-label="Show password" aria-controls="pw-current">
+                  <i class="ti ti-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+              <p class="auth-error" id="pw-current-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="pw-new">New password</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-key" aria-hidden="true"></i>
+                <input type="password" id="pw-new" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="pw-new-rules pw-new-error" required />
+                <button class="auth-reveal" type="button" aria-label="Show password" aria-controls="pw-new">
+                  <i class="ti ti-eye" aria-hidden="true"></i>
+                </button>
+              </div>
+              <ul class="auth-rules" id="pw-new-rules" role="list" aria-label="Password requirements">
+                <li data-rule="length"><i class="ti ti-circle" aria-hidden="true"></i> 8+ characters</li>
+                <li data-rule="letter"><i class="ti ti-circle" aria-hidden="true"></i> A letter</li>
+                <li data-rule="number"><i class="ti ti-circle" aria-hidden="true"></i> A number</li>
+              </ul>
+              <p class="auth-error" id="pw-new-error"></p>
+            </div>
+
+            <div class="auth-field">
+              <label for="pw-confirm">Confirm new password</label>
+              <div class="auth-input-wrap">
+                <i class="ti ti-key" aria-hidden="true"></i>
+                <input type="password" id="pw-confirm" autocomplete="new-password" aria-describedby="pw-confirm-error" required />
+              </div>
+              <p class="auth-error" id="pw-confirm-error"></p>
+            </div>
+
+            <button class="auth-submit" type="submit">
+              <span class="auth-submit-label">Change password</span>
+            </button>
+          </form>
+        </section>
+
+      </div>
+
+      <!-- Delete account -->
+      <section class="results-card results-card-full dash-danger" aria-labelledby="deleteHeading">
+        <div class="results-card-label" id="deleteHeading">Delete account</div>
+        <p class="results-card-sub">
+          This permanently deletes your account and every response you've given, and removes them from all
+          results. It can't be undone.
+        </p>
+
+        <div class="auth-alert" id="delete-alert" role="alert" hidden>
+          <i class="ti ti-alert-circle" aria-hidden="true"></i>
+          <p class="auth-alert-text"></p>
+        </div>
+
+        <form class="auth-form dash-form dash-delete-form" id="delete-form" novalidate>
+          <div class="auth-field">
+            <label for="del-password">Enter your password to confirm</label>
+            <div class="auth-input-wrap">
+              <i class="ti ti-lock" aria-hidden="true"></i>
+              <input type="password" id="del-password" autocomplete="current-password" aria-describedby="del-password-error" required />
+            </div>
+            <p class="auth-error" id="del-password-error"></p>
+          </div>
+
+          <div class="auth-field">
+            <label class="auth-check">
+              <input type="checkbox" id="del-confirm" aria-describedby="del-confirm-error" required />
+              <span class="auth-check-box" aria-hidden="true"><i class="ti ti-check"></i></span>
+              <span class="auth-check-text">I understand my account and responses will be deleted permanently.</span>
+            </label>
+            <p class="auth-error" id="del-confirm-error"></p>
+          </div>
+
+          <button class="auth-submit dash-delete-btn" type="submit">
+            <i class="ti ti-trash" aria-hidden="true"></i>
+            <span class="auth-submit-label">Delete my account</span>
+          </button>
+        </form>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer aria-label="Site footer">
+    <div class="footer-top">
+      <div class="footer-about">
+        <a href="index.html" class="logo" aria-label="PulseAfrica home">
+          <span class="logo-pulse">Pulse</span>
+          <div class="logo-sep" aria-hidden="true"></div>
+          <span class="logo-africa">Africa</span>
+        </a>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <a href="polls.html">Active Polls</a>
+        <a href="results.html">Results Dashboard</a>
+        <a href="methodology.html">Methodology</a>
+        <a href="#">State Tracker</a>
+      </div>
+      <div class="footer-col">
+        <h5>About</h5>
+        <a href="about.html">Our Mission</a>
+        <a href="about.html#team-heading">The Team</a>
+        <a href="#">FAQ</a>
+        <a href="#">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Data Ethics</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">
+        &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
+      </span>
+      <div class="footer-badges">
+        <span class="badge">Anonymous Data</span>
+        <span class="badge">Open Methodology</span>
+        <span class="badge">No Party Affiliation</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script src="api.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="ticker.js"></script>
+  <script>
+    const navToggle = document.getElementById('navToggle');
+    const navLinks  = document.querySelector('.nav-links');
+    navToggle.addEventListener('click', function () {
+      const isOpen = navLinks.style.display === 'flex';
+      if (isOpen) {
+        navLinks.style.display = 'none';
+        navToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        Object.assign(navLinks.style, {
+          display:'flex', flexDirection:'column', position:'absolute',
+          top:'64px', left:'0', right:'0', background:'#0A1628',
+          padding:'20px 24px 24px', gap:'20px',
+          borderTop:'1px solid rgba(200,151,58,0.18)'
+        });
+        navToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    /* ── User dashboard ──
+       Loads GET /api/auth/me, GET /api/auth/me/responses and GET /api/polls.
+       Signed-out visitors (or an expired session) get a sign-in prompt. */
+    const CATEGORY_NAMES = {
+      presidency: 'Presidency', governors: 'Governors', economy: 'Economy', security: 'Security',
+      education: 'Education', healthcare: 'Healthcare', governance: 'Governance'
+    };
+    const TABS = ['overview', 'history', 'settings'];
+
+    let user = null;
+    let answered = [];   /* GET /api/auth/me/responses, newest first */
+    let polls = [];
+    let historyFilter = 'all';
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text == null ? '' : String(text);
+      return div.innerHTML;
+    }
+
+    function plural(n, word) {
+      return n.toLocaleString() + ' ' + word + (n === 1 ? '' : 's');
+    }
+
+    function longDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function shortDate(iso) {
+      return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    function firstName(name) {
+      return name.trim().split(/\s+/)[0];
+    }
+
+    /* ── Notices: loading / signed out / deleted / error ── */
+    function showNotice(opts) {
+      const notice = document.getElementById('dashNotice');
+      notice.hidden = !opts;
+      document.getElementById('dashTabs').hidden = !!opts;
+      document.querySelectorAll('.dash-page .results-panel').forEach(function (p) {
+        p.hidden = !!opts || !p.classList.contains('active');
+      });
+      if (!opts) return;
+      notice.className = 'results-card results-card-full results-notice' + (opts.tone ? ' is-' + opts.tone : '');
+      notice.querySelector('i').className = 'ti ti-' + opts.icon;
+      notice.querySelector('.results-notice-title').textContent = opts.title;
+      notice.querySelector('.results-notice-text').innerHTML = opts.html || '';
+    }
+
+    function showSignedOut(expired) {
+      user = null;
+      document.getElementById('dashGreeting').textContent = 'Your dashboard';
+      document.querySelectorAll('#dashStats .ph-stat-num').forEach(function (el) { el.textContent = '–'; });
+      showNotice({
+        icon: 'lock',
+        title: expired ? 'Your session has ended' : 'Sign in to see your dashboard',
+        html: (expired ? 'Please sign in again to continue. ' : 'Your profile, poll history and settings are here once you’re signed in. ') +
+          '<a href="login.html?next=dashboard.html">Sign in</a> or <a href="login.html?next=dashboard.html#register">create an account</a>.'
+      });
+    }
+
+    /* Any 401 means the token is no longer valid */
+    function handleError(err, alertId) {
+      if (!(err instanceof PulseAPI.ApiError)) throw err;
+      if (err.status === 401) {
+        PulseAPI.clearToken();
+        PulseNav.refresh();
+        showSignedOut(true);
+        return true;
+      }
+      if (alertId) showAlert(alertId, err.message);
+      return false;
+    }
+
+    /* ── Tabs (Overview / Participation history / Account settings) ── */
+    function showTab(name, focusTab) {
+      if (TABS.indexOf(name) === -1) name = 'overview';
+      document.querySelectorAll('#dashTabs .results-tab').forEach(function (t) {
+        const on = t.dataset.tab === name;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        if (on && focusTab) t.focus();
+      });
+      document.querySelectorAll('.dash-page .results-panel').forEach(function (p) {
+        const on = p.id === 'panel-' + name;
+        p.classList.toggle('active', on);
+        p.hidden = !on || !user;
+      });
+    }
+
+    document.querySelectorAll('#dashTabs .results-tab').forEach(function (tab, i, all) {
+      tab.addEventListener('click', function () {
+        window.history.replaceState(null, '', '#' + tab.dataset.tab);
+        showTab(tab.dataset.tab);
+      });
+      tab.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        const next = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length];
+        window.history.replaceState(null, '', '#' + next.dataset.tab);
+        showTab(next.dataset.tab, true);
+      });
+    });
+
+    /* Links like "Edit profile" that jump to another tab */
+    document.addEventListener('click', function (e) {
+      const link = e.target.closest('[data-tab-link]');
+      if (!link) return;
+      e.preventDefault();
+      window.history.replaceState(null, '', '#' + link.dataset.tabLink);
+      showTab(link.dataset.tabLink, true);
+    });
+
+    window.addEventListener('hashchange', function () {
+      showTab(location.hash.slice(1));
+    });
+
+    /* ── Rendering ── */
+    function renderProfile() {
+      document.getElementById('dashGreeting').textContent = 'Welcome back, ' + firstName(user.fullName);
+      document.title = 'Your dashboard — PulseAfrica';
+      document.getElementById('profName').textContent = user.fullName;
+      document.getElementById('profEmail').textContent = user.email;
+      document.getElementById('profState').textContent = user.state;
+      document.getElementById('profAge').textContent = user.ageRange;
+      document.getElementById('profSince').textContent = longDate(user.createdAt);
+      document.getElementById('profRole').textContent = user.role === 'admin' ? 'Administrator' : 'Citizen';
+      document.getElementById('statSince').textContent =
+        new Date(user.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+      document.getElementById('statState').textContent = user.state.replace(/ STATE$/, '');
+    }
+
+    function waitingPolls() {
+      const done = {};
+      answered.forEach(function (h) { done[h.pollId] = true; });
+      return polls.filter(function (p) { return p.status === 'active' && !done[p.id]; })
+        .sort(function (a, b) { return b.responseCount - a.responseCount; });
+    }
+
+    function categoryTag(key) {
+      const k = CATEGORY_NAMES[key] ? key : 'governance';
+      return '<span class="poll-cat-label cat-' + k + '">' + CATEGORY_NAMES[k] + '</span>';
+    }
+
+    function statusBadge(status) {
+      return status === 'active'
+        ? '<span class="poll-live-badge"><span class="live-dot" aria-hidden="true"></span> Live</span>'
+        : '<span class="poll-live-badge is-closed"><span class="live-dot" aria-hidden="true"></span> Closed</span>';
+    }
+
+    function historyItem(h) {
+      const live = h.pollStatus === 'active';
+      return '<li class="dash-item">' +
+        '<div class="dash-item-meta">' + categoryTag(h.category) + statusBadge(h.pollStatus) + '</div>' +
+        '<div class="dash-item-title">' + escapeHtml(h.pollTitle) + '</div>' +
+        '<div class="dash-item-foot">' +
+          '<span class="dash-item-date">Answered ' + longDate(h.respondedAt) + '</span>' +
+          '<a class="poll-take-btn" href="results.html?id=' + h.pollId + '">' +
+            (live ? 'Results so far' : 'Final results') + ' <i class="ti ti-chart-bar" aria-hidden="true"></i></a>' +
+        '</div>' +
+      '</li>';
+    }
+
+    function emptyItem(html) {
+      return '<li class="dash-empty">' + html + '</li>';
+    }
+
+    function renderOverview() {
+      const waiting = waitingPolls();
+      document.getElementById('statAnswered').textContent = answered.length;
+      document.getElementById('statWaiting').textContent = waiting.length;
+
+      document.getElementById('waitingSub').textContent = waiting.length
+        ? 'Live polls you haven’t answered yet, most popular first'
+        : '';
+      document.getElementById('waitingList').innerHTML = waiting.length
+        ? waiting.slice(0, 4).map(function (p) {
+            return '<li class="dash-item">' +
+              '<div class="dash-item-meta">' + categoryTag(p.category) + '</div>' +
+              '<div class="dash-item-title">' + escapeHtml(p.title) + '</div>' +
+              '<div class="dash-item-foot">' +
+                '<span class="dash-item-date">' + plural(p.responseCount, 'response') +
+                  (p.closesAt ? ' · closes ' + shortDate(p.closesAt) : '') + '</span>' +
+                '<a class="poll-take-btn" href="poll.html?id=' + p.id + '">Take poll <i class="ti ti-arrow-right" aria-hidden="true"></i></a>' +
+              '</div>' +
+            '</li>';
+          }).join('')
+        : emptyItem('You’ve answered every live poll. Thank you! New polls will appear here.');
+
+      document.getElementById('recentList').innerHTML = answered.length
+        ? answered.slice(0, 3).map(historyItem).join('')
+        : emptyItem('You haven’t answered any polls yet. <a href="polls.html">Find one to start with</a>.');
+      document.getElementById('recentAll').hidden = answered.length <= 3;
+    }
+
+    function renderHistory() {
+      const rows = answered.filter(function (h) { return historyFilter === 'all' || h.pollStatus === historyFilter; });
+      const live = answered.filter(function (h) { return h.pollStatus === 'active'; }).length;
+      document.getElementById('historySub').textContent = answered.length
+        ? plural(answered.length, 'poll') + ' answered · ' + live + ' still live · newest first'
+        : '';
+      document.getElementById('historyList').innerHTML = rows.length
+        ? rows.map(historyItem).join('')
+        : emptyItem(answered.length
+            ? 'No ' + (historyFilter === 'active' ? 'live' : 'closed') + ' polls in your history.'
+            : 'You haven’t answered any polls yet. <a href="polls.html">Browse live polls</a>.');
+    }
+
+    document.querySelectorAll('.dash-filter-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        historyFilter = btn.dataset.filter;
+        document.querySelectorAll('.dash-filter-btn').forEach(function (b) {
+          const on = b === btn;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        renderHistory();
+      });
+    });
+
+    function fillProfileForm() {
+      document.getElementById('set-name').value = user.fullName;
+      document.getElementById('set-email').value = user.email;
+      document.getElementById('set-state').value = user.state;
+      document.getElementById('set-age').value = user.ageRange;
+    }
+
+    function renderAll() {
+      renderProfile();
+      renderOverview();
+      renderHistory();
+      fillProfileForm();
+    }
+
+    /* ── Form helpers (same patterns as login.html) ── */
+    function setFieldError(input, message) {
+      const field = input.closest('.auth-field');
+      const errorEl = document.getElementById(input.id + '-error');
+      field.classList.toggle('has-error', !!message);
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      if (errorEl) {
+        errorEl.innerHTML = message ? '<i class="ti ti-alert-circle" aria-hidden="true"></i><span></span>' : '';
+        if (message) errorEl.querySelector('span').textContent = message;
+      }
+      return !message;
+    }
+
+    function clearErrors(form) {
+      form.querySelectorAll('input, select').forEach(function (input) { setFieldError(input, ''); });
+    }
+
+    /* tone: undefined = error (red), 'success' = green */
+    function showAlert(id, message, tone) {
+      const alert = document.getElementById(id);
+      alert.classList.toggle('is-success', tone === 'success');
+      alert.querySelector('i').className = 'ti ti-' + (tone === 'success' ? 'circle-check' : 'alert-circle');
+      alert.querySelector('.auth-alert-text').textContent = message || '';
+      alert.hidden = !message;
+      alert.setAttribute('role', tone === 'success' ? 'status' : 'alert');
+    }
+
+    function setLoading(form, loading, label) {
+      const btn = form.querySelector('.auth-submit');
+      btn.disabled = loading;
+      btn.classList.toggle('loading', loading);
+      btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+      if (label) btn.querySelector('.auth-submit-label').textContent = label;
+    }
+
+    /* Validation errors from the API (422) shown next to their fields */
+    function showFieldErrors(err, fieldIds) {
+      let shown = 0;
+      Object.keys(err.fields || {}).forEach(function (name) {
+        const input = fieldIds[name] && document.getElementById(fieldIds[name]);
+        if (input) {
+          setFieldError(input, err.fields[name]);
+          shown++;
+        }
+      });
+      return shown;
+    }
+
+    function passwordChecks(pw) {
+      return { length: pw.length >= 8, letter: /[A-Za-z]/.test(pw), number: /\d/.test(pw) };
+    }
+
+    document.querySelectorAll('.auth-reveal').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const input = document.getElementById(btn.getAttribute('aria-controls'));
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.querySelector('i').className = show ? 'ti ti-eye-off' : 'ti ti-eye';
+      });
+    });
+
+    document.getElementById('pw-new').addEventListener('input', function () {
+      const c = passwordChecks(this.value);
+      document.querySelectorAll('#pw-new-rules li').forEach(function (li) {
+        const met = c[li.dataset.rule];
+        li.classList.toggle('met', met);
+        li.querySelector('i').className = met ? 'ti ti-circle-check' : 'ti ti-circle';
+      });
+    });
+
+    /* ── Profile form ── */
+    document.getElementById('profile-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      clearErrors(form);
+      showAlert('profile-alert', '');
+      const name = document.getElementById('set-name');
+      const state = document.getElementById('set-state');
+      const age = document.getElementById('set-age');
+
+      const nameValue = name.value.trim().replace(/\s+/g, ' ');
+      let ok = true;
+      if (!nameValue) ok = setFieldError(name, 'Enter your full name.') && ok;
+      else if (nameValue.split(' ').length < 2) ok = setFieldError(name, 'Enter your first and last name.') && ok;
+      if (!state.value) ok = setFieldError(state, 'Select your state of residence.') && ok;
+      if (!age.value) ok = setFieldError(age, 'Select your age range.') && ok;
+      if (!ok) {
+        form.querySelector('[aria-invalid="true"]').focus();
+        return;
+      }
+
+      /* Send only what changed */
+      const changes = {};
+      if (nameValue !== user.fullName) changes.fullName = nameValue;
+      if (state.value !== user.state) changes.state = state.value;
+      if (age.value !== user.ageRange) changes.ageRange = age.value;
+      if (!Object.keys(changes).length) {
+        showAlert('profile-alert', 'Nothing to save — your details are already up to date.', 'success');
+        return;
+      }
+
+      setLoading(form, true, 'Saving…');
+      PulseAPI.updateProfile(changes).then(function (updated) {
+        user = updated;
+        renderAll();
+        PulseNav.showUser(updated);
+        showAlert('profile-alert', 'Your profile has been updated.', 'success');
+      }).catch(function (err) {
+        if (handleError(err)) return;
+        if (!showFieldErrors(err, { fullName: 'set-name', state: 'set-state', ageRange: 'set-age' })) {
+          showAlert('profile-alert', err.message);
+        }
+      }).finally(function () {
+        setLoading(form, false, 'Save changes');
+      });
+    });
+
+    /* ── Password form ── */
+    document.getElementById('password-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      clearErrors(form);
+      showAlert('password-alert', '');
+      const current = document.getElementById('pw-current');
+      const next = document.getElementById('pw-new');
+      const confirm = document.getElementById('pw-confirm');
+
+      let ok = true;
+      if (!current.value) ok = setFieldError(current, 'Enter your current password.') && ok;
+      const c = passwordChecks(next.value);
+      if (!next.value) ok = setFieldError(next, 'Choose a new password.') && ok;
+      else if (!c.length || !c.letter || !c.number) ok = setFieldError(next, 'Use at least 8 characters, including a letter and a number.') && ok;
+      else if (next.value === current.value) ok = setFieldError(next, 'Choose a password different from your current one.') && ok;
+      if (!confirm.value) ok = setFieldError(confirm, 'Confirm your new password.') && ok;
+      else if (confirm.value !== next.value) ok = setFieldError(confirm, 'Passwords do not match.') && ok;
+      if (!ok) {
+        form.querySelector('[aria-invalid="true"]').focus();
+        return;
+      }
+
+      setLoading(form, true, 'Changing…');
+      PulseAPI.changePassword(current.value, next.value, confirm.value).then(function () {
+        form.reset();
+        next.dispatchEvent(new Event('input'));
+        showAlert('password-alert', 'Your password has been changed.', 'success');
+      }).catch(function (err) {
+        if (handleError(err)) return;
+        if (err.status === 403) {
+          setFieldError(current, 'That isn’t your current password.');
+          current.value = '';
+          current.focus();
+          return;
+        }
+        if (!showFieldErrors(err, { currentPassword: 'pw-current', newPassword: 'pw-new', confirmPassword: 'pw-confirm' })) {
+          showAlert('password-alert', err.message);
+        }
+      }).finally(function () {
+        setLoading(form, false, 'Change password');
+      });
+    });
+
+    /* ── Delete account ── */
+    document.getElementById('delete-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      clearErrors(form);
+      showAlert('delete-alert', '');
+      const password = document.getElementById('del-password');
+      const confirm = document.getElementById('del-confirm');
+
+      let ok = true;
+      if (!password.value) ok = setFieldError(password, 'Enter your password.') && ok;
+      if (!confirm.checked) ok = setFieldError(confirm, 'Tick the box to confirm.') && ok;
+      if (!ok) {
+        form.querySelector('[aria-invalid="true"]').focus();
+        return;
+      }
+
+      setLoading(form, true, 'Deleting…');
+      PulseAPI.deleteAccount(password.value).then(function () {
+        user = null;
+        PulseNav.refresh();
+        document.getElementById('dashGreeting').textContent = 'Account deleted';
+        document.querySelectorAll('#dashStats .ph-stat-num').forEach(function (el) { el.textContent = '–'; });
+        showNotice({
+          icon: 'circle-check', title: 'Your account has been deleted',
+          html: 'Your account and all of your responses have been removed. Thank you for taking part. ' +
+            '<a href="index.html">Back to the home page</a>.'
+        });
+        document.getElementById('dashNotice').focus();
+      }).catch(function (err) {
+        if (handleError(err)) return;
+        if (err.status === 403) {
+          setFieldError(password, 'That password isn’t right.');
+          password.value = '';
+          password.focus();
+          return;
+        }
+        showAlert('delete-alert', err.message);
+      }).finally(function () {
+        setLoading(form, false, 'Delete my account');
+      });
+    });
+
+    /* Signing out from the nav while on this page */
+    document.addEventListener('pulse:signedout', function () {
+      showSignedOut(false);
+    });
+
+    /* ── Load ── */
+    function load() {
+      if (!PulseAPI.getToken()) {
+        showSignedOut(false);
+        return;
+      }
+      showNotice({ icon: 'loader-2', title: 'Loading your dashboard…' });
+      Promise.all([PulseAPI.me(), PulseAPI.myResponses(), PulseAPI.listPolls()]).then(function (data) {
+        user = data[0];
+        answered = data[1];
+        polls = data[2];
+        renderAll();
+        showNotice(null);
+        showTab(location.hash.slice(1));
+      }).catch(function (err) {
+        if (handleError(err)) return;
+        showNotice({
+          tone: 'warn', icon: 'wifi-off', title: 'We couldn’t load your dashboard',
+          html: escapeHtml(err.message) + ' <button type="button" class="polls-retry" id="dashRetry">Try again</button>'
+        });
+        document.getElementById('dashRetry').addEventListener('click', load);
+      });
+    }
+
+    load();
+  </script>
+
+</body>
+</html>

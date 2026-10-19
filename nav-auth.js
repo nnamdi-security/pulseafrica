@@ -3,7 +3,9 @@
      <script src="api.js"></script>
      <script src="nav-auth.js"></script>
    Turns the nav's <li data-nav-auth> "Sign in" link into the
-   user's first name + a Sign out button while signed in.
+   user's first name (a link to dashboard.html) + a Sign out button
+   while signed in. Signing out fires a "pulse:signedout" event on
+   document so the current page can react.
    ============================================================ */
 (function () {
   const slot = document.querySelector('[data-nav-auth]');
@@ -21,18 +23,23 @@
     const firstName = user.fullName.trim().split(/\s+/)[0];
     slot.classList.add('nav-auth-in');
     slot.innerHTML =
-      '<span class="nav-user"></span>' +
+      '<a class="nav-user" href="dashboard.html"></a>' +
       '<button type="button" class="nav-signout">Sign out</button>';
 
     const name = slot.querySelector('.nav-user');
-    name.title = 'Signed in as ' + user.email;
-    name.innerHTML = '<i class="ti ti-user-circle" aria-hidden="true"></i><span class="sr-only">Signed in as </span>';
+    name.title = 'Signed in as ' + user.email + ' — your dashboard';
+    name.innerHTML = '<i class="ti ti-user-circle" aria-hidden="true"></i><span class="sr-only">Your dashboard, signed in as </span>';
     name.appendChild(document.createTextNode(firstName));
+    if (/(^|\/)dashboard\.html$/.test(location.pathname)) {
+      name.classList.add('active');
+      name.setAttribute('aria-current', 'page');
+    }
 
     slot.querySelector('.nav-signout').addEventListener('click', function () {
       PulseAPI.logout();
       renderSignedOut();
       slot.querySelector('a').focus();
+      document.dispatchEvent(new CustomEvent('pulse:signedout'));
     });
   }
 

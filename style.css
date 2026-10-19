@@ -211,6 +211,12 @@ img {
   color: #C8973A;
 }
 
+a.nav-user:hover,
+a.nav-user:focus-visible,
+a.nav-user.active {
+  color: #C8973A;
+}
+
 .nav-signout {
   background: none;
   border: 0;
@@ -5479,5 +5485,213 @@ footer {
   .auth-aside-stat-label {
     font-size: 8.5px;
     letter-spacing: 0.08em;
+  }
+}
+
+/* ============================================================
+   USER DASHBOARD — dashboard.html
+   Reuses .page-head, .results-tabs, .results-card and the
+   .auth-* form styles from login.html.
+   ============================================================ */
+.dash-page [hidden],
+.dash-page .results-panel[hidden] {
+  display: none;
+}
+
+.dash-page .results-notice:focus {
+  outline: none;
+}
+
+/* Profile details */
+.dash-profile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  margin: 14px 0 20px;
+}
+
+.dash-profile dt {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6B7280;
+  margin-bottom: 4px;
+}
+
+.dash-profile dd {
+  font-size: 14px;
+  color: #0A1628;
+  overflow-wrap: anywhere;
+}
+
+.dash-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2D6A4F;
+}
+
+.dash-link:hover,
+.dash-link:focus-visible {
+  color: #C8973A;
+}
+
+.dash-link[hidden] {
+  display: none;
+}
+
+/* Lists of polls (waiting, recent, history) */
+.dash-list {
+  list-style: none;
+  margin: 8px 0 18px;
+  padding: 0;
+}
+
+.dash-item {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(10, 22, 40, 0.07);
+}
+
+.dash-item:first-child {
+  padding-top: 4px;
+}
+
+.dash-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.dash-item-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0A1628;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.dash-item-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dash-item-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+}
+
+.dash-empty {
+  padding: 18px 0;
+  font-size: 13px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.dash-empty a {
+  color: #2D6A4F;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* History header + status filter */
+.dash-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dash-filter {
+  display: inline-flex;
+  border: 1px solid rgba(10, 22, 40, 0.12);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.dash-filter-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #4a4a4a;
+  background: #fff;
+  border: none;
+  border-left: 1px solid rgba(10, 22, 40, 0.12);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.dash-filter-btn:first-child {
+  border-left: none;
+}
+
+.dash-filter-btn.active {
+  background: #0A1628;
+  color: #F5F0E8;
+}
+
+.dash-filter-btn:focus-visible {
+  outline: 2px solid #C8973A;
+  outline-offset: -2px;
+}
+
+/* Settings forms */
+.dash-form .auth-submit {
+  width: auto;
+  align-self: flex-start;
+  padding: 11px 22px;
+  cursor: pointer;
+}
+
+.dash-form input[readonly] {
+  color: #6B7280;
+  background: #f4f2ee;
+  cursor: default;
+}
+
+.auth-alert.is-success {
+  background: rgba(45, 106, 79, 0.06);
+  border-color: rgba(45, 106, 79, 0.25);
+  border-left-color: #2D6A4F;
+}
+
+.auth-alert.is-success i,
+.auth-alert.is-success .auth-alert-text {
+  color: #1a4d33;
+}
+
+/* Delete account */
+.dash-danger {
+  border-color: rgba(163, 45, 45, 0.3);
+}
+
+.dash-danger .results-card-label {
+  color: #A32D2D;
+}
+
+.dash-delete-form {
+  max-width: 440px;
+}
+
+.dash-delete-btn {
+  background: #A32D2D;
+}
+
+.dash-delete-btn:hover {
+  background: #842323;
+}
+
+@media (max-width: 600px) {
+  .dash-profile {
+    grid-template-columns: 1fr;
   }
 }

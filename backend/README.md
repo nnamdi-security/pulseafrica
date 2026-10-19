@@ -144,6 +144,10 @@ JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript fronten
 | POST | `/api/auth/register` | — | Create an account |
 | POST | `/api/auth/login` | — | Get an access token |
 | GET | `/api/auth/me` | User | Current user's profile |
+| PATCH | `/api/auth/me` | User | Update any of `fullName`, `state`, `ageRange` (email can't be changed) |
+| POST | `/api/auth/me/password` | User | Change password: `currentPassword`, `newPassword`, `confirmPassword` → `204`, or `403` if the current password is wrong |
+| DELETE | `/api/auth/me` | User | Delete the account and all its responses. Body `{ "password": "…" }` → `204`, or `403` if the password is wrong |
+| GET | `/api/auth/me/responses` | User | Polls the user has answered (title, category, status, when), newest first. Never includes how they answered |
 | GET | `/api/polls` | — | List polls with `responseCount`, `questionCount` and a first-question `preview`. Query: `category`, `status`, `search` |
 | GET | `/api/polls/{id}` | — | One poll with its questions and options, plus `hasResponded` (`true` / `false` when signed in, `null` when not) |
 | POST | `/api/polls` | Admin | Create a poll with questions and options |
@@ -262,6 +266,8 @@ Every page also loads [`../nav-auth.js`](../nav-auth.js) after `api.js`. It repl
 `polls.html` loads every poll once with `GET /api/polls`, then filters, sorts and paginates in the browser. `poll.html?id=…` builds one screen per question from `GET /api/polls/{id}`, pre-fills age range and state from the account, and submits to `POST /api/responses`. People who aren't signed in, who have already responded, or who open a closed poll see a message instead of the questions.
 
 Every page loads [`../ticker.js`](../ticker.js) after `api.js`. It calls `GET /api/stats` and `GET /api/polls` once, fills the ticker with each category's headline result and the platform figures, and shares both requests with the home page through `window.PulseLive`. The home page also loads `GET /api/results/{id}` for its featured poll: the biggest live presidency poll, or the biggest live poll if there isn't one.
+
+`dashboard.html` loads `GET /api/auth/me`, `GET /api/auth/me/responses` and `GET /api/polls`. It shows the profile, the live polls the user hasn't answered yet, and their history, plus forms for the three account endpoints above. Deleting an account removes its responses from every result.
 
 `results.html?id=…` combines `GET /api/polls/{id}` and `GET /api/results/{id}`; with no id it shows the poll with the most responses. Each question's options are split into positive, neutral and negative groups by position (first half, middle option, last half), which drives the headline figures and every "share" bar. Groups with fewer than 5 responses are faded and left out of the state rankings. Charts are drawn only when their tab is visible, and if Chart.js can't load from its CDN the chart boxes say so instead of staying blank.
 
