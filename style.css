@@ -5942,10 +5942,6 @@ input[type="search"].admin-input {
   color: #7a4c08;
 }
 
-.admin-poll-link[aria-disabled="true"] {
-  pointer-events: none;
-}
-
 /* Status and role badges (always a label, never colour alone) */
 .admin-status {
   display: inline-flex;

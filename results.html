@@ -634,7 +634,9 @@
       document.getElementById('resTitle').textContent = poll.title;
       document.getElementById('resCrumb').textContent = poll.title.split(' — ')[0] + ' — results';
       document.getElementById('resBadges').innerHTML =
-        (live
+        (poll.status === 'draft'
+          ? '<span class="results-badge results-badge-closed">Draft &middot; visible to admins only</span>'
+          : live
           ? '<span class="results-badge results-badge-live"><span class="results-live-dot" aria-hidden="true"></span>Live &middot; ' +
               plural(results.totalResponses, 'response') + '</span>'
           : '<span class="results-badge results-badge-closed">Closed &middot; ' + plural(results.totalResponses, 'response') + '</span>') +
@@ -1037,7 +1039,8 @@
     function renderPollPicker(selectedId) {
       const picker = document.getElementById('pollPicker');
       picker.innerHTML = polls.map(function (p) {
-        return '<option value="' + p.id + '">' + escapeHtml(p.title) + (p.status === 'closed' ? ' (closed)' : '') + '</option>';
+        return '<option value="' + p.id + '">' + escapeHtml(p.title) +
+          (p.status === 'closed' ? ' (closed)' : p.status === 'draft' ? ' (draft)' : '') + '</option>';
       }).join('');
       picker.value = String(selectedId);
       picker.disabled = polls.length < 2;
@@ -1060,7 +1063,9 @@
         if (!results.totalResponses) {
           showNotice({
             icon: 'mood-empty', title: 'No responses yet',
-            html: poll.status === 'active'
+            html: poll.status === 'draft'
+              ? 'This draft isn’t published yet. Its results appear here once it’s live and people respond.'
+              : poll.status === 'active'
               ? 'Results appear here as soon as people respond. <a href="poll.html?id=' + poll.id + '">Be the first to take this poll</a>.'
               : 'This poll closed without any responses.'
           });

@@ -5,10 +5,10 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select, true
 from sqlalchemy.orm import selectinload
 
-from app.api.deps import DbSession
+from app.api.deps import DbSession, OptionalUser
 from app.api.rules import effective_status, published_responses
 from app.core.constants import MIN_GROUP_SIZE, SMALL_SAMPLE_SIZE
-from app.models import Answer, Poll, PollStatus, Question, Response
+from app.models import Answer, Poll, PollStatus, Question, Response, UserRole
 from app.schemas.results import (
     GroupResult,
     OptionResult,
@@ -78,13 +78,15 @@ def _period_start(day: str, interval: str) -> str:
 
 
 @router.get("/{poll_id}", response_model=PollResults)
-def poll_results(poll_id: int, db: DbSession) -> PollResults:
+def poll_results(poll_id: int, db: DbSession, user: OptionalUser) -> PollResults:
     poll = db.scalar(
         select(Poll)
         .where(Poll.id == poll_id)
         .options(selectinload(Poll.questions).selectinload(Question.options))
     )
-    if poll is None or poll.status == PollStatus.draft:
+    # Admins may preview a draft's (empty) results page (BE-04); to everyone else drafts don't exist.
+    is_admin = user is not None and user.role == UserRole.admin
+    if poll is None or (poll.status == PollStatus.draft and not is_admin):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Poll not found")
 
     total_responses = db.scalar(select(func.count()).where(Response.poll_id == poll_id)) or 0
