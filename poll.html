@@ -528,7 +528,7 @@
           '<span class="poll-progress-label">' + label + '</span>' +
           '<span class="poll-progress-pct">' + Math.round(step / total * 100) + '%</span>' +
         '</div>' +
-        '<div class="poll-segments" role="progressbar" aria-valuenow="' + step + '" aria-valuemin="1" aria-valuemax="' + total + '">' +
+        '<div class="poll-segments" role="progressbar" aria-label="' + label + '" aria-valuenow="' + step + '" aria-valuemin="1" aria-valuemax="' + total + '">' +
           segments +
         '</div>';
     }

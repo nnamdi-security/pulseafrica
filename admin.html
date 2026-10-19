@@ -626,7 +626,7 @@
         const tip = dayLabel(d.date) + ': ' + plural(d.count, 'response');
         const label = i === 0 || i === days.length - 1 || i % 2 === 0
           ? new Date(d.date + 'T00:00:00Z').getUTCDate() : '';
-        return '<div class="admin-col" tabindex="0" data-tip="' + escapeHtml(tip) + '" aria-label="' + escapeHtml(tip) + '">' +
+        return '<div class="admin-col" role="img" tabindex="0" data-tip="' + escapeHtml(tip) + '" aria-label="' + escapeHtml(tip) + '">' +
           '<div class="admin-col-bar' + (d.count ? '' : ' is-zero') + '" style="height: ' + (100 * d.count / max) + '%;"></div>' +
           '<span class="admin-col-label" aria-hidden="true">' + label + '</span>' +
         '</div>';
