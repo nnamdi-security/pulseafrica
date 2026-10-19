@@ -71,6 +71,10 @@ class PollResults(CamelModel):
     min_group_size: int
     # True when the poll has fewer than min_group_size responses: only totals are shown
     results_withheld: bool
+    # Responses the figures count: whole steps of min_group_size, so one response can't move them
+    published_responses: int
+    # True while the poll is open: breakdowns and the trend are published when it closes
+    breakdowns_held: bool
     # Distinct states respondents reported, including states whose group is withheld
     states_covered: int
     trend_interval: Literal["day", "week", "month"]

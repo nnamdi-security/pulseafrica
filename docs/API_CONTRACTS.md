@@ -65,7 +65,7 @@ Clients should show `detail` strings: they're written to be user-safe.
 | PATCH | `/polls/{id}` | admin | any of the POST fields | 200 `PollOut` | 404 · 409 questions locked / back to draft with responses · 422 |
 | DELETE | `/polls/{id}` | admin | — | 204: deletes the poll, its questions and options, **and every response to it** | 404 |
 
-- **`PollSummary`:** `{id, title, description, category, status, closesAt, createdAt, isSynthetic, responseCount, questionCount, preview: [{text, count, percent}]}`. `isSynthetic` is `true` for seeded demonstration polls ([METH-01](AUDIT.md#meth-01)); pages label them. `preview` covers the **first question's** options, and is `[]` until the poll has at least 10 responses (the minimum group size, [decision 0001](decisions/0001-minimum-public-group-size.md)).
+- **`PollSummary`:** `{id, title, description, category, status, closesAt, createdAt, isSynthetic, responseCount, questionCount, preview: [{text, count, percent}]}`. `isSynthetic` is `true` for seeded demonstration polls ([METH-01](AUDIT.md#meth-01)); pages label them. `preview` covers the **first question's** options, and is `[]` until the poll has at least 10 responses (the minimum group size, [decision 0001](decisions/0001-minimum-public-group-size.md)). Like the results, it counts whole steps of 10 responses only ([decision 0006](decisions/0006-results-released-in-steps.md)); `responseCount` is exact.
 - **`PollOut`:** `PollSummary` plus `questions: [{id, text, options: [{id, text, description}]}]` (ordered by position) and `hasResponded`: `true`/`false` when signed in, `null` when not.
 
 **Business rules** (enforced in `routes/polls.py`):
@@ -89,9 +89,11 @@ Demographics are **self-reported for each response**. They can differ from the p
 |---|---|---|---|
 | GET | `/results/{pollId}` | — | 200 `PollResults` for active and closed polls; 404 for drafts, even for admins ([BE-04](AUDIT.md#be-04)) |
 
-- **`PollResults`:** `{pollId, title, isSynthetic, totalResponses, minGroupSize, resultsWithheld, statesCovered, trendInterval, questions: [QuestionResult]}`.
+- **`PollResults`:** `{pollId, title, isSynthetic, totalResponses, minGroupSize, resultsWithheld, publishedResponses, breakdownsHeld, statesCovered, trendInterval, questions: [QuestionResult]}`.
   - `minGroupSize`: the smallest group shown (10). Clients use this value rather than their own.
   - `resultsWithheld`: `true` when `totalResponses < minGroupSize`. Every option's `count` and `percent` are then `null`, and every breakdown and the trend are empty; only the totals are shown.
+  - `publishedResponses`: how many responses the figures count, the largest multiple of `minGroupSize` not above `totalResponses` (the first ones received). `totalResponses` stays exact.
+  - `breakdownsHeld`: `true` while the poll is open (its effective status is `active`). Every breakdown and the trend are then empty, with `withheld` all zeros.
   - `statesCovered`: distinct states among the respondents, including states whose group is withheld.
   - `trendInterval`: `"day"`, `"week"` or `"month"`, the length of each `trend` period.
 - **`QuestionResult`:** `{questionId, text, total, options: [OptionResult], byState, byAgeRange, byGender, byEducation, byOccupation: [GroupResult], trend: [{date, total, options}], withheld}`.
@@ -105,6 +107,7 @@ The groups follow these rules:
 - **Group order:** groups are sorted by name; clients reorder them, e.g. ages in `AGE_ORDER`.
 - **Optional demographics:** `byEducation` and `byOccupation` include only respondents who answered those questions.
 - **Trend:** one entry per UTC period, oldest first; `date` is the first day of the period (a Monday for weeks). Polls whose responses span up to 21 days are grouped by day, up to 182 days by week, and longer by month; if fewer than two periods would be shown, the next coarser interval that shows two is used.
+- **Released in steps ([decision 0006](decisions/0006-results-released-in-steps.md)):** every count, percentage, group and trend period is computed over the first `publishedResponses` responses only, so a single response never changes the published figures on its own. Breakdowns and the trend are published only once the poll closes. When `resultsWithheld` is `true` the step doesn't apply; only totals are shown.
 - **Unweighted:** all figures are raw counts.
 - **Breaking change (Milestone 1):** `count` and `percent` can be `null`, and `trend[].date` can be the start of a week or month rather than a day. Every page that reads results was updated in the same change.
 

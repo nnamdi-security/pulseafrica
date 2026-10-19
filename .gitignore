@@ -14,7 +14,7 @@ venv/
 .coverage
 htmlcov/
 
-# Node (for the Playwright suite planned in Milestone 2)
+# Node
 node_modules/
 
 # Editors and operating systems
@@ -23,3 +23,6 @@ node_modules/
 *.swp
 .DS_Store
 Thumbs.db
+
+# Browser test traces (e2e/)
+test-results/

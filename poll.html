@@ -22,7 +22,7 @@
     <div class="ticker-inner" data-ticker>
       <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">PulseAfrica</span><span class="tick-val">Independent civic opinion research</span></div>
       <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Coverage</span><span class="tick-val">40 states &middot; 450 tribes</span></div>
-      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Responses</span><span class="tick-val">Anonymous by design</span></div>
+      <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Responses</span><span class="tick-val">Published as totals only</span></div>
       <div class="tick-item"><span class="tick-dot warn"></span><span class="tick-label">Methodology</span><span class="tick-val">Open and published</span></div>
       <div class="tick-item"><span class="tick-dot"></span><span class="tick-label">Affiliation</span><span class="tick-val">No party, no government</span></div>
     </div>
@@ -336,7 +336,7 @@
           <div class="logo-sep" aria-hidden="true"></div>
           <span class="logo-africa">Africa</span>
         </a>
-        <p>An independent, non-partisan civic opinion research platform for the United STATEs of Africa.</p>
+        <p>An independent, non-partisan civic opinion research platform for the United States of Africa.</p>
       </div>
       <div class="footer-col">
         <h5>Platform</h5>
@@ -365,7 +365,7 @@
         &copy; 2026 PulseAfrica &middot; Non-partisan &middot; Non-governmental &middot; Independent
       </span>
       <div class="footer-badges">
-        <span class="badge">Anonymous Data</span>
+        <span class="badge">Totals Only</span>
         <span class="badge">Open Methodology</span>
         <span class="badge">No Party Affiliation</span>
       </div>
@@ -528,7 +528,7 @@
           '<span class="poll-progress-label">' + label + '</span>' +
           '<span class="poll-progress-pct">' + Math.round(step / total * 100) + '%</span>' +
         '</div>' +
-        '<div class="poll-segments" role="progressbar" aria-valuenow="' + step + '" aria-valuemin="1" aria-valuemax="' + total + '">' +
+        '<div class="poll-segments" role="progressbar" aria-label="' + label + '" aria-valuenow="' + step + '" aria-valuemin="1" aria-valuemax="' + total + '">' +
           segments +
         '</div>';
     }

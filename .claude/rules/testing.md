@@ -27,11 +27,11 @@ cd backend && TEST_DATABASE_URL=postgresql+psycopg://pulseafrica:pulseafrica@loc
 
 ## Frontend
 
-- **No automated frontend tests exist yet.** Until Milestone 2 adds Playwright in `e2e/`, verify frontend changes manually: in a browser against a seeded API, at 1280px and 390px, covering loading, empty and error states and keyboard use.
-- **When `e2e/` exists:**
+- **Browser tests live in `e2e/`** (Python Playwright, [decision 0005](../../docs/decisions/0005-browser-tests-in-python.md)). Run them for any frontend change: `cd e2e && E2E_POSTGRES_URL=postgresql://pulseafrica:pulseafrica@localhost:5432/postgres pytest`. The suite creates and drops its own database.
   - **Each journey gets a test;** stable locators are roles and labels, then ids.
   - **No fixed sleeps;** wait for conditions.
-  - **Axe check** on every page.
+  - **Axe check** on every page; only the FE-03 contrast rule is excluded.
+  - **Still look at the page yourself** at 1280px and 390px for visual changes; the suite checks behaviour, not appearance.
 - **For the proposed Next.js frontend:** Vitest and Testing Library for logic and components; MSW for API states; the same Playwright journeys as the parity suite.
 
 ## Reporting
