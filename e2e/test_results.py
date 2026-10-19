@@ -2,9 +2,11 @@
 until they close (decision 0006)."""
 
 import re
+import secrets
 
 from playwright.sync_api import Page, expect
 
+from conftest import api, register
 from test_take_poll import seeded_poll
 
 PRESIDENT = "Presidential performance — Q2 2026 mid-term assessment"
@@ -58,3 +60,31 @@ def test_a_closed_poll_shows_its_breakdowns(page: Page, console_errors):
     expect(page.locator("#stateHeatmap .state-heat-cell").first).to_be_visible()
     open_tab(page, "Trend analysis")
     expect(page.locator("#trendSub")).to_contain_text("share among the responses received each")
+
+
+def test_figures_show_their_sample_size(page: Page, admin, console_errors):
+    # METH-03 (decision 0014): n beside every figure, and a note under 100 responses.
+    status, poll = api("POST", "/polls", {
+        "title": f"Small sample {secrets.token_hex(3)}", "description": "Ten respondents.", "category": "economy",
+        "status": "active",
+        "questions": [{"text": "Is the economy improving?", "options": [{"text": "Yes"}, {"text": "No"}]}],
+    }, token=admin.token)
+    assert status == 201, poll
+    question = poll["questions"][0]
+    for i in range(10):
+        user = register("sample")
+        status, body = api("POST", "/responses", {
+            "pollId": poll["id"], "ageRange": "25–34", "gender": "Female", "state": "ENUGU STATE",
+            "answers": [{"questionId": question["id"], "optionId": question["options"][i % 2]["id"]}],
+        }, token=user.token)
+        assert status == 201, body
+    assert api("PATCH", f"/polls/{poll['id']}", {"status": "closed"}, token=admin.token)[0] == 200
+
+    page.goto(f"/results.html?id={poll['id']}")
+    expect(page.locator("#distSample")).to_have_text(
+        "Based on 10 responses (n). Small sample: with fewer than 100 responses, "
+        "these figures can change a lot as more people answer.")
+    open_tab(page, "By demographic")
+    expect(page.locator("#genderBars .results-hbar-n")).to_have_text("n=10")
+    expect(page.locator("#genderBars")).to_contain_text("Small samples: groups with fewer than 100 responses")
+    api("DELETE", f"/polls/{poll['id']}", token=admin.token)

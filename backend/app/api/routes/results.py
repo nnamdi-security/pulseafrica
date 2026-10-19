@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from app.api.deps import DbSession
 from app.api.rules import effective_status, published_responses
-from app.core.constants import MIN_GROUP_SIZE
+from app.core.constants import MIN_GROUP_SIZE, SMALL_SAMPLE_SIZE
 from app.models import Answer, Poll, PollStatus, Question, Response
 from app.schemas.results import (
     GroupResult,
@@ -210,6 +210,7 @@ def poll_results(poll_id: int, db: DbSession) -> PollResults:
         is_synthetic=poll.is_synthetic,
         total_responses=total_responses,
         min_group_size=MIN_GROUP_SIZE,
+        small_sample_size=SMALL_SAMPLE_SIZE,
         results_withheld=withheld_all,
         published_responses=published_count,
         breakdowns_held=breakdowns_held,

@@ -320,3 +320,10 @@ def test_the_list_preview_moves_in_steps_too(client, db, admin_headers):
     assert card["responseCount"] == K + 3
     assert [o["count"] for o in card["preview"]] == [K // 2, K // 2, 0]
     assert [o["count"] for o in client.get(f"/api/polls/{poll['id']}").json()["preview"]] == [K // 2, K // 2, 0]
+
+
+def test_results_report_the_small_sample_size(client, admin_headers):
+    # METH-03 (decision 0014): pages flag figures from fewer responses than this.
+    poll = create_poll(client, admin_headers)
+    assert results(client, poll)["smallSampleSize"] == 100
+

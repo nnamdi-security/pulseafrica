@@ -3280,6 +3280,28 @@ footer {
   text-align: right;
 }
 
+.results-hbar-n {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: #6B7280;
+  flex-shrink: 0;
+}
+
+/* Sample size under the answer distribution, and small-sample notes under breakdowns (METH-03) */
+.results-sample-note {
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-top: 14px;
+}
+
+.results-small-note {
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
 .results-hbar-val.trend-up   { color: #2D6A4F; }
 .results-hbar-val.trend-down { color: #A32D2D; }
 
@@ -3317,6 +3339,13 @@ footer {
   font-size: 16px;
   font-weight: 700;
   color: #F5F0E8;
+}
+
+.state-heat-n {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(245, 240, 232, 0.75);
+  margin-top: 2px;
 }
 
 .state-legend {

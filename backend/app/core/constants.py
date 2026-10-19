@@ -44,3 +44,7 @@ OCCUPATIONS = [
 # Smallest group shown in public results; smaller groups, and polls with fewer
 # responses than this, are withheld (docs/decisions/0001-minimum-public-group-size.md)
 MIN_GROUP_SIZE = 10
+
+# Figures based on fewer responses than this carry a small-sample note on the results page
+# (METH-03, docs/decisions/0014-sample-size-without-margin-of-error.md)
+SMALL_SAMPLE_SIZE = 100
