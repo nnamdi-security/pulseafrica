@@ -46,7 +46,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [FE-04](#fe-04) | LOW | Accessibility | Poll answer tiles (`role="radio"`) have no arrow-key navigation | Confirmed (inspection) |
 | [FE-05](#fe-05) | LOW | Frontend | 83 placeholder `href="#"` links and several buttons that do nothing | Confirmed (inspection) |
 | [FE-06](#fe-06) | LOW | Security | XSS safety depends on hand-escaping at 70 `innerHTML` sites | Potential risk |
-| [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Confirmed (inspection) |
+| [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Fixed (M1) |
 | [BE-04](#be-04) | IMPROVEMENT | Backend | Admins can't preview results of a draft poll | Reproduced |
 | [BE-05](#be-05) | IMPROVEMENT | Operations | `/api/health` doesn't check the database | Confirmed (inspection) |
 | [METH-03](#meth-03) | IMPROVEMENT | Research integrity | No sample-size warnings or uncertainty estimates in results | Confirmed (inspection) |
@@ -384,6 +384,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - **`.gitignore`:** only `backend/.gitignore` exists, so files like `__pycache__` or a root-level `.env` could be committed by mistake.
 - **Recommended fix:** correct the README statements (done in this branch, see below). Add a root `.gitignore` in Milestone 1, since it's a repository-hygiene change rather than documentation.
 - **Verification status:** Confirmed (inspection).
+- **Resolution (M1):** fixed. The README was corrected in Milestone 0; a root `.gitignore` now covers `.env` files, Python caches and virtualenvs, `node_modules/`, and editor and OS files. No tracked file became ignored.
 
 <a id="be-04"></a>
 ### BE-04: Admins can't preview draft results (IMPROVEMENT)
