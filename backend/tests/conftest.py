@@ -1,4 +1,5 @@
 import os
+from http.cookiejar import DefaultCookiePolicy
 
 # The API refuses to start without a strong secret, so set a test-only one before the app is imported.
 os.environ["JWT_SECRET_KEY"] = "test-only-secret-not-for-real-use-0123456789"
@@ -44,6 +45,9 @@ def db():
 def client(db):
     app.dependency_overrides[get_db] = lambda: db
     with TestClient(app) as test_client:
+        # Like the current pages, the shared client authenticates with bearer tokens only and keeps
+        # no cookies. Cookie sessions are tested with their own clients (test_sessions.py).
+        test_client.cookies.jar.set_policy(DefaultCookiePolicy(allowed_domains=[]))
         yield test_client
     app.dependency_overrides.clear()
 

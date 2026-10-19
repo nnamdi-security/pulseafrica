@@ -87,6 +87,8 @@ class AccountDelete(CamelModel):
 class UserLogin(CamelModel):
     email: EmailStr
     password: str
+    # "Keep me signed in": the session cookie then outlives the browser session.
+    remember: bool = False
 
 
 class UserOut(CamelModel):

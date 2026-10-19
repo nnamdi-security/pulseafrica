@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import Response as HttpResponse
 from sqlalchemy import delete, select, update
 
 from app.api import ratelimit
-from app.api.deps import CurrentUser, DbSession
+from app.api.deps import SESSION_COOKIE, CurrentUser, DbSession, OptionalUser
+from app.core.config import get_settings
 from app.api.rules import effective_status, ensure_another_active_admin
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import Answer, Poll, Response, User
@@ -40,8 +42,13 @@ def register(payload: UserRegister, db: DbSession, request: Request) -> User:
     return user
 
 
+def _session_cookie_options() -> dict:
+    return {"path": "/api", "httponly": True, "samesite": "lax",
+            "secure": get_settings().environment == "production"}
+
+
 @router.post("/login", response_model=Token)
-def login(payload: UserLogin, db: DbSession, request: Request) -> Token:
+def login(payload: UserLogin, db: DbSession, request: Request, response: HttpResponse) -> Token:
     email = payload.email.lower()
     ratelimit.enforce(db, ratelimit.LOGIN_PER_ADDRESS, ratelimit.client_address(request))
     ratelimit.check(db, ratelimit.FAILED_LOGINS_PER_ACCOUNT, email)
@@ -50,14 +57,22 @@ def login(payload: UserLogin, db: DbSession, request: Request) -> Token:
     if user is None or not verify_password(payload.password, user.hashed_password) or not user.is_active:
         ratelimit.record(db, ratelimit.FAILED_LOGINS_PER_ACCOUNT, email)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
-    return Token(access_token=create_access_token(user.id, user.token_version))
+    token = create_access_token(user.id, user.token_version)
+    # Also as an HttpOnly cookie, for a same-origin frontend (decision 0011). The current pages
+    # don't send cookies and keep using the bearer token.
+    max_age = get_settings().jwt_expire_minutes * 60 if payload.remember else None
+    response.set_cookie(SESSION_COOKIE, token, max_age=max_age, **_session_cookie_options())
+    return Token(access_token=token)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-def logout(db: DbSession, user: CurrentUser) -> None:
-    """Signs the user out everywhere: every token issued so far stops working (decision 0010)."""
-    user.token_version += 1
-    db.commit()
+def logout(db: DbSession, user: OptionalUser, response: HttpResponse) -> None:
+    """Signs the user out everywhere: every token issued so far stops working (decision 0010).
+    Always clears the session cookie, which the browser can't clear itself, even once it's stale."""
+    if user is not None:
+        user.token_version += 1
+        db.commit()
+    response.delete_cookie(SESSION_COOKIE, **_session_cookie_options())
 
 
 @router.get("/me", response_model=UserOut)
