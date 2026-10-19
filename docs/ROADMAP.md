@@ -76,7 +76,11 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** flaky end-to-end tests. Mitigation: deterministic seed data (the seed already uses a fixed random seed) and no fixed sleeps.
 - **Completion condition:** CI required on PRs.
 
-## M3: Security hardening and session contract (NOT STARTED)
+## M3: Security hardening and session contract (COMPLETED, pending merge)
+
+- **Progress:** built in one PR following owner decisions D12–D18 ([0009–0012](decisions/README.md)), per the [Milestone 3 plan](https://claude.ai/code/artifact/551f38cc-6928-4497-b013-f9f102eb66e1). Fixed: SEC-03, SEC-05, SEC-10, BE-01, BE-02, BE-05; SEC-08 apart from Google Fonts; SEC-07 for the API; the backend half of SEC-04. SEC-09 accepted. TEST-02 was done in M2 (PR #8).
+- **Left for later:** the current pages moving to the cookie (SEC-04, M7); a CSP for the static pages (SEC-07, M9).
+- **Behaviour changes to know:** everyone signs in once more after release (old tokens have no version); signing out signs a user out on every device; a password change signs in again on that page.
 
 - **Objective:** close the remaining security gaps, and add the backend half of the recommended authentication model **without breaking the current pages**.
 - **Dependencies:** M2 (so regressions are caught).
@@ -186,5 +190,12 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D9 | ~~"Anonymous" badge and ticker wording~~ **Decided 2026-10-19:** "Totals Only" ([0007](decisions/0007-totals-only-wording.md)) | M2 |
 | D10 | ~~Live-results timing leak~~ **Decided 2026-10-19:** steps of 10, breakdowns after close ([0006](decisions/0006-results-released-in-steps.md)) | M2 |
 | D11 | ~~CI required for merging~~ **Decided 2026-10-19:** yes, once the browser suite is green ([0008](decisions/0008-required-ci-checks.md)); the owner sets branch protection | M2 |
+| D12 | ~~Where rate limiting lives~~ **Decided 2026-10-19:** in the API, counted in Postgres ([0009](decisions/0009-rate-limiting.md)) | M3 |
+| D13 | ~~Limits and lockout~~ **Decided 2026-10-19:** per-address and per-user limits, a 15-minute per-account pause ([0009](decisions/0009-rate-limiting.md)) | M3 |
+| D14 | ~~What sign-out revokes~~ **Decided 2026-10-19:** a token version; every token of the user ([0010](decisions/0010-token-version-revocation.md)) | M3 |
+| D15 | ~~CSRF defence~~ **Decided 2026-10-19:** `X-Requested-With: pulseafrica` on cookie writes ([0011](decisions/0011-cookie-session-and-csrf.md)) | M3 |
+| D16 | ~~Current pages on the cookie in M3~~ **Decided 2026-10-19:** no, they keep bearer ([0011](decisions/0011-cookie-session-and-csrf.md)) | M3 |
+| D17 | ~~CDN protection~~ **Decided 2026-10-19:** SRI on Tabler Icons and Chart.js; fonts unchanged ([0012](decisions/0012-asset-integrity.md)) | M3 |
+| D18 | ~~SEC-09~~ **Decided 2026-10-19:** accepted with rate limiting ([0009](decisions/0009-rate-limiting.md)) | M3 |
 
 Record each decision in [`docs/decisions/`](decisions/README.md) when it's made.
