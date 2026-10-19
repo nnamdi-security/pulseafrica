@@ -1,4 +1,4 @@
-"""Retired claims stay retired (PRIV-02, decisions 0003 and 0007). Reads the HTML files directly."""
+"""Retired claims stay retired (PRIV-02, METH-02; decisions 0003, 0007 and 0013). Reads the HTML files directly."""
 
 import re
 
@@ -7,8 +7,7 @@ import pytest
 from conftest import ROOT
 
 PAGES = sorted(ROOT.glob("*.html"))
-# methodology.html's "anonymous response design" is methodology copy, left for METH-02 (Milestone 4).
-ALLOWED = {("methodology.html", "Anonymous response design")}
+ALLOWED: set[tuple[str, str]] = set()
 
 
 def test_all_nine_pages_are_checked():
@@ -30,3 +29,19 @@ def test_footer_and_ticker_say_totals_only(page):
     assert '<span class="badge">Totals Only</span>' in text
     assert '<span class="tick-val">Published as totals only</span>' in text
     assert "never linked" not in text.lower()
+
+
+# METH-02 (decision 0013): research claims the code doesn't support.
+RETIRED_METHODOLOGY = [
+    "results are weighted", "statistically weighted", "apply post-stratification", "weight aggressively",
+    "includes a margin of error", "&plusmn;", "±", "min. sample per poll", "stratified to match",
+    "verified email", "verified registered accounts", "update in real time", "ip level", "ip-level",
+    "weighting factors applied", "every weighting factor",
+]
+
+
+@pytest.mark.parametrize("page", [ROOT / name for name in ("index.html", "methodology.html", "about.html")],
+                         ids=lambda p: p.name)
+def test_no_unsupported_methodology_claims(page):
+    text = " ".join(page.read_text().lower().split())
+    assert [claim for claim in RETIRED_METHODOLOGY if claim in text] == []
