@@ -757,6 +757,13 @@
       });
     }
 
+    // login.html?next=poll.html%3Fid%3D3 sends the user back there after signing in.
+    // Only a page in this site is accepted (no other domains, no "//" tricks).
+    function nextPage() {
+      const next = new URLSearchParams(location.search).get('next');
+      return next && /^[a-z0-9_-]+\.html(\?[^#]*)?$/i.test(next) ? next : null;
+    }
+
     function showSuccess(opts) {
       document.getElementById('success-title').textContent = opts.title;
       document.getElementById('success-text').textContent = opts.text;
@@ -826,6 +833,10 @@
         .then(function (results) {
           const user = results[0];
           PulseNav.showUser(user);
+          if (nextPage()) {
+            location.href = nextPage();
+            return;
+          }
           showSuccess({
             title: 'You’re signed in',
             text: 'Welcome back, ' + firstNameOf(user.fullName) + '. ' + results[1],
@@ -864,6 +875,10 @@
           return PulseAPI.login(payload.email, payload.password, false).then(function () { return user; });
         })
         .then(function (user) {
+          if (nextPage()) {
+            location.href = nextPage();
+            return;
+          }
           PulseNav.refresh();
           showSuccess({
             title: 'Account created',

@@ -49,6 +49,17 @@ python -m app.create_admin you@example.com
 
 Admins can create polls and see drafts.
 
+### Load demo data
+
+```bash
+python -m app.seed                  # 10 polls + 300 demo voters' responses
+python -m app.seed --responses 0    # polls only
+```
+
+This creates the polls that the original static `polls.html` showed. Each demo voter's answers are random, weighted towards the percentages the static cards displayed, so the pages have realistic numbers. Demo voters are inactive accounts with unusable passwords, so nobody can sign in as them. The seed runs only on a database with no polls.
+
+To start again from scratch: `alembic downgrade base && alembic upgrade head && python -m app.seed`.
+
 ---
 
 ## Run the tests
@@ -133,13 +144,13 @@ JSON uses **camelCase** (`fullName`, `ageRange`) to match the JavaScript fronten
 | POST | `/api/auth/register` | — | Create an account |
 | POST | `/api/auth/login` | — | Get an access token |
 | GET | `/api/auth/me` | User | Current user's profile |
-| GET | `/api/polls` | — | List polls. Query: `category`, `status`, `search` |
-| GET | `/api/polls/{id}` | — | One poll with its questions and options |
+| GET | `/api/polls` | — | List polls with `responseCount`, `questionCount` and a first-question `preview`. Query: `category`, `status`, `search` |
+| GET | `/api/polls/{id}` | — | One poll with its questions and options, plus `hasResponded` (`true` / `false` when signed in, `null` when not) |
 | POST | `/api/polls` | Admin | Create a poll with questions and options |
 | POST | `/api/responses` | User | Submit answers to an active poll (once per user) |
 | GET | `/api/results/{pollId}` | — | Counts and percentages, overall and by state / age range / gender |
 
-Drafts are hidden from everyone except admins.
+Drafts are hidden from everyone except admins. A poll's `category` must be one of `presidency`, `governors`, `economy`, `security`, `education`, `healthcare` or `governance` (the filter buttons on `polls.html`).
 
 ### Examples
 
@@ -175,12 +186,16 @@ Drafts are hidden from everyone except admins.
   "ageRange": "25–34",
   "gender": "Female",
   "state": "ENUGU STATE",
+  "education": "Bachelor's degree",
+  "occupation": "Student",
   "answers": [
     { "questionId": 1, "optionId": 1 },
     { "questionId": 2, "optionId": 4 }
   ]
 }
 ```
+
+`education` and `occupation` are optional (omit them or send `null`); when sent, they must be one of the choices on `poll.html`.
 
 → `201`. `409` if you already responded or the poll is closed; `422` if a question is missing or an option doesn't belong to its question.
 
@@ -236,7 +251,9 @@ The token is kept in `localStorage` when "Keep me signed in" is ticked, otherwis
 
 Every page also loads [`../nav-auth.js`](../nav-auth.js) after `api.js`. It replaces the nav's `<li data-nav-auth>` "Sign in" link with the user's first name and a Sign out button. The name comes from a cached copy of `/auth/me`, so it appears without a flicker, and is then re-checked against the API; an expired or invalid token signs the user out. Signing out just deletes the stored token (JWTs are stateless, so there is no logout endpoint).
 
-`login.html` is wired up: sign in, create account (which signs the new user straight in), duplicate-email and wrong-password errors, and a "server unreachable" message. The password reset form is still simulated because there's no reset endpoint yet.
+`login.html` is wired up: sign in, create account (which signs the new user straight in), duplicate-email and wrong-password errors, and a "server unreachable" message. The password reset form is still simulated because there's no reset endpoint yet. `login.html?next=poll.html%3Fid%3D3` returns the user to that page after signing in; only page names on this site are accepted.
+
+`polls.html` loads every poll once with `GET /api/polls`, then filters, sorts and paginates in the browser. `poll.html?id=…` builds one screen per question from `GET /api/polls/{id}`, pre-fills age range and state from the account, and submits to `POST /api/responses`. People who aren't signed in, who have already responded, or who open a closed poll see a message instead of the questions.
 
 ---
 

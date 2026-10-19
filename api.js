@@ -158,6 +158,22 @@
       });
       const qs = params.toString();
       return request('GET', '/polls' + (qs ? '?' + qs : ''));
+    },
+
+    // → poll with questions, responseCount and hasResponded (null when signed out)
+    getPoll: function (id) {
+      return request('GET', '/polls/' + encodeURIComponent(id));
+    },
+
+    // payload: { pollId, ageRange, gender, state, education?, occupation?,
+    //            answers: [{ questionId, optionId }] }
+    submitResponse: function (payload) {
+      return request('POST', '/responses', payload);
+    },
+
+    // → counts and percentages, overall and by state / age range / gender
+    getResults: function (pollId) {
+      return request('GET', '/results/' + encodeURIComponent(pollId));
     }
   };
 })();

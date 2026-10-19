@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import Field, field_validator
 
-from app.core.constants import AGE_RANGES, GENDERS, STATES
+from app.core.constants import AGE_RANGES, EDUCATION_LEVELS, GENDERS, OCCUPATIONS, STATES
 from app.schemas.base import CamelModel
 
 
@@ -16,6 +16,8 @@ class ResponseCreate(CamelModel):
     age_range: str
     gender: str
     state: str
+    education: str | None = None
+    occupation: str | None = None
     answers: list[AnswerIn] = Field(min_length=1)
 
     @field_validator("age_range")
@@ -37,6 +39,21 @@ class ResponseCreate(CamelModel):
     def valid_state(cls, value: str) -> str:
         if value not in STATES:
             raise ValueError("Unknown state")
+        return value
+
+
+    @field_validator("education")
+    @classmethod
+    def valid_education(cls, value: str | None) -> str | None:
+        if value is not None and value not in EDUCATION_LEVELS:
+            raise ValueError("Unknown education level")
+        return value
+
+    @field_validator("occupation")
+    @classmethod
+    def valid_occupation(cls, value: str | None) -> str | None:
+        if value is not None and value not in OCCUPATIONS:
+            raise ValueError("Unknown occupation")
         return value
 
 

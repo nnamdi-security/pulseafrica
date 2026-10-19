@@ -43,6 +43,8 @@ def submit_response(payload: ResponseCreate, db: DbSession, user: CurrentUser) -
         age_range=payload.age_range,
         gender=payload.gender,
         state=payload.state,
+        education=payload.education,
+        occupation=payload.occupation,
         answers=[Answer(question_id=a.question_id, option_id=a.option_id) for a in payload.answers],
     )
     db.add(response)

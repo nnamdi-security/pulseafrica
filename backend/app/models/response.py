@@ -19,6 +19,8 @@ class Response(Base):
     age_range: Mapped[str] = mapped_column(String(16))
     gender: Mapped[str] = mapped_column(String(16))
     state: Mapped[str] = mapped_column(String(64))
+    education: Mapped[str | None] = mapped_column(String(64))
+    occupation: Mapped[str | None] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     answers: Mapped[list["Answer"]] = relationship(back_populates="response", cascade="all, delete-orphan")

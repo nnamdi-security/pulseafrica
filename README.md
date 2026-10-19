@@ -10,7 +10,14 @@ This repository contains the **Phase 1 frontend** (HTML, CSS, vanilla JS, no fra
 
 ## Status
 
-🚧 **In progress.** The frontend pages are built. The backend API (auth, polls, responses, results) is scaffolded in [`backend/`](backend/) **sign in / create account on `login.html` now use the real API**, and every page's nav shows the signed-in user's name with a Sign out button. Every other page still shows static placeholder content (poll counts, response numbers, approval ratings) hard-coded into the HTML.
+🚧 **In progress.** The frontend pages are built and the backend API (auth, polls, responses, results) lives in [`backend/`](backend/). These pages now run on the real API:
+
+- **`login.html`**: sign in and create account
+- **`polls.html`**: the poll directory, with live counts, filters, sorting and search
+- **`poll.html`**: taking a poll (`poll.html?id=1`), from sign-in through to the thank-you screen
+- **The nav** on every page shows the signed-in user's name and a Sign out button
+
+`results.html`, the home page and the ticker still show static placeholder numbers hard-coded into the HTML.
 
 ---
 
@@ -103,7 +110,9 @@ Navigate between pages using the top nav — all internal links (`index.html`, `
 
 The API is Python + FastAPI + PostgreSQL. Setup steps, the database schema, and every endpoint are documented in **[`backend/README.md`](backend/README.md)**. In short: `docker compose up -d`, install `requirements.txt`, `alembic upgrade head`, then `uvicorn app.main:app --reload`. Interactive API docs are then at `http://localhost:8000/docs`.
 
-Sign in and Create account on `login.html` need the backend running. Open the page through Live Server (`http://localhost:5500` or `http://127.0.0.1:5500`); opening the HTML file directly (`file://`) is blocked by the API's CORS settings.
+For a populated demo, run `python -m app.seed` once after migrating. It adds the 10 polls from the original static page and 300 demo voters' responses.
+
+The connected pages need the backend running. Open the page through Live Server (`http://localhost:5500` or `http://127.0.0.1:5500`); opening the HTML file directly (`file://`) is blocked by the API's CORS settings.
 
 ---
 
@@ -141,7 +150,8 @@ Sign in and Create account on `login.html` need the backend running. Open the pa
 
 **Phase 3 — Integration**
 - [x] Wire login / register to the auth API (`api.js`)
-- [ ] Wire polls, single poll and results pages to the API
+- [x] Wire polls directory and single poll pages to the API
+- [ ] Wire the results dashboard (`results.html?id=…`) to the API
 - [x] Sign-in state in the nav (user's name, sign out) via `nav-auth.js`
 - [ ] Replace placeholder data with real database queries
 - [ ] Real-time-ish results updates

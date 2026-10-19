@@ -128,3 +128,45 @@ def test_results_for_poll_with_no_responses(client, admin_headers):
     body = client.get(f"/api/results/{poll['id']}").json()
     assert body["totalResponses"] == 0
     assert all(o["percent"] == 0.0 for o in body["questions"][0]["options"])
+
+
+def test_list_includes_counts_and_preview(client, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    submit(client, citizen_headers, poll, choice=0)
+    submit(client, admin_headers, poll, choice=1)
+
+    [card] = client.get("/api/polls").json()
+    assert card["responseCount"] == 2
+    assert card["questionCount"] == 2
+    assert [(o["text"], o["count"], o["percent"]) for o in card["preview"]] == [
+        ("Approve", 1, 50.0), ("Neutral", 1, 50.0), ("Disapprove", 0, 0.0),
+    ]
+
+
+def test_preview_with_no_responses(client, admin_headers):
+    create_poll(client, admin_headers)
+    [card] = client.get("/api/polls").json()
+    assert card["responseCount"] == 0
+    assert [o["percent"] for o in card["preview"]] == [0.0, 0.0, 0.0]
+
+
+def test_has_responded(client, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    url = f"/api/polls/{poll['id']}"
+    assert client.get(url).json()["hasResponded"] is None
+    assert client.get(url, headers=citizen_headers).json()["hasResponded"] is False
+    submit(client, citizen_headers, poll)
+    body = client.get(url, headers=citizen_headers).json()
+    assert body["hasResponded"] is True
+    assert body["responseCount"] == 1
+
+
+def test_create_poll_rejects_unknown_category(client, admin_headers):
+    res = client.post("/api/polls", json={**POLL_PAYLOAD, "category": "sports"}, headers=admin_headers)
+    assert res.status_code == 422
+
+
+def test_optional_demographics(client, admin_headers, citizen_headers):
+    poll = create_poll(client, admin_headers)
+    assert submit(client, citizen_headers, poll, education="Postgraduate", occupation="Nurse").status_code == 422
+    assert submit(client, citizen_headers, poll, education="Bachelor's degree", occupation="Student").status_code == 201

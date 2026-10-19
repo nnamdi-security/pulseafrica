@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
+from app.core.constants import CATEGORIES
 from app.models.poll import PollStatus
 from app.schemas.base import CamelModel
 
@@ -19,10 +20,17 @@ class QuestionIn(CamelModel):
 class PollCreate(CamelModel):
     title: str = Field(min_length=3, max_length=200)
     description: str = ""
-    category: str = Field(min_length=1, max_length=64)
+    category: str
     status: PollStatus = PollStatus.draft
     closes_at: datetime | None = None
     questions: list[QuestionIn] = Field(min_length=1)
+
+    @field_validator("category")
+    @classmethod
+    def valid_category(cls, value: str) -> str:
+        if value not in CATEGORIES:
+            raise ValueError(f"Category must be one of: {', '.join(CATEGORIES)}")
+        return value
 
 
 class OptionOut(CamelModel):
@@ -37,6 +45,12 @@ class QuestionOut(CamelModel):
     options: list[OptionOut]
 
 
+class PreviewOption(CamelModel):
+    text: str
+    count: int
+    percent: float
+
+
 class PollSummary(CamelModel):
     id: int
     title: str
@@ -45,7 +59,13 @@ class PollSummary(CamelModel):
     status: PollStatus
     closes_at: datetime | None
     created_at: datetime
+    response_count: int = 0
+    question_count: int = 0
+    # Answer split for the poll's first question, for the cards' sentiment bar
+    preview: list[PreviewOption] = []
 
 
 class PollOut(PollSummary):
     questions: list[QuestionOut]
+    # None when nobody is signed in
+    has_responded: bool | None = None

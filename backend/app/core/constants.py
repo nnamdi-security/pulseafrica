@@ -16,3 +16,18 @@ STATES = [
 AGE_RANGES = ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"]
 
 GENDERS = ["Male", "Female"]
+
+# Poll categories — the filter buttons on polls.html use these exact keys
+CATEGORIES = ["presidency", "governors", "economy", "security", "education", "healthcare", "governance"]
+
+# Optional demographics asked on poll.html
+EDUCATION_LEVELS = [
+    "No formal education", "Primary school", "Secondary school",
+    "Vocational / technical", "Bachelor's degree", "Postgraduate",
+]
+
+OCCUPATIONS = [
+    "Agriculture / farming", "Trade / commerce", "Civil service",
+    "Private sector employee", "Self-employed / entrepreneur", "Student",
+    "Unemployed", "Retired", "Prefer not to say",
+]
