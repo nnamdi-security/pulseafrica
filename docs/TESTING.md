@@ -35,6 +35,7 @@
 - **Database:** `backend/tests/conftest.py` builds the schema with `Base.metadata.create_all` on in-memory SQLite (a `StaticPool`), or on `TEST_DATABASE_URL`. It drops everything after **each test**, so **never point `TEST_DATABASE_URL` at a database you care about.**
 - **Wiring:** the `client` fixture overrides `get_db`. `citizen_headers` and `admin_headers` register users through the real API, and promote the admin directly in the session.
 - **No migrations in tests:** tests use `create_all`, not Alembic, so migrations are checked separately by `alembic upgrade head` / `downgrade` cycles and `alembic check` (see [DATABASE.md](DATABASE.md#migrations)).
+- **Postgres-only tests:** `test_simultaneous_duplicate_submissions_store_one_response` sends two submissions for the same user and poll at once, each with its own session, held at a barrier until both are about to insert. Exactly one gets 201 and the other 409. It is skipped on SQLite, which serialises everything through one connection.
 - **SQLite vs Postgres:** the main difference is that **SQLite doesn't enforce foreign keys**. That's why deletes are explicit in `delete_account` and `delete_poll`. Run the suite against Postgres before merging anything that touches deletes, constraints, dates or `func.date`/timezone handling.
 
 ## Standards for new work
@@ -53,7 +54,6 @@
 | No end-to-end tests of the 9 pages | Frontend regressions go unnoticed; no parity check for a migration | Milestone 2 |
 | No CI | Tests depend on someone remembering to run them | Milestone 2 |
 | No tests for SEC-01, SEC-02, INT-01, PRIV-01, SEC-06 | These defects are currently untested | Milestone 1 |
-| No concurrency test for simultaneous duplicate submissions | The unique constraint should hold, but it's unproven under load | Milestone 1 (Postgres-only test) |
 | No migration up/down test in the suite | A broken downgrade would only be found by hand | Milestone 2 |
 | No accessibility checks | FE-03 and FE-04 regressions | Milestone 2 (axe in Playwright) |
 
