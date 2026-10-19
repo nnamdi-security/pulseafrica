@@ -27,7 +27,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [METH-01](#meth-01) | HIGH | Research integrity | Seeded synthetic responses are indistinguishable from real ones and never disclosed | Confirmed (inspection) |
 | [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Potential risk |
 | [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Reproduced |
-| [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Reproduced |
+| [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
 | [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Reproduced (API) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Confirmed (inspection) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Confirmed (inspection) |
@@ -199,6 +199,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** nobody can manage polls or users until someone runs `python -m app.create_admin` on the server.
 - **Recommended fix:** apply the same last-active-admin guard (409) in `delete_account`, and add a test.
 - **Verification status:** Reproduced.
+- **Resolution (M1):** fixed. `DELETE /api/auth/me` now answers 409 "There must always be at least one active admin." for the last active admin, after the password check. The guard lives in `app/api/rules.py` and is shared with `PATCH /api/admin/users/{id}`. **Known remaining race:** two admins deleting or demoting each other at the same instant could both pass the count; the PATCH path had the same race before this fix, and it's accepted for now.
 
 <a id="sec-07"></a>
 ### SEC-07: No security headers (MEDIUM)

@@ -26,7 +26,7 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 | Admin | `AdminUser` / `require_admin` → 403 |
 | Drafts | Hidden (404) from non-admins in list, detail, responses and results |
 | Own data only | `/auth/me*` act only on the token's user. Nothing takes another user's id |
-| Admin self-protection | No self-suspend or self-demote; always at least one active admin (`PATCH /admin/users`). **Not** applied to `DELETE /auth/me` ([SEC-06](AUDIT.md#sec-06)) |
+| Admin self-protection | No self-suspend or self-demote; always at least one active admin, on both `PATCH /admin/users/{id}` and `DELETE /auth/me` ([SEC-06](AUDIT.md#sec-06), fixed) |
 | Re-authentication | The current password is required to change the password or delete the account |
 
 ### Input handling
@@ -51,7 +51,6 @@ This describes the security model **as implemented** on `main` (`7119fa7`), its 
 | PRIV-02 | HIGH | Privacy copy contradicts the data model |
 | SEC-04 | MEDIUM | Tokens readable by any script on the origin |
 | SEC-05 | MEDIUM | No token revocation on password change; no `iat` |
-| SEC-06 | MEDIUM | Sole admin can delete their own account |
 | SEC-07 | MEDIUM | No security headers or CSP |
 | SEC-08 | MEDIUM | CDN assets without SRI |
 | SEC-09 | LOW | Registration reveals existing emails |

@@ -8,7 +8,7 @@ Background and the current gaps: [docs/SECURITY.md](../../docs/SECURITY.md) and 
 - **Users act only on themselves** through `/auth/me*`. Any endpoint that takes another user's id must be admin-only.
 - **Keep the admin guards:**
   - no self-suspend or self-demote;
-  - at least one active admin must remain, on **every** path that can remove one (SEC-06 is the known gap: `DELETE /auth/me`).
+  - at least one active admin must remain, on **every** path that can remove one (use `ensure_another_active_admin` in `app/api/rules.py`).
 - **Drafts:** return 404 (not 403) to non-admins, so their existence isn't revealed.
 
 ## Input and output

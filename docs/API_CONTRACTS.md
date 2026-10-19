@@ -50,7 +50,7 @@ Clients should show `detail` strings: they're written to be user-safe.
 | GET | `/auth/me` | user | — | 200 `UserOut` | 401 |
 | PATCH | `/auth/me` | user | any of `{fullName, state, ageRange}`. Email can't be changed | 200 `UserOut` | 401 · 422 |
 | POST | `/auth/me/password` | user | `{currentPassword, newPassword, confirmPassword}` (`newPassword` as for register) | 204 | 403 wrong current (also for an over-72-byte one) · 422 |
-| DELETE | `/auth/me` | user | `{password}` | 204: deletes the account **and all its responses**; polls it created are kept, with `created_by_id = null` | 403 · 401 |
+| DELETE | `/auth/me` | user | `{password}` | 204: deletes the account **and all its responses**; polls it created are kept, with `created_by_id = null` | 403 · 401 · 409 if this is the last active admin |
 | GET | `/auth/me/responses` | user | — | 200 `[{pollId, pollTitle, category, pollStatus, closesAt, respondedAt}]`, newest first. **Never includes answers** | 401 |
 
 `UserOut` is `{id, fullName, email, state, ageRange, role, createdAt}`.
