@@ -21,6 +21,11 @@ export const statsQuery = (base?: string) =>
 export const pollsQuery = (base?: string) =>
   queryOptions({ queryKey: queryKeys.polls, queryFn: ({ signal }) => api.polls({ signal, base }) });
 
+/** Depends on the user (`hasResponded`), and the session cookie only reaches /api, so it's
+    fetched in the browser (decision 0022) */
+export const pollQuery = (id: number) =>
+  queryOptions({ queryKey: queryKeys.poll(id), queryFn: ({ signal }) => api.poll(id, { signal }) });
+
 export const resultsQuery = (id: number, base?: string) =>
   queryOptions({ queryKey: queryKeys.results(id), queryFn: ({ signal }) => api.results(id, { signal, base }) });
 
