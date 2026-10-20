@@ -37,15 +37,18 @@ export function FieldError({ id, error }: { id: string; error: ReactNode }) {
 
 type TextFieldProps = {
   id: string;
-  label: string;
+  label: ReactNode;
   Icon: Icon;
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
   status: Status;
   error: ReactNode;
-  type?: 'text' | 'email' | 'password';
+  type?: 'text' | 'email' | 'password' | 'date';
   autoComplete: string;
+  maxLength?: number;
+  /** Defaults to true unless read-only (Admin's optional closing date) */
+  required?: boolean;
   placeholder?: string;
   hint?: string;
   /** Beside the label, e.g. "Forgot password?" */
@@ -80,6 +83,8 @@ export function TextField({
   reveal,
   readOnly,
   inputRef,
+  maxLength,
+  required = !readOnly,
 }: TextFieldProps) {
   const [shown, setShown] = useState(false);
   const errorId = `${id}-error`;
@@ -115,8 +120,9 @@ export function TextField({
           type={reveal && shown ? 'text' : type}
           autoComplete={autoComplete}
           placeholder={placeholder}
-          required={!readOnly}
+          required={required}
           readOnly={readOnly}
+          maxLength={maxLength}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
@@ -159,6 +165,9 @@ export function TextField({
   );
 }
 
+/** An option whose value and text differ (Admin's category keys and status labels) */
+export type SelectOption = { value: string; label: string; disabled?: boolean };
+
 export function SelectField({
   id,
   label,
@@ -168,17 +177,21 @@ export function SelectField({
   onChange,
   status,
   error,
+  hint,
 }: {
   id: string;
   label: string;
-  placeholder: string;
+  /** The empty first option; left out when a value is always chosen */
+  placeholder?: string;
   /** undefined while loading, null if the lists couldn't load */
-  options: string[] | null | undefined;
+  options: (string | SelectOption)[] | null | undefined;
   value: string;
   onChange: (value: string) => void;
   status: Status;
   error: ReactNode;
+  hint?: string;
 }) {
+  const hintId = hint ? `${id}-hint` : undefined;
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={id} className={LABEL}>
@@ -192,15 +205,28 @@ export function SelectField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={status === 'error'}
-          aria-describedby={`${id}-error`}
+          aria-describedby={[hintId, `${id}-error`].filter(Boolean).join(' ')}
           className={cn(CONTROL, controlState(status), 'cursor-pointer appearance-none py-[11px] pr-8 pl-3 text-ellipsis')}
         >
-          <option value="">{options === null ? 'Couldn’t load the list. Refresh to try again.' : placeholder}</option>
-          {options?.map((o) => (
-            <option key={o}>{o}</option>
-          ))}
+          {placeholder !== undefined || options === null ? (
+            <option value="">{options === null ? 'Couldn’t load the list. Refresh to try again.' : placeholder}</option>
+          ) : null}
+          {options?.map((o) =>
+            typeof o === 'string' ? (
+              <option key={o}>{o}</option>
+            ) : (
+              <option key={o.value} value={o.value} disabled={o.disabled}>
+                {o.label}
+              </option>
+            ),
+          )}
         </select>
       </div>
+      {hint ? (
+        <p id={hintId} className="text-[12px] text-muted">
+          {hint}
+        </p>
+      ) : null}
       <FieldError id={`${id}-error`} error={error} />
     </div>
   );

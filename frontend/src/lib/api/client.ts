@@ -140,4 +140,13 @@ export const api = {
 
   /** → platform totals, responses per day and participation by poll; 401 signed out, 403 not an admin */
   adminOverview: (signal?: AbortSignal) => request<Schemas['AdminOverview']>('GET', '/admin/overview', { signal }),
+
+  /** → the new poll; 422 for invalid fields */
+  createPoll: (body: Schemas['PollCreate']) => request<Schemas['PollOut']>('POST', '/polls', { body }),
+
+  /** → the saved poll; 409 when answered questions would change or a poll with responses goes back to draft */
+  updatePoll: (id: number, body: Schemas['PollUpdate']) => request<Schemas['PollOut']>('PATCH', `/polls/${id}`, { body }),
+
+  /** Deletes a poll and every response to it */
+  deletePoll: (id: number) => request<null>('DELETE', `/polls/${id}`),
 };

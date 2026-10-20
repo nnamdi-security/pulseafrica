@@ -1,5 +1,7 @@
-"""Journey 6 on frontend/ (Milestone 8): the admin gate and the Overview. The polls, the editor and
-users follow in the next PRs (decision 0026)."""
+"""Journey 6 on frontend/ (Milestone 8): the admin gate, the Overview, the poll list and the poll
+editor. Users follow in the next PR (decision 0026)."""
+
+import secrets
 
 import pytest
 from axe_playwright_python.sync_playwright import Axe
@@ -12,7 +14,31 @@ from test_frontend_shell import SCREENSHOTS
 axe = Axe()
 
 # The new routes, with the static view each replaces
-PAGES = {"/admin": "/admin.html"}
+PAGES = {"/admin": "/admin.html", "/admin/polls": "/admin.html#polls", "/admin/polls/new": "/admin.html#polls"}
+NEW_POLL = "/admin/polls/new"
+
+
+def open_static(page: Page, path: str):
+    """The static view a route replaces, in its final state; returns the part that was moved"""
+    page.goto(SITE + PAGES[path])
+    if path == "/admin":
+        expect(page.locator("#partTable tr").first).to_be_visible()
+        return page.locator("#panel-overview")
+    expect(page.locator("#pollTable tr").first).to_be_visible()
+    if path == NEW_POLL:
+        page.get_by_role("button", name="New poll").click()
+        expect(page.get_by_role("heading", name="New poll")).to_be_focused()
+        return page.locator("#pollEditorView")
+    return page.locator("#pollListView")
+
+
+def open_new(page: Page, app_url: str, path: str):
+    page.goto(app_url + path)
+    if path == NEW_POLL:
+        expect(page.get_by_role("heading", name="New poll")).to_be_focused()
+        expect(page.get_by_label("Category").locator("option")).not_to_have_count(1)
+    else:
+        expect(page.get_by_role("tabpanel").get_by_role("row").nth(1)).to_be_visible()
 
 
 def stat(page: Page, label: str):
@@ -79,28 +105,124 @@ def test_overview_shows_the_apis_figures(page: Page, app_url, admin, console_err
     expect(rows.nth(1).get_by_role("link")).to_have_attribute("href", f"/results/{first['id']}")
 
 
-def test_old_link_lands_on_the_new_route(page: Page, app_url, admin):
+def test_poll_lifecycle(page: Page, app_url, admin, console_errors):
+    """test_admin.py's journey on the new pages: create a draft, publish, close, cancelled and confirmed delete"""
+    title = f"Public transport satisfaction {secrets.token_hex(3)}"
+    sign_in_with_cookie(page, app_url, admin)
+    page.goto(app_url + "/admin/polls")
+    expect(page.get_by_role("tab", name="Polls")).to_have_attribute("aria-selected", "true")
+
+    page.get_by_role("link", name="New poll").click()
+    expect(page).to_have_url(app_url + "/admin/polls/new")
+    expect(page.get_by_role("heading", name="New poll")).to_be_focused()
+    form = page.get_by_role("form", name="New poll")
+    form.get_by_label("Title").fill(title)
+    form.get_by_label("Description", exact=True).fill("How satisfied are you with public transport in your state?")
+    form.get_by_label("Category").select_option("governance")
+    expect(form.get_by_label("Status")).to_have_value("draft")
+    form.get_by_label("Question 1").fill("How satisfied are you with public transport?")
+    options = form.get_by_label("Option text")
+    options.nth(0).fill("Satisfied")
+    options.nth(1).fill("Dissatisfied")
+    form.get_by_role("button", name="Save poll").click()
+    expect(page).to_have_url(app_url + "/admin/polls")
+    alert = page.get_by_role("region", name="Polls").get_by_role("status")
+    expect(alert).to_contain_text(f"“{title}” was created")
+
+    row = page.get_by_role("row").filter(has_text=title)
+    expect(row).to_contain_text("Draft")
+    assert title not in [p["title"] for p in api("GET", "/polls")[1]]  # drafts stay hidden
+
+    row.get_by_role("button", name="Publish").click()
+    expect(alert).to_contain_text(f"“{title}” is now live.")
+    assert title in [p["title"] for p in api("GET", "/polls")[1]]
+
+    row.get_by_role("button", name="Close").click()
+    expect(alert).to_contain_text(f"“{title}” is now closed.")
+
+    page.get_by_role("button", name="Closed", exact=True).click()
+    expect(page).to_have_url(app_url + "/admin/polls?status=closed")
+    expect(row).to_have_count(1)
+    expect(page.get_by_role("row").filter(has_text="Live")).to_have_count(0)
+
+    row.get_by_role("button", name=f"Delete {title}").click()
+    dialog = page.get_by_role("dialog", name="Delete this poll?")
+    expect(dialog.get_by_role("button", name="Cancel")).to_be_focused()
+    expect(dialog).to_contain_text("permanently deleted")
+    page.keyboard.press("Escape")
+    expect(dialog).to_be_hidden()
+    expect(row.get_by_role("button", name=f"Delete {title}")).to_be_focused()
+    expect(row).to_have_count(1)
+
+    row.get_by_role("button", name=f"Delete {title}").click()
+    dialog.get_by_role("button", name="Delete poll").click()
+    expect(alert).to_contain_text(f"“{title}” was deleted.")
+    expect(row).to_have_count(0)
+
+
+def test_editor_checks_fields_and_locks_answered_questions(page: Page, app_url, admin, console_errors):
+    sign_in_with_cookie(page, app_url, admin)
+    page.goto(app_url + "/admin/polls/new")
+    form = page.get_by_role("form", name="New poll")
+    form.get_by_role("button", name="Save poll").click()
+    expect(page.get_by_role("main").get_by_role("alert")).to_have_text("Please fix the highlighted fields.")
+    expect(form.get_by_label("Title")).to_be_focused()
+    expect(form).to_contain_text("Choose a category.")
+    expect(form).to_contain_text("Question 1 needs its text.")
+
+    # A seeded poll that people have answered: its questions can't change
+    answered = max(api("GET", "/polls")[1], key=lambda p: p["responseCount"])
+    page.goto(app_url + "/admin/polls")
+    page.get_by_role("row").filter(has_text=answered["title"]).get_by_role("link", name="Edit").click()
+    expect(page).to_have_url(f"{app_url}/admin/polls/{answered['id']}/edit")
+    form = page.get_by_role("form", name="Edit poll")
+    expect(form.get_by_label("Title")).to_have_value(answered["title"])
+    expect(form).to_contain_text("Questions are locked because")
+    expect(form.get_by_label("Question 1")).to_be_disabled()
+    expect(form.get_by_role("button", name="Add question")).to_have_count(0)
+    page.get_by_role("button", name="Cancel").click()
+    expect(page).to_have_url(app_url + "/admin/polls")
+
+
+def test_admins_can_preview_a_drafts_results(page: Page, app_url, admin, console_errors):
+    title = f"Draft preview {secrets.token_hex(3)}"
+    status, draft = api("POST", "/polls", {
+        "title": title, "description": "A draft to preview.", "category": "economy", "status": "draft",
+        "questions": [{"text": "How is the economy doing?", "options": [{"text": "Well"}, {"text": "Badly"}]}],
+    }, token=admin.token)
+    assert status == 201, draft
+    sign_in_with_cookie(page, app_url, admin)
+    page.goto(app_url + "/admin/polls?status=draft")
+    page.get_by_role("row").filter(has_text=title).get_by_role("link", name="Results").click()
+    expect(page).to_have_url(f"{app_url}/results/{draft['id']}")
+    expect(page.get_by_role("heading", level=1)).to_contain_text(title)
+    expect(page.get_by_text("Draft · visible to admins only")).to_be_visible()
+    api("DELETE", f"/polls/{draft['id']}", token=admin.token)
+
+
+def test_old_links_land_on_the_new_routes(page: Page, app_url, admin):
     sign_in_with_cookie(page, app_url, admin)
     page.goto(app_url + "/admin.html")
     expect(page).to_have_url(app_url + "/admin")
     expect(page.get_by_role("tab", name="Overview")).to_have_attribute("aria-selected", "true")
+    page.goto(app_url + "/admin.html#polls")
+    expect(page).to_have_url(app_url + "/admin/polls")
+    expect(page.get_by_role("tab", name="Polls")).to_have_attribute("aria-selected", "true")
 
 
 @pytest.mark.parametrize("path", list(PAGES))
 def test_same_copy_as_the_static_page(page: Page, app_url, admin, path):
     """Ported word for word (D56): the static panel's visible text is on the new page"""
     sign_in(page, admin)
-    page.goto(SITE + PAGES[path])
-    panel = page.locator(".dash-page .results-panel:not([hidden])")
-    expect(panel).to_have_count(1)
-    expect(panel.locator("#partTable tr").first).to_be_visible()
-    old = [" ".join(t.split()) for t in panel.locator(".results-card-label, .results-card-sub, dt, th, summary, dd span")
+    panel = open_static(page, path)
+    old = [" ".join(t.split()) for t in panel.locator(
+        ".results-card-label, .results-card-sub, dt, th, summary, dd span, label, legend, .auth-hint, h2, button, .dash-filter-btn")
            .filter(visible=True).all_inner_texts()]
     head = [" ".join(t.split()) for t in page.locator(".page-head").locator(".page-head-label, h1, p, .ph-stat-label").all_inner_texts()]
     sign_in_with_cookie(page, app_url, admin)
-    page.goto(app_url + path)
-    expect(page.get_by_role("tabpanel")).to_be_visible()
-    page.get_by_text("Show as table").click()
+    open_new(page, app_url, path)
+    if path == "/admin":
+        page.get_by_text("Show as table").click()
     new = " ".join(page.locator("main").inner_text().split())
     assert [t for t in old + head if t and t.lower() not in new.lower()] == []
 
@@ -110,9 +232,8 @@ def test_same_copy_as_the_static_page(page: Page, app_url, admin, path):
 def test_axe_and_no_horizontal_scroll(page: Page, app_url, admin, path, width):
     sign_in_with_cookie(page, app_url, admin)
     page.set_viewport_size({"width": width, "height": 900})
-    page.goto(app_url + path)
+    open_new(page, app_url, path)
     wait_for_page(page)
-    expect(page.get_by_role("tabpanel")).to_be_visible()
     assert page.evaluate("document.documentElement.scrollWidth") <= width
     violations = axe.run(page).response["violations"]
     serious = [f"{v['id']} ({v['impact']}): {[n['target'] for n in v['nodes']][:3]}"
@@ -139,9 +260,11 @@ def test_page_screenshots(page: Page, app_url, admin, path, width):
     name = path.strip("/").replace("/", "-")
     sign_in(page, admin)
     sign_in_with_cookie(page, app_url, admin)
-    for label, url in [("current", SITE + PAGES[path]), ("new", app_url + path)]:
-        page.goto(url)
+    for label in ["current", "new"]:
+        if label == "current":
+            open_static(page, path)
+        else:
+            open_new(page, app_url, path)
         wait_for_page(page)
-        expect(page.get_by_text("Platform totals", exact=True)).to_be_visible()
         expect(page.get_by_text("Total users", exact=True).locator("xpath=preceding-sibling::*")).not_to_have_text("–")
         page.screenshot(path=SCREENSHOTS / f"{width}-{name}-{label}.png", full_page=True, animations="disabled")

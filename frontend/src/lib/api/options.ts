@@ -15,6 +15,9 @@ export const queryKeys = {
   results: (id: number) => ['results', id] as const,
   reference: ['reference'] as const,
   adminOverview: ['admin', 'overview'] as const,
+  /** Every poll, drafts included: what GET /polls returns to an admin. Kept apart from the
+      public list, which the server prefetches without the session. */
+  adminPolls: ['admin', 'polls'] as const,
 };
 
 export const statsQuery = (base?: string) =>
