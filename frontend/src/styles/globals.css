@@ -21,6 +21,10 @@
   --color-faint: #9ca3af;
   /* The nav CTA's hover fill (style.css .nav-cta:hover) */
   --color-gold-hover: #d9a845;
+  /* results.html's lighter data shades and its neutral grey (DESIGN_SYSTEM "Data colour rules") */
+  --color-green-pale: #8cbfa3;
+  --color-red-pale: #e0a3a3;
+  --color-grey: #aaaaaa;
   /* One of about.html's team avatars (decision 0023: the page is ported as it is) */
   --color-indigo: #534ab7;
 

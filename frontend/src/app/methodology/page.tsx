@@ -308,7 +308,8 @@ export default function MethodologyPage() {
                     />
                     <div>
                       <h3 className="mb-1 font-serif text-[14px] font-semibold text-navy">{item.heading}</h3>
-                      <p className="text-[12px] leading-[1.65] text-muted">{item.text}</p>
+                      {/* Darker than muted: muted fails 4.5:1 on the tinted card (decision 0017) */}
+                      <p className="text-[12px] leading-[1.65] text-ink/65">{item.text}</p>
                     </div>
                   </li>
                 );

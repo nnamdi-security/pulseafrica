@@ -107,7 +107,8 @@ const TEAM = [
   },
   {
     initials: 'EA',
-    avatar: 'bg-gold',
+    // Navy initials: parchment on gold is 2.3:1 (decision 0017)
+    avatar: 'bg-gold text-navy',
     name: 'Emmanuel Akpan',
     role: 'Lead Data Engineer',
     bio: 'Built data pipeline systems for census operations across 3 states. Leads all backend infrastructure, data integrity, and anti-duplication systems.',
@@ -275,8 +276,8 @@ export default function AboutPage() {
               <div
                 aria-hidden="true"
                 className={cn(
-                  'mx-auto mb-3.5 flex size-14 items-center justify-center rounded-full font-mono text-[16px] font-bold text-parchment',
-                  person.avatar,
+                  'mx-auto mb-3.5 flex size-14 items-center justify-center rounded-full font-mono text-[16px] font-bold',
+                  person.avatar.includes('text-') ? person.avatar : `${person.avatar} text-parchment`,
                 )}
               >
                 {person.initials}
