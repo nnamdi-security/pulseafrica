@@ -72,6 +72,8 @@ export async function request<T>(method: Method, path: string, options: RequestO
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
       credentials: 'same-origin',
+      // Figures are never cached on the server: every request sees the current ones (decision 0021)
+      cache: 'no-store',
       signal,
     });
   } catch (err) {
@@ -86,6 +88,8 @@ export async function request<T>(method: Method, path: string, options: RequestO
 
 /* Endpoints, added as the migrated pages need them. Types come from schema.d.ts. */
 
+type Fetch = { signal?: AbortSignal; base?: string };
+
 export const api = {
   /** → the signed-in user, or rejects with status 401 */
   me: (signal?: AbortSignal) => request<Schemas['UserOut']>('GET', '/auth/me', { signal }),
@@ -94,11 +98,17 @@ export const api = {
   logout: () => request<null>('POST', '/auth/logout'),
 
   /** → platform totals for the ticker and home page */
-  stats: (signal?: AbortSignal) => request<Schemas['PlatformStats']>('GET', '/stats', { signal }),
+  stats: (options: Fetch = {}) => request<Schemas['PlatformStats']>('GET', '/stats', options),
 
   /** → published polls (drafts too, for admins), newest first */
-  polls: (signal?: AbortSignal) => request<Schemas['PollSummary'][]>('GET', '/polls', { signal }),
+  polls: (options: Fetch = {}) => request<Schemas['PollSummary'][]>('GET', '/polls', options),
+
+  /** → one poll with its questions; 404 for drafts unless the user is an admin */
+  poll: (id: number, options: Fetch = {}) => request<Schemas['PollOut']>('GET', `/polls/${id}`, options),
+
+  /** → a poll's published figures (decisions 0001, 0006 and 0014 decide what is withheld) */
+  results: (id: number, options: Fetch = {}) => request<Schemas['PollResults']>('GET', `/results/${id}`, options),
 
   /** → the fixed lists: states, age ranges, genders, education, occupations, categories (DB-03) */
-  reference: (signal?: AbortSignal) => request<Schemas['Reference']>('GET', '/reference', { signal }),
+  reference: (options: Fetch = {}) => request<Schemas['Reference']>('GET', '/reference', options),
 };

@@ -1,17 +1,13 @@
 'use client';
 
-/* Query hooks shared across pages. Keys follow FRONTEND_MIGRATION.md §8, so mutations in
-   later milestones can invalidate exactly what the current pages refresh. */
+/* Query hooks shared across pages. The keys and fetchers are in options.ts, so the server's
+   prefetches (server.ts) fill exactly the queries these hooks read. */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { api, ApiError, type Schemas } from './client';
+import { pollsQuery, queryKeys, referenceQuery, resultsQuery, statsQuery } from './options';
 
-export const queryKeys = {
-  me: ['me'] as const,
-  stats: ['stats'] as const,
-  polls: ['polls', {}] as const,
-  reference: ['reference'] as const,
-};
+export { queryKeys };
 
 /** The signed-in user, or null when signed out. An unreachable server is an error, not "signed out". */
 export function useMe() {
@@ -39,18 +35,18 @@ export function useSignOut() {
 }
 
 export function useStats() {
-  return useQuery({ queryKey: queryKeys.stats, queryFn: ({ signal }) => api.stats(signal) });
+  return useQuery(statsQuery());
 }
 
 export function usePolls() {
-  return useQuery({ queryKey: queryKeys.polls, queryFn: ({ signal }) => api.polls(signal) });
+  return useQuery(pollsQuery());
 }
 
-/** The fixed lists change only with a deploy, so they're fetched once per visit */
+/** One poll's published figures */
+export function useResults(id: number) {
+  return useQuery(resultsQuery(id));
+}
+
 export function useReference() {
-  return useQuery({
-    queryKey: queryKeys.reference,
-    queryFn: ({ signal }) => api.reference(signal),
-    staleTime: Infinity,
-  });
+  return useQuery(referenceQuery());
 }
