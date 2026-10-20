@@ -107,6 +107,15 @@ export const api = {
   /** → the polls the signed-in user answered, newest first: titles and dates, never the answers */
   myResponses: (signal?: AbortSignal) => request<Schemas['MyResponse'][]>('GET', '/auth/me/responses', { signal }),
 
+  /** → the updated user; send only the fields that changed. 422 for invalid fields. */
+  updateProfile: (body: Schemas['ProfileUpdate']) => request<Schemas['UserOut']>('PATCH', '/auth/me', { body }),
+
+  /** 403 if the current password is wrong. Revokes every session, this one included (decision 0010). */
+  changePassword: (body: Schemas['PasswordChange']) => request<null>('POST', '/auth/me/password', { body }),
+
+  /** Deletes the account and every response it gave. 403 if the password is wrong, 409 for the last active admin. */
+  deleteAccount: (body: Schemas['AccountDelete']) => request<null>('DELETE', '/auth/me', { body }),
+
   /** Revokes every session of the user and clears the cookie (decision 0010) */
   logout: () => request<null>('POST', '/auth/logout'),
 

@@ -6,8 +6,8 @@ Milestone 8 ([decision 0016](../docs/decisions/0016-nextjs-frontend.md),
 the shared shell (ticker, nav, footer), the design tokens, the API client and the checks.
 Milestone 6 moved the six public pages: `/`, `/polls`, `/polls/[id]`, `/results` and
 `/results/[id]`, `/methodology` and `/about`. Milestone 7 adds `/login`, `/register` and
-`/login/reset` (decision 0024), then `/dashboard` and `/dashboard/history`; the Dashboard's
-settings follow. It isn't deployed yet.
+`/login/reset` (decision 0024), then `/dashboard`, `/dashboard/history` and
+`/dashboard/settings`. It isn't deployed yet.
 
 The data pages are rendered per request from `API_INTERNAL_URL` (default
 `http://localhost:8000/api`) and refreshed in the browser (decision 0021). Chart.js is
