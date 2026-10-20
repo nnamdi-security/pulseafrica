@@ -169,8 +169,8 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 ## M8: Administration and cutover (IN PROGRESS)
 
 - **Progress:** planned 2026-10-20 in the [Milestone 8 plan](https://claude.ai/code/artifact/971cc186-0446-4fb7-9164-7b2225870621); the owner chose decisions D49–D58 the same day ([0026–0027](decisions/README.md)). Nothing is deployed, so the milestone ends cutover-ready in the repository, and traffic moves with Milestone 9's first deployment (D49). Three PRs:
-  1. the admin gate, the shared confirmation dialog, and the Overview (`/admin`);
-  2. the polls list and the poll editor (`/admin/polls`, `/admin/polls/new`, `/admin/polls/[id]/edit`);
+  1. the admin gate, the shared confirmation dialog, and the Overview (`/admin`): merged as #20;
+  2. the polls list and the poll editor (`/admin/polls`, `/admin/polls/new`, `/admin/polls/[id]/edit`): built;
   3. users (`/admin/users`), the legacy-URL tests, the rollback runbook, and the close-out docs.
 
 - **Scope:** Admin overview, polls and editor, users; the full parity suite; screenshot sign-off; tag `legacy-frontend-final` and a rehearsed rollback (D58). The traffic switch moves to M9, and permanent redirects and removing the static pages follow two stable weeks in production (D57).
