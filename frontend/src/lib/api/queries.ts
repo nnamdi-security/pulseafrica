@@ -63,8 +63,8 @@ export function useSubmitResponse(id: number) {
 }
 
 /** One poll's published figures */
-export function useResults(id: number) {
-  return useQuery(resultsQuery(id));
+export function useResults(id: number | null) {
+  return useQuery({ ...resultsQuery(id ?? 0), enabled: id !== null });
 }
 
 export function useReference() {
