@@ -381,6 +381,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Description:** the answer tiles in `poll.html` use `role="radio"` inside `role="radiogroup"`. Each tile is a separate tab stop and handles only Enter and Space (`poll.html:623`). The ARIA radio pattern expects a single tab stop with arrow keys.
 - **Recommended fix:** roving `tabindex` with Arrow keys, or real `<input type="radio">` elements.
 - **Verification status:** Confirmed (inspection).
+- **Status:** fixed in `frontend/` in Milestone 6: the new Poll page uses real radio inputs ([decision 0022](decisions/0022-poll-page-sign-in-and-radios.md)), checked by `e2e/test_frontend_pages.py::test_poll_answers_are_real_radios`. Open on the static `poll.html` until cutover.
 
 <a id="fe-05"></a>
 ### FE-05: Placeholder links and inert buttons (LOW)
@@ -391,6 +392,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** a broken-feeling product, and the terms the user agrees to don't exist.
 - **Recommended fix:** link to existing pages or remove. Add Terms and Privacy pages before any public launch.
 - **Verification status:** Confirmed (inspection).
+- **Status:** fixed on the six public pages in `frontend/` in Milestone 6 ([decision 0023](decisions/0023-public-pages-migration-conventions.md), D40): real links stay, `#` links are plain text, and the home page's inert buttons are left out. Open on the static pages until cutover; the Terms and Privacy pages are still to be written.
 
 <a id="fe-06"></a>
 ### FE-06: XSS safety depends on manual escaping (LOW)

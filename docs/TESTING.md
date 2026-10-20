@@ -14,10 +14,10 @@
 |---|---|---|---|---|---|---|
 | `pytest` (in-memory SQLite, the default) | 145 | **144** | 0 | 1 | 0 | ~110 s |
 | `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 145 | **145** | 0 | 0 | 0 | ~140 s |
-| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 108 | **108** in CI | 0 | 0 | 0 | ~150 s |
-| `pnpm test` (from `frontend/`, Vitest) | 50 | **50** | 0 | 0 | 0 | ~5 s |
+| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 169 | **159** locally (`--deselect test_assets.py`); all 169 in CI | 0 | 0 | 0 | ~185 s |
+| `pnpm test` (from `frontend/`, Vitest) | 96 | **96** | 0 | 0 | 0 | ~8 s |
 
-The counts above were updated in Milestone 5 (decisions 0016–0019). The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
+The browser and Vitest counts above were updated in Milestone 6 (decisions 0021–0023); the backend ones in Milestone 5. The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 
 - **One expected warning in both runs:** PyJWT's `InsecureKeyLengthWarning` from `test_token_signed_with_the_old_default_is_rejected`, which signs a token with the old 9-byte default key on purpose (SEC-01). The Starlette test-client warning is gone since the move to `httpx2` ([TEST-02](AUDIT.md#test-02) fixed).
 - **No environment-related failures or missing dependencies.**
@@ -58,7 +58,8 @@ The counts above were updated in Milestone 5 (decisions 0016–0019). The 10 `te
 | `test_accessibility.py` | 15 | axe on all 9 pages (and tabs), failing on serious or critical violations except the known FE-03 contrast ones |
 | `test_assets.py` | 10 | The icon stylesheet on all 9 pages and Chart.js carry `integrity` and still load (SEC-08) |
 | `test_frontend_shell.py` | 26 | The new frontend's shell (decisions 0016–0019): the ticker goes live with the API's figures and keeps its placeholder when the API is down; nav links, current page and keyboard order; footer links only to real pages; the mobile menu; no sideways scroll at 1280px and 390px; signed-in nav from the HttpOnly cookie, admin link, sign-out revoking the session; old `.html` URLs and hash tabs landing on the new routes; the not-found page; axe **including contrast** at both widths; current and new shell screenshots |
-| `test_copy.py` | 22 | No page claims anonymity or "never linked" (decisions 0003, 0007); all 9 pages carry the "Totals Only" badge and ticker; index, methodology and about make none of the retired METH-02 claims (decision 0013) |
+| `test_frontend_pages.py` | 54 | The six public pages in `frontend/` (decisions 0021–0023): Methodology's jump links and deep links; About; every static heading on the new page (D37); axe **including contrast** and no sideways scroll at 1280px and 390px; old and new screenshots (D39); Home's figures equal the API; Polls' filters, search, sort and counts, shared in the URL with Back undoing them (D36); the Poll flow on the cookie session (gate, one screen per question, demographics, thank-you, already responded), arrow keys on real radios (FE-04), closed and not found; Results' held breakdowns, a closed poll's tabs and drawn Chart.js charts, headline figures computed from the API, *n* and small-sample notes, the tab and question in the URL, not found |
+| `test_copy.py` | 29 | No page claims anonymity or "never linked" (decisions 0003, 0007); all 9 pages carry the "Totals Only" badge and ticker; index, methodology and about, and the new pages in `frontend/`, make none of the retired METH-02 claims (decision 0013) |
 
 ### Frontend unit and component tests (`frontend/`, Vitest)
 
@@ -70,6 +71,12 @@ The counts above were updated in Milestone 5 (decisions 0016–0019). The 10 `te
 | `src/components/layout/Ticker.test.tsx` | 5 | Placeholder, live figures, the API down, no reference list, demonstration data, hidden copies and speed |
 | `src/components/layout/SiteHeader.test.tsx` | 7 | Signed out, signed in, admin, names shown as text, sign-out (server, cache, focus), API unreachable, the mobile menu |
 | `src/components/layout/SiteFooter.test.tsx` | 1 | Real links only (decision 0019) |
+| `src/features/results/figures.test.ts` | 6 | Number and date formats, tones, shares and colours, each compared with the static pages' own functions (run from `results.html`, `index.html` and `polls.html`) |
+| `src/features/results/compute.test.ts` | 8 | Results' trend periods, halves and withheld notes compared with `results.html`'s functions; group order, state ranking, held notices and key moments |
+| `src/features/results/ResultsDashboard.test.tsx` | 8 | `?tab` and `?q`, headline figures, arrow-key tabs, the question and poll pickers, the most-responded poll, no responses, too few to publish, not found, retry |
+| `src/features/poll/PollFlow.test.tsx` | 13 | Every gate, the sign-in link, not found, real radios with arrow keys and Back, pre-filled demographics, the missing-field message and focus, the submitted body, the thank-you counts, 401/409/422 mapped as `poll.html` maps them |
+| `src/features/polls/filters.test.ts`, `PollsBrowser.test.tsx` | 5 + 3 | Filters from and to the URL, matching, paging and the summary; the error with retry, no polls, paging |
+| `src/features/home/HomeLive.test.tsx` | 3 | The API down, no live polls, a featured poll still under the minimum group |
 
 ## How the browser tests work
 
