@@ -34,6 +34,23 @@ export function useSignOut() {
   });
 }
 
+/** Signs in (and, for a new account, registers first), then treats every cached response as
+    another user's: `me` is set, everything else is refetched (FRONTEND_MIGRATION.md §8) */
+export function useSignIn() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ register, ...login }: Schemas['UserLogin'] & { register?: Schemas['UserRegister'] }) => {
+      if (register) await api.register(register);
+      await api.signIn(login);
+      return api.me();
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(queryKeys.me, user);
+      return queryClient.invalidateQueries({ predicate: (query) => query.queryHash !== JSON.stringify(queryKeys.me) });
+    },
+  });
+}
+
 export function useStats() {
   return useQuery(statsQuery());
 }

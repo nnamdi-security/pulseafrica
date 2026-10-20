@@ -588,7 +588,7 @@ export function PollMain({ id }: { id: number | null }) {
         text="Every response is tied to one verified account, so each citizen is counted exactly once. It takes under a minute to register."
         actions={[
           { href: next, label: 'Sign in', Icon: IconLogin, primary: true },
-          { href: `${next}#register`, label: 'Create account', Icon: IconUserPlus },
+          { href: `/register?next=/polls/${id}`, label: 'Create account', Icon: IconUserPlus },
         ]}
       />
     );

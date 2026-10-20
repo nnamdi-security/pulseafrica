@@ -94,6 +94,16 @@ export const api = {
   /** → the signed-in user, or rejects with status 401 */
   me: (signal?: AbortSignal) => request<Schemas['UserOut']>('GET', '/auth/me', { signal }),
 
+  /** Sets the HttpOnly session cookie, lasting as long as the token when `remember` is set
+      (decision 0011). The response also carries the token for bearer clients; it is never kept.
+      401 for a wrong email or password, 429 when rate limited. */
+  signIn: async (body: Schemas['UserLogin']) => {
+    await request<Schemas['Token']>('POST', '/auth/login', { body });
+  },
+
+  /** → the new account; 409 if the email is taken, 422 for invalid fields. Doesn't sign in. */
+  register: (body: Schemas['UserRegister']) => request<Schemas['UserOut']>('POST', '/auth/register', { body }),
+
   /** Revokes every session of the user and clears the cookie (decision 0010) */
   logout: () => request<null>('POST', '/auth/logout'),
 
