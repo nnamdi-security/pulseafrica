@@ -14,7 +14,8 @@ Milestone 7 moves Login, Register and the Dashboard into `frontend/`, signed in 
 - **D43, routes:** `/login`, `/register` and `/login/reset`; `/dashboard`, `/dashboard/history` and `/dashboard/settings` (FRONTEND_MIGRATION §7). The sign-in and create-account tabs are links between the two routes.
 - **D44, landing after sign-in:** a safe `next` (an internal path, or an old page name mapped to its new route) is followed; without one, the success panel shows, as on `login.html`.
 - **D45, "Keep me signed in":** as decision 0011 specifies. Ticked, the cookie lasts as long as the token (60 minutes) and survives a browser restart; unticked, it ends with the browser session. Longer sessions, if wanted, belong with deployment (M9).
-- **D46, after a password change:** the API ends every session, this one included (decision 0010). The page says so: "Your password has been changed. For your security you've been signed out on every device; sign in with your new password.", clears the cached data and links to `/login?next=/dashboard/settings`. `dashboard.html` is corrected the same way, since it said "changed" and then failed the next request.
+- **D46, after a password change (revised and confirmed by the owner 2026-10-20):** the API ends every session, this one included (decision 0010). The page then signs this browser straight back in with the new password, for the browser session only (as if "Keep me signed in" were unticked, since the page can't read the cookie's lifetime), and says "Your password has been changed." under "You'll stay signed in on this device.", as `dashboard.html` does. If that sign-in fails, the page shows that the session has ended. Every other device stays signed out.
+  - *Correction:* the first version of this record said `dashboard.html` reported "changed" and then failed the next request, and chose to sign the user out. That premise was wrong: `api.js`'s `changePassword` already signs in again with the new password, keeping the remember choice it can read from Web Storage, so `dashboard.html` needs no fix.
 
 ## Alternatives considered
 
@@ -22,7 +23,7 @@ Milestone 7 moves Login, Register and the Dashboard into `frontend/`, signed in 
 - **D43:** one `/login` and one `/dashboard` with hash tabs, as today.
 - **D44:** go straight to `/dashboard`.
 - **D45:** remembered sessions of about 30 days (a backend and security change).
-- **D46:** sign the user straight back in with the new password (it would have to guess the "Keep me signed in" choice), or have the API issue this device a new cookie (a contract change).
+- **D46:** sign the user out and ask them to sign in again (the first version of this record, built on a wrong premise; it would differ from `dashboard.html`), or have the API issue this device a new cookie that keeps its lifetime (a contract change).
 
 ## Consequences
 
