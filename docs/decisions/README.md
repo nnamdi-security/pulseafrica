@@ -71,6 +71,8 @@ What becomes easier, what becomes harder, what must now be done.
 | [0023](0023-public-pages-migration-conventions.md) | Conventions for moving the public pages (D36–D40) | Accepted (2026-10-20) |
 | [0024](0024-sign-in-and-session-in-the-browser.md) | Sign-in, register and the session in the new frontend (D41, D43–D46) | Accepted (2026-10-20) |
 | [0025](0025-account-pages-migration-conventions.md) | Conventions for moving Login and the Dashboard (D42, D47, D48) | Accepted (2026-10-20) |
+| [0026](0026-admin-pages-in-the-new-frontend.md) | The Admin pages in the new frontend (D50–D56) | Accepted (2026-10-20) |
+| [0027](0027-cutover-readiness.md) | Cutover readiness before the first deployment (D49, D57, D58) | Accepted (2026-10-20) |
 
 Pending decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 
