@@ -21,7 +21,11 @@ PAGES = {
     "/polls": "/polls.html",
     "/methodology": "/methodology.html",
     "/about": "/about.html",
+    "/polls/1": "/poll.html?id=1",  # the seeded presidential poll, signed out
 }
+
+# Pages that decide what to show in the browser, and the heading that says they have
+READY = {"/polls/1": "Sign in to take this poll"}
 
 
 def wait_for_page(page: Page) -> None:
@@ -71,11 +75,15 @@ def test_about_page(page: Page, app_url, console_errors):
 def test_same_copy_as_the_static_page(page: Page, app_url, path):
     """Ported word for word (D37): every heading of the static page is on the new one"""
     page.goto(SITE + PAGES[path])
+    # Only what shows: poll.html keeps its other screens in the page, hidden
     old = [" ".join(t.split()) for t in page.locator("main h2, main h3, .meth-hero h1, .about-hero h1, "
-                                                     "body > section h2, body > section h3").all_inner_texts()]
+                                                     "body > section h2, body > section h3").filter(visible=True)
+           .all_inner_texts()]
     page.goto(app_url + path)
     # React reveals streamed content a frame after it arrives, so wait for it rather than the load event
     expect(page.locator("main h1").first).to_be_visible()
+    if path in READY:
+        expect(page.get_by_role("heading", name=READY[path])).to_be_visible()
     new = {" ".join(t.split()) for t in page.locator("main h1, main h2, main h3").all_inner_texts()}
     assert [h for h in old if h not in new] == []
 
@@ -228,3 +236,96 @@ def test_polls_counts_equal_the_api(page: Page, app_url):
     closed = next(p for p in polls if p["status"] == "closed")
     card = page.get_by_role("article").filter(has_text=closed["title"])
     expect(card.get_by_role("link", name="View results")).to_have_attribute("href", f"/results/{closed['id']}")
+
+
+# ── Poll (decision 0022: the cookie session; /login arrives in Milestone 7) ──
+
+FOREIGN_POLICY = "Foreign policy and diplomatic relations — public rating"
+
+
+def seeded(title: str) -> dict:
+    return next(p for p in api("GET", "/polls")[1] if p["title"] == title)
+
+
+def sign_in_with_cookie(page: Page, app_url, user) -> None:
+    """What /login will do: POST /api/auth/login sets the HttpOnly session cookie"""
+    res = page.request.post(app_url + "/api/auth/login", data={"email": user.email, "password": user.password},
+                            headers={"X-Requested-With": "pulseafrica"})
+    assert res.ok, res.text()
+
+
+def test_poll_take_and_thank_you(page: Page, app_url, citizen, console_errors):
+    """Journey 2 on the new page: gate, one screen per question, demographics, thank-you, then responded"""
+    poll = seeded(FOREIGN_POLICY)
+    page.goto(f"{app_url}/polls/{poll['id']}")
+    expect(page.get_by_role("heading", level=1, name=FOREIGN_POLICY)).to_be_visible()
+    expect(page.get_by_role("heading", name="Sign in to take this poll")).to_be_visible()
+    expect(page.get_by_label("Poll questions").get_by_role("link", name="Sign in")).to_have_attribute(
+        "href", f"/login?next=/polls/{poll['id']}")
+
+    sign_in_with_cookie(page, app_url, citizen)
+    page.reload()
+    questions = api("GET", f"/polls/{poll['id']}")[1]["questions"]
+    for i, question in enumerate(questions):
+        main = page.get_by_label("Poll questions")
+        expect(main.get_by_role("heading", name=question["text"])).to_be_visible()
+        expect(main.get_by_role("button", name="Next")).to_be_disabled()
+        main.get_by_role("radio").first.check()
+        main.get_by_role("button", name="Next").click()
+
+    expect(page.get_by_role("heading", name="A few details to help us weight the data accurately")).to_be_focused()
+    expect(page.get_by_label("Age range")).to_have_value("25–34")
+    expect(page.get_by_label("State of residence")).to_have_value("ENUGU STATE")
+    page.get_by_role("button", name="Submit my response").click()
+    expect(page.get_by_label("Poll questions").get_by_role("alert")).to_have_text("Please select your gender to submit.")
+    page.get_by_label("Gender").select_option("Female")
+    page.get_by_role("button", name="Submit my response").click()
+
+    expect(page.get_by_role("heading", name="Response recorded. Thank you.")).to_be_focused()
+    expect(page.get_by_test_id("thanks-voices")).to_have_text(f"{poll['responseCount'] + 1:,}")
+    expect(page.get_by_role("link", name="View live results")).to_have_attribute("href", f"/results/{poll['id']}")
+    assert api("GET", f"/polls/{poll['id']}")[1]["responseCount"] == poll["responseCount"] + 1
+
+    page.reload()
+    expect(page.get_by_role("heading", name="You’ve already responded")).to_be_visible()
+
+
+def test_poll_answers_are_real_radios(page: Page, app_url, citizen):
+    """FE-04 fixed: arrow keys move the choice, and Back keeps it"""
+    poll = seeded("Presidential performance — Q2 2026 mid-term assessment")
+    sign_in_with_cookie(page, app_url, citizen)
+    page.goto(f"{app_url}/polls/{poll['id']}")
+    group = page.get_by_role("radiogroup")
+    group.get_by_role("radio").first.focus()
+    page.keyboard.press("Space")
+    page.keyboard.press("ArrowDown")
+    expect(group.get_by_role("radio").nth(1)).to_be_checked()
+    page.get_by_role("button", name="Next").click()
+    page.get_by_role("button", name="Back").click()
+    expect(page.get_by_role("radiogroup").get_by_role("radio").nth(1)).to_be_checked()
+
+
+@pytest.mark.parametrize("width", [1280, 390])
+def test_poll_question_screen_axe(page: Page, app_url, citizen, width):
+    """The signed-in screens, which the page list (signed out) doesn't reach"""
+    poll = seeded("Presidential performance — Q2 2026 mid-term assessment")
+    sign_in_with_cookie(page, app_url, citizen)
+    page.set_viewport_size({"width": width, "height": 900})
+    page.goto(f"{app_url}/polls/{poll['id']}")
+    page.get_by_role("radiogroup").get_by_role("radio").first.check()
+    wait_for_page(page)
+    assert page.evaluate("document.documentElement.scrollWidth") <= width
+    serious = [f"{v['id']}: {[n['target'] for n in v['nodes']][:3]}"
+               for v in axe.run(page).response["violations"] if v["impact"] in ("serious", "critical")]
+    assert serious == []
+
+
+def test_poll_closed_and_not_found(page: Page, app_url, console_errors):
+    closed = next(p for p in api("GET", "/polls")[1] if p["status"] == "closed")
+    page.goto(f"{app_url}/polls/{closed['id']}")
+    expect(page.get_by_role("heading", name="This poll has closed")).to_be_visible()
+    expect(page.get_by_role("link", name="View results")).to_have_attribute("href", f"/results/{closed['id']}")
+    for path in ("/polls/999999", "/polls/abc"):
+        page.goto(app_url + path)
+        expect(page.get_by_role("heading", level=1, name="Poll not found")).to_be_visible()
+        expect(page.get_by_role("heading", name="We couldn’t find that poll")).to_be_visible()
