@@ -39,7 +39,7 @@ The plan, risks, routing table and acceptance criteria are in `docs/FRONTEND_MIG
 
 ## 3. React architecture
 
-- **Route** in `src/app/<route>/page.tsx`. Use server components for public data with short `revalidate`, and client components for user-specific or interactive parts.
+- **Route** in `src/app/<route>/page.tsx`. Use server components that prefetch public data per request into the query cache (`prefetch()` in `src/lib/api/server.ts`, decision 0021), and client components for user-specific or interactive parts.
 - **Feature code** (components, query hooks, pure logic) goes in `src/features/<area>/`. Pure logic (polarity buckets, positive share, weekly bucketing, formatting) goes in plain TypeScript functions with unit tests. Port it **from the current page's code**, preserving its outputs exactly.
 - **State:**
   - TanStack Query for server data, with the query keys and invalidations in `FRONTEND_MIGRATION.md §8`;

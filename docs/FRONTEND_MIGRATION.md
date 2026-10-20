@@ -73,12 +73,12 @@ See [ARCHITECTURE.md](ARCHITECTURE.md#implemented-frontend). In short: 9 static 
 | **Toolchain** | Node LTS, a package manager and lockfile, a build step, TypeScript configuration, and React 19 / Next.js upgrade churn. The project owner describes themselves as new to full-stack development, which raises the learning cost |
 | **Second deployable** | A Node runtime (Vercel or a container) as well as FastAPI. Same-origin needs rewrites or a reverse proxy |
 | **CSS port** | 6,378 lines into Tailwind and component styles; highest risk of visual drift |
-| **Charts** | 3 Chart.js charts → Recharts. Lazy-on-tab drawing, tooltips and the text fallbacks need re-implementing. The CSS column chart ports easily |
+| **Charts** | 3 Chart.js charts, kept in Chart.js and loaded lazily ([decision 0021](decisions/0021-public-pages-data-and-charts.md)). Lazy-on-tab drawing, tooltips and the text fallbacks need re-implementing. The CSS column chart ports easily |
 | **Icons** | Tabler → Lucide changes glyphs. Using `@tabler/icons-react` keeps them identical (recommended, see §5) |
 | **Rendering model** | Server vs client components, hydration, and caching semantics (`revalidate`) are new failure modes. "Live" figures must not be cached for too long |
 | **shadcn/ui defaults** | They'd make the site look generic unless every component is re-themed; that requires discipline |
 | **Parallel maintenance** | Until cutover, any bug fix has to be made in both frontends. Keep that window short |
-| **Bundle size** | React + Query + Recharts + Radix is far heavier than the current zero-dependency pages. Set a budget |
+| **Bundle size** | React + Query + Chart.js + Radix is far heavier than the current zero-dependency pages. Set a budget |
 
 ## 5. Dependency assessment
 
@@ -130,7 +130,7 @@ frontend/
 
 | Current | Proposed route | Rendering | Notes |
 |---|---|---|---|
-| `index.html` | `/` | Server, revalidate 60s; ticker on the client | |
+| `index.html` | `/` | Server, per request ([decision 0021](decisions/0021-public-pages-data-and-charts.md)); ticker on the client | |
 | `polls.html` | `/polls` | Server shell plus client filters | Optional `?category=&status=&q=&sort=` makes filters shareable (new, harmless) |
 | `poll.html?id=N` | `/polls/[id]` | Client (depends on the user) | Gate when signed out → `/login?next=/polls/N` |
 | `results.html` / `?id=N` | `/results` (→ most-responded poll) and `/results/[id]` | Server-fetched data; client tabs | Tab in `?tab=overview\|demographic\|state\|trend` |
@@ -199,7 +199,7 @@ Summarised from [SECURITY.md](SECURITY.md#recommended-authentication-architectur
 
 | Reused as-is | Reused as specification | Rewritten |
 |---|---|---|
-| FastAPI API and its OpenAPI schema; `images/profile-photo.jpg`; all copy text; the palette, typography and spacing values | Every component's look (`style.css`); interaction patterns: tabs with arrow keys, confirm dialogs, sign-in gate with `next`, lazy chart drawing, loading, empty and error states; `api.js` error semantics; polarity and positive-share rules; the redirect allow-list | All markup (JSX), all inline scripts (TypeScript modules and hooks), Chart.js configs (Recharts), the CSS (Tailwind and components), `nav-auth.js` / `ticker.js` / `api.js` (React components and hooks) |
+| FastAPI API and its OpenAPI schema; `images/profile-photo.jpg`; all copy text; the palette, typography and spacing values | Every component's look (`style.css`); interaction patterns: tabs with arrow keys, confirm dialogs, sign-in gate with `next`, lazy chart drawing, loading, empty and error states; `api.js` error semantics; polarity and positive-share rules; the redirect allow-list | All markup (JSX), all inline scripts (TypeScript modules and hooks), Chart.js configs (as React-drawn Chart.js, decision 0021), the CSS (Tailwind and components), `nav-auth.js` / `ticker.js` / `api.js` (React components and hooks) |
 
 ## 12. Page-by-page checklist
 
