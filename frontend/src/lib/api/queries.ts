@@ -5,7 +5,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { api, ApiError, type Schemas } from './client';
-import { pollsQuery, queryKeys, referenceQuery, resultsQuery, statsQuery } from './options';
+import { pollQuery, pollsQuery, queryKeys, referenceQuery, resultsQuery, statsQuery } from './options';
 
 export { queryKeys };
 
@@ -40,6 +40,26 @@ export function useStats() {
 
 export function usePolls() {
   return useQuery(pollsQuery());
+}
+
+/** One poll with its questions, and whether the signed-in user has answered it */
+export function usePoll(id: number | null) {
+  return useQuery({ ...pollQuery(id ?? 0), enabled: id !== null });
+}
+
+/** Submits a response, then refreshes what it changes, as poll.html's thank-you screen does
+    (FRONTEND_MIGRATION.md §8) */
+export function useSubmitResponse(id: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Schemas['ResponseCreate']) => api.submitResponse(body),
+    onSuccess: () =>
+      Promise.all(
+        [queryKeys.poll(id), queryKeys.results(id), ['polls'], queryKeys.stats, ['me', 'responses']].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
+      ),
+  });
 }
 
 /** One poll's published figures */

@@ -103,8 +103,12 @@ export const api = {
   /** → published polls (drafts too, for admins), newest first */
   polls: (options: Fetch = {}) => request<Schemas['PollSummary'][]>('GET', '/polls', options),
 
-  /** → one poll with its questions; 404 for drafts unless the user is an admin */
+  /** → one poll with its questions; 404 for drafts unless the user is an admin.
+      `hasResponded` is null when signed out. */
   poll: (id: number, options: Fetch = {}) => request<Schemas['PollOut']>('GET', `/polls/${id}`, options),
+
+  /** Records the signed-in user's answers; 409 when closed or already answered, 422 for invalid fields */
+  submitResponse: (body: Schemas['ResponseCreate']) => request<Schemas['ResponseOut']>('POST', '/responses', { body }),
 
   /** → a poll's published figures (decisions 0001, 0006 and 0014 decide what is withheld) */
   results: (id: number, options: Fetch = {}) => request<Schemas['PollResults']>('GET', `/results/${id}`, options),
