@@ -158,8 +158,8 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 
 - **Progress:** planned 2026-10-20 in the [Milestone 7 plan](https://claude.ai/code/artifact/f2493012-1aa3-49ad-82d8-9f20faedeec1); the owner chose decisions D41–D48 the same day ([0024–0025](decisions/README.md)). Three PRs:
   1. Login, Register and the reset notice, the shared form module and the `next` round trip (merged as #17);
-  2. the Dashboard's overview and history, behind the browser-side guard (D41) (in review);
-  3. the Dashboard's settings, and the close-out docs.
+  2. the Dashboard's overview and history, behind the browser-side guard (D41) (merged as #18);
+  3. the Dashboard's settings, and the close-out docs (in review).
 
 - **Scope:** Login, Register, cookie sessions end to end, a browser-side guard (D41), Dashboard (profile, history, settings).
 - **Dependencies:** M3 (cookie support), M6.
@@ -248,6 +248,6 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D43 | ~~Routes~~ **Decided 2026-10-20:** `/login`, `/register`, `/login/reset`, `/dashboard`, `/dashboard/history`, `/dashboard/settings` ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
 | D44 | ~~Landing after sign-in~~ **Decided 2026-10-20:** a safe `next`, else the success panel ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
 | D45 | ~~Keep me signed in~~ **Decided 2026-10-20:** as decision 0011: the token's lifetime, or the browser session ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
-| D46 | ~~After a password change~~ **Decided 2026-10-20:** say every session has ended and offer sign-in; the same fix in `dashboard.html` ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
+| D46 | ~~After a password change~~ **Revised 2026-10-20 (owner confirmed):** sign this browser back in with the new password for the browser session, as `dashboard.html` does; the first version rested on a wrong premise ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
 | D47 | ~~Freeze on `login.html` and `dashboard.html`~~ **Decided 2026-10-20:** bug fixes only, made in both ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |
 | D48 | ~~Conventions from M6~~ **Decided 2026-10-20:** copy word for word, screenshot sign-off per PR, real links only ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |

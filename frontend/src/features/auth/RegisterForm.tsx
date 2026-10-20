@@ -26,7 +26,6 @@ const FILL = ['', 'bg-red', 'bg-gold', 'bg-green-soft', 'bg-green'];
 const TONE = ['text-muted', 'text-red', 'text-gold-ink', 'text-green', 'text-green'];
 
 function PasswordHelp({ password }: { password: string }) {
-  const checks = passwordChecks(password);
   const score = strength(password);
   return (
     <>
@@ -36,18 +35,26 @@ function PasswordHelp({ password }: { password: string }) {
         </div>
         <span className={cn('min-w-14 text-right font-mono text-[10px] uppercase tracking-[0.1em]', TONE[score])}>{STRENGTH[score]}</span>
       </div>
-      <ul id="reg-password-rules" aria-label="Password requirements" className="flex flex-wrap gap-x-4 gap-y-1">
-        {RULES.map((rule) => {
-          const met = checks[rule.key];
-          const Icon = met ? IconCircleCheck : IconCircle;
-          return (
-            <li key={rule.key} className={cn('flex items-center gap-[5px] text-[12px] transition-colors', met ? 'text-green' : 'text-muted')}>
-              <Icon aria-hidden="true" size={14} /> {rule.label}
-            </li>
-          );
-        })}
-      </ul>
+      <PasswordRules id="reg-password-rules" password={password} />
     </>
+  );
+}
+
+/** The ticks under a new password: 8+ characters, a letter, a number */
+export function PasswordRules({ id, password }: { id: string; password: string }) {
+  const checks = passwordChecks(password);
+  return (
+    <ul id={id} aria-label="Password requirements" className="flex flex-wrap gap-x-4 gap-y-1">
+      {RULES.map((rule) => {
+        const met = checks[rule.key];
+        const Icon = met ? IconCircleCheck : IconCircle;
+        return (
+          <li key={rule.key} className={cn('flex items-center gap-[5px] text-[12px] transition-colors', met ? 'text-green' : 'text-muted')}>
+            <Icon aria-hidden="true" size={14} /> {rule.label}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 

@@ -21,9 +21,9 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
 | New frontend (foundation) | Next.js 16 App Router, React 19, TypeScript strict, Tailwind CSS 4 (theme = design tokens), shadcn/ui re-themed, TanStack Query, `@tabler/icons-react`, pnpm, Node 24 | `frontend/` |
-| Tests | pytest + FastAPI `TestClient` (145 tests); Python Playwright browser suite (219 tests, 130 of them on `frontend/`); Vitest (139 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
+| Tests | pytest + FastAPI `TestClient` (145 tests); Python Playwright browser suite (226 tests, 137 of them on `frontend/`); Vitest (148 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
 
-**The Next.js migration is approved ([decision 0016](docs/decisions/0016-nextjs-frontend.md)).** Milestone 5 built `frontend/`'s foundation: the shell (ticker, nav, footer), tokens, API client and checks. Milestone 6 moved the six public pages (Home, Polls, Poll, Results, Methodology, About; decisions 0021–0023). Milestone 7 (in progress, decisions 0024–0025) moves Login, Register and the Dashboard (Login, Register, and the Dashboard's Overview and history so far). **`frontend/` isn't deployed yet:** the static pages at the repo root are still what users get. The six public static pages take bug fixes only, made in both frontends (D38); Login, Dashboard and Admin move in Milestones 7–8, with the `frontend-migration` skill.
+**The Next.js migration is approved ([decision 0016](docs/decisions/0016-nextjs-frontend.md)).** Milestone 5 built `frontend/`'s foundation: the shell (ticker, nav, footer), tokens, API client and checks. Milestone 6 moved the six public pages (Home, Polls, Poll, Results, Methodology, About; decisions 0021–0023). Milestone 7 (in progress, decisions 0024–0025) moves Login, Register and the Dashboard (all three are in `frontend/`; the static pages stay live until cutover). **`frontend/` isn't deployed yet:** the static pages at the repo root are still what users get. The six public static pages take bug fixes only, made in both frontends (D38); Login, Dashboard and Admin move in Milestones 7–8, with the `frontend-migration` skill.
 
 ## Repository map
 

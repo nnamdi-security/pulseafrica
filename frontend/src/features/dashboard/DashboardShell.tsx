@@ -1,15 +1,15 @@
 'use client';
 
-/* dashboard.html's frame for /dashboard and /dashboard/history (decision 0024, D43): the
-   greeting and figures, the tabs, and the guard. The session cookie only reaches /api, so who
+/* dashboard.html's frame for /dashboard, /dashboard/history and /dashboard/settings (decision
+   0024, D43): the greeting and figures, the tabs, and the guard. The session cookie only reaches /api, so who
    is signed in is decided here, in the browser (D41): the API answers every request, and a 401
    from any of them returns the page to its signed-out state. Hiding the page is never the
    security; the API is. */
-import { IconLoader2, IconLock, IconWifiOff, type Icon } from '@tabler/icons-react';
+import { IconCircleCheck, IconLoader2, IconLock, IconWifiOff, type Icon } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { createContext, useContext, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import { PageHead } from '@/components/layout/PageHead';
 import { ApiError, type Schemas } from '@/lib/api/client';
@@ -19,7 +19,13 @@ import { cn } from '@/lib/utils';
 
 import { firstName, memberSince, stateShort, waitingPolls, type Answered } from './data';
 
-type DashboardData = { user: Schemas['UserOut']; answered: Answered[]; polls: Schemas['PollSummary'][] };
+type DashboardData = {
+  user: Schemas['UserOut'];
+  answered: Answered[];
+  polls: Schemas['PollSummary'][];
+  /** Called as the account is deleted, before the user is forgotten */
+  markDeleted: () => void;
+};
 
 const DashboardContext = createContext<DashboardData | null>(null);
 
@@ -38,6 +44,7 @@ const noSubscription = () => () => {};
 const TABS = [
   { href: '/dashboard', label: 'Overview', id: 'tab-overview' },
   { href: '/dashboard/history', label: 'Participation history', id: 'tab-history' },
+  { href: '/dashboard/settings', label: 'Account settings', id: 'tab-settings' },
 ] as const;
 
 function Tabs() {
@@ -105,10 +112,14 @@ function HeadStats({ data }: { data: DashboardData | null }) {
 
 type Notice = { Icon: Icon; title: string; text?: ReactNode; warn?: boolean };
 
-function NoticeCard({ notice }: { notice: Notice }) {
+function NoticeCard({ notice, focus }: { notice: Notice; focus?: boolean }) {
   const spin = notice.Icon === IconLoader2;
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (focus) ref.current?.focus();
+  }, [focus]);
   return (
-    <div role="status" className={cn(CARD, 'flex items-start gap-3.5')}>
+    <div ref={ref} role="status" tabIndex={focus ? -1 : undefined} className={cn(CARD, 'flex items-start gap-3.5 focus:outline-none')}>
       <notice.Icon
         aria-hidden="true"
         size={22}
@@ -146,6 +157,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const me = useMe();
   const user = me.data ?? null;
   const responses = useMyResponses(Boolean(user));
+  const [deleted, setDeleted] = useState(false);
   const polls = usePolls();
   // History refused with 401 after /auth/me said who it was: the session ended (expired or
   // revoked). The refused query is kept, so the page says so; the nav shows "Sign in" again.
@@ -155,10 +167,23 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     if (sessionEnded && user) queryClient.setQueryData(queryKeys.me, null);
   }, [sessionEnded, user, queryClient]);
 
-  const data: DashboardData | null = user && responses.data && polls.data ? { user, answered: responses.data, polls: polls.data } : null;
+  const data: DashboardData | null =
+    user && responses.data && polls.data && !deleted
+      ? { user, answered: responses.data, polls: polls.data, markDeleted: () => setDeleted(true) }
+      : null;
 
   let notice: Notice | null = null;
-  if (!hydrated || me.isPending) notice = { Icon: IconLoader2, title: 'Loading your dashboard…' };
+  if (deleted)
+    notice = {
+      Icon: IconCircleCheck,
+      title: 'Your account has been deleted',
+      text: (
+        <>
+          Your account and all of your responses have been removed. Thank you for taking part. <Link href="/">Back to the home page</Link>.
+        </>
+      ),
+    };
+  else if (!hydrated || me.isPending) notice = { Icon: IconLoader2, title: 'Loading your dashboard…' };
   else if (me.isError)
     notice = { Icon: IconWifiOff, warn: true, title: 'We couldn’t load your dashboard', text: <Retry message={me.error.message} onRetry={() => me.refetch()} /> };
   else if (!user || sessionEnded)
@@ -184,16 +209,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <PageHead label="Your dashboard" title={data ? `Welcome back, ${firstName(data.user.fullName)}` : 'Your dashboard'} extra={<HeadStats data={data} />}>
+      <PageHead label="Your dashboard" title={deleted ? 'Account deleted' : data ? `Welcome back, ${firstName(data.user.fullName)}` : 'Your dashboard'} extra={<HeadStats data={data} />}>
         Your profile, the polls you&apos;ve taken part in, and your account settings.
       </PageHead>
       {notice ? null : <Tabs />}
       <div className="bg-cream px-10 pt-7 pb-10 tablet:px-6 tablet:pt-5 tablet:pb-8">
         {notice || !data ? (
-          <NoticeCard notice={notice ?? { Icon: IconLoader2, title: 'Loading your dashboard…' }} />
+          <NoticeCard notice={notice ?? { Icon: IconLoader2, title: 'Loading your dashboard…' }} focus={deleted} />
         ) : (
           <DashboardContext.Provider value={data}>
-            <div id="dash-panel" role="tabpanel" aria-labelledby={pathname === '/dashboard/history' ? 'tab-history' : 'tab-overview'}>
+            <div id="dash-panel" role="tabpanel" aria-labelledby={(TABS.find((t) => t.href === pathname) ?? TABS[0]).id}>
               {children}
             </div>
           </DashboardContext.Provider>

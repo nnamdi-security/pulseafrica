@@ -63,6 +63,47 @@ export function useSignIn() {
   });
 }
 
+/** Saves profile changes; the nav and dashboard show the new details at once */
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Schemas['ProfileUpdate']) => api.updateProfile(body),
+    onSuccess: (user) => queryClient.setQueryData(queryKeys.me, user),
+  });
+}
+
+/** Changes the password, which ends every session (decision 0010), then signs this browser
+    back in with the new one for the browser session only (decision 0024, D46). If that
+    sign-in fails, the page shows that the session has ended. */
+export function useChangePassword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ email, ...body }: Schemas['PasswordChange'] & { email: string }) => {
+      await api.changePassword(body);
+      try {
+        await api.signIn({ email, password: body.newPassword, remember: false });
+      } catch {
+        queryClient.setQueryData(queryKeys.me, null);
+      }
+    },
+  });
+}
+
+/** Deletes the account, then forgets everything cached about it, as signing out does.
+    `onDeleted` runs first, so the page can say what happened before it loses the user. */
+export function useDeleteAccount(onDeleted: () => void) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Schemas['AccountDelete']) => api.deleteAccount(body),
+    onSuccess: () => {
+      onDeleted();
+      // `me` is kept and set, so the nav (which holds that query) shows "Sign in" at once
+      queryClient.setQueryData<Schemas['UserOut'] | null>(queryKeys.me, null);
+      queryClient.removeQueries({ predicate: (query) => query.queryHash !== JSON.stringify(queryKeys.me) });
+    },
+  });
+}
+
 export function useStats() {
   return useQuery(statsQuery());
 }

@@ -3,7 +3,7 @@
 /* The form controls of login.html and dashboard.html (style.css .auth-*): labelled fields with
    an icon, a show/hide button for passwords, selects, a tick box, the error banner and the
    submit button. Errors are tied to their inputs with aria-describedby and aria-invalid. */
-import { IconAlertCircle, IconArrowRight, IconCheck, IconEye, IconEyeOff, type Icon } from '@tabler/icons-react';
+import { IconAlertCircle, IconArrowRight, IconCheck, IconCircleCheck, IconEye, IconEyeOff, type Icon } from '@tabler/icons-react';
 import { useState, type ReactNode, type Ref } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -56,6 +56,8 @@ type TextFieldProps = {
   describedBy?: string;
   /** A show/hide button for a password */
   reveal?: boolean;
+  /** Shown but not editable (the dashboard's email) */
+  readOnly?: boolean;
   inputRef?: Ref<HTMLInputElement>;
 };
 
@@ -76,6 +78,7 @@ export function TextField({
   after,
   describedBy,
   reveal,
+  readOnly,
   inputRef,
 }: TextFieldProps) {
   const [shown, setShown] = useState(false);
@@ -112,13 +115,19 @@ export function TextField({
           type={reveal && shown ? 'text' : type}
           autoComplete={autoComplete}
           placeholder={placeholder}
-          required
+          required={!readOnly}
+          readOnly={readOnly}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           aria-invalid={status === 'error'}
           aria-describedby={[hintId, describedBy, errorId].filter(Boolean).join(' ')}
-          className={cn(CONTROL, controlState(status), 'py-[11px] pr-10 pl-[38px] placeholder:text-faint')}
+          className={cn(
+            CONTROL,
+            controlState(status),
+            'py-[11px] pr-10 pl-[38px] placeholder:text-faint',
+            readOnly && 'cursor-default bg-navy/4 text-slate focus:bg-navy/4',
+          )}
         />
         {reveal ? (
           <button
@@ -249,12 +258,20 @@ export function CheckField({
   );
 }
 
-/** The banner above a form: a summary of field errors, or why a request failed */
-export function FormAlert({ text }: { text: string }) {
+/** The banner above a form: a summary of field errors, why a request failed, or (on the
+    dashboard's settings) that a change was saved */
+export function FormAlert({ text, success = false }: { text: string; success?: boolean }) {
+  const Icon = success ? IconCircleCheck : IconAlertCircle;
   return (
-    <div role="alert" className="mb-[18px] flex items-start gap-2.5 rounded-[6px] border border-l-[3px] border-red/25 border-l-red bg-red/6 px-3.5 py-[11px]">
-      <IconAlertCircle aria-hidden="true" size={16} className="mt-px shrink-0 text-red" />
-      <p className="text-[13px] text-red-ink">{text}</p>
+    <div
+      role={success ? 'status' : 'alert'}
+      className={cn(
+        'mb-[18px] flex items-start gap-2.5 rounded-[6px] border border-l-[3px] px-3.5 py-[11px]',
+        success ? 'border-green/25 border-l-green bg-green/6' : 'border-red/25 border-l-red bg-red/6',
+      )}
+    >
+      <Icon aria-hidden="true" size={16} className={cn('mt-px shrink-0', success ? 'text-green-ink' : 'text-red')} />
+      <p className={cn('text-[13px]', success ? 'text-green-ink' : 'text-red-ink')}>{text}</p>
     </div>
   );
 }
@@ -264,15 +281,30 @@ export const SUBMIT = cn(
   FOCUS_RING,
 );
 
+const SPINNER = 'size-3.5 animate-spin rounded-full border-2 border-parchment/30 border-t-gold motion-reduce:animate-none';
+
 export function SubmitButton({ label, busy }: { label: string; busy: boolean }) {
   return (
     <button type="submit" className={SUBMIT} disabled={busy} aria-busy={busy}>
       <span>{label}</span>
-      {busy ? (
-        <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-parchment/30 border-t-gold motion-reduce:animate-none" />
-      ) : (
-        <IconArrowRight aria-hidden="true" size={16} />
-      )}
+      {busy ? <span aria-hidden="true" className={SPINNER} /> : <IconArrowRight aria-hidden="true" size={16} />}
+    </button>
+  );
+}
+
+/** The dashboard's settings buttons (style.css .dash-form .auth-submit): as wide as their label,
+    with an optional icon before it */
+export function SettingsButton({ label, busy, Icon, danger = false }: { label: string; busy: boolean; Icon?: Icon; danger?: boolean }) {
+  return (
+    <button
+      type="submit"
+      className={cn(SUBMIT, 'w-auto cursor-pointer self-start px-[22px] py-[11px]', danger && 'bg-red hover:bg-red-ink disabled:bg-red')}
+      disabled={busy}
+      aria-busy={busy}
+    >
+      {Icon && !busy ? <Icon aria-hidden="true" size={16} /> : null}
+      <span>{label}</span>
+      {busy ? <span aria-hidden="true" className={SPINNER} /> : null}
     </button>
   );
 }

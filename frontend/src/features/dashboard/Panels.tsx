@@ -2,7 +2,7 @@
 
 /* dashboard.html's Overview and Participation history panels. Both list which polls the user
    took part in and when, never how they answered (GET /api/auth/me/responses has no answers). */
-import { IconArrowRight, IconChartBar, IconHistory, IconLayoutGrid, IconLock } from '@tabler/icons-react';
+import { IconArrowRight, IconChartBar, IconHistory, IconLayoutGrid, IconLock, IconPencil } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 
@@ -112,6 +112,9 @@ function Profile() {
           </div>
         ))}
       </dl>
+      <Link href="/dashboard/settings" className={LINK}>
+        <IconPencil aria-hidden="true" size={15} /> Edit profile
+      </Link>
     </Card>
   );
 }

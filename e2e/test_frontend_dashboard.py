@@ -1,7 +1,5 @@
-"""Journey 5 on frontend/ (Milestone 7, PR 2): the dashboard's guard, Overview and Participation history.
-
-The settings tab (profile, password, delete) arrives in PR 3, with the rest of test_dashboard.py's journey.
-"""
+"""Journey 5 on frontend/ (Milestone 7): the dashboard's guard, Overview, Participation history and
+Account settings (profile, password, delete)."""
 
 import pytest
 from axe_playwright_python.sync_playwright import Axe
@@ -15,7 +13,8 @@ from test_frontend_shell import SCREENSHOTS
 axe = Axe()
 
 # The new routes, with the static view each replaces
-PAGES = {"/dashboard": "/dashboard.html", "/dashboard/history": "/dashboard.html#history"}
+PAGES = {"/dashboard": "/dashboard.html", "/dashboard/history": "/dashboard.html#history",
+         "/dashboard/settings": "/dashboard.html#settings"}
 
 
 def test_signed_out_visitors_are_asked_to_sign_in_and_come_back(page: Page, app_url, citizen, console_errors):
@@ -75,6 +74,58 @@ def test_overview_and_history(page: Page, app_url, citizen, console_errors):
     expect(page.get_by_role("note")).to_contain_text("How you answered is never shown here or anywhere else")
 
 
+def test_profile_password_and_delete(page: Page, app_url, citizen, console_errors):
+    """test_dashboard.py's settings journey on the new page, with the cookie session"""
+    sign_in_with_cookie(page, app_url, citizen)
+    page.goto(app_url + "/dashboard")
+    page.get_by_role("link", name="Edit profile").click()
+    expect(page).to_have_url(app_url + "/dashboard/settings")
+    expect(page.get_by_role("tab", name="Account settings")).to_have_attribute("aria-selected", "true")
+
+    profile = page.get_by_role("form", name="Profile details")
+    expect(profile.get_by_label("Email address")).to_have_value(citizen.email)
+    profile.get_by_label("Full name").fill("Amaka Obi")
+    profile.get_by_role("button", name="Save changes").click()
+    expect(page.get_by_role("main").get_by_role("status").filter(has_text="Your profile has been updated.")).to_be_visible()
+    expect(page.get_by_role("heading", level=1)).to_have_text("Welcome back, Amaka")
+    expect(page.get_by_role("navigation")).to_contain_text("Amaka")
+
+    password = page.get_by_role("form", name="Change password")
+    password.get_by_label("Current password").fill("not-my-password-1")
+    password.get_by_label("New password", exact=True).fill("newsecret1")
+    password.get_by_label("Confirm new password").fill("newsecret1")
+    password.get_by_role("button", name="Change password").click()
+    expect(password.get_by_text("That isn’t your current password.")).to_be_visible()
+    expect(password.get_by_label("Current password")).to_be_focused()
+
+    password.get_by_label("Current password").fill(citizen.password)
+    password.get_by_label("New password", exact=True).fill("newsecret1")
+    password.get_by_label("Confirm new password").fill("newsecret1")
+    password.get_by_role("button", name="Change password").click()
+    expect(page.get_by_text("Your password has been changed.")).to_be_visible()
+    assert api("POST", "/auth/login", {"email": citizen.email, "password": "newsecret1"})[0] == 200
+    # The change revoked every earlier session (decision 0010); this browser signed in again
+    # for the browser session only (D46), and stays signed in
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 401
+    cookie = next(c for c in page.context.cookies() if c["name"] == "pa_session")
+    assert cookie["expires"] == -1
+    page.reload()
+    expect(page.get_by_role("heading", level=1)).to_have_text("Welcome back, Amaka")
+
+    delete = page.get_by_role("form", name="Delete account")
+    delete.get_by_label("Enter your password to confirm").fill("newsecret1")
+    delete.get_by_role("button", name="Delete my account").click()
+    expect(delete.get_by_role("checkbox")).to_have_attribute("aria-invalid", "true")  # consequence not confirmed
+
+    delete.get_by_text("I understand my account and responses will be deleted permanently.").click()
+    expect(delete.get_by_role("checkbox")).to_be_checked()
+    delete.get_by_role("button", name="Delete my account").click()
+    expect(page.get_by_role("heading", level=1)).to_have_text("Account deleted")
+    expect(page.get_by_text("Your account has been deleted")).to_be_visible()
+    expect(page.get_by_role("navigation").get_by_role("link", name="Sign in")).to_be_visible()
+    assert api("POST", "/auth/login", {"email": citizen.email, "password": "newsecret1"})[0] == 401
+
+
 def test_a_revoked_session_is_signed_out(page: Page, app_url, citizen, console_errors):
     sign_in_with_cookie(page, app_url, citizen)
     page.goto(app_url + "/dashboard")
@@ -91,6 +142,9 @@ def test_old_links_land_on_the_new_routes(page: Page, app_url, citizen):
     page.goto(app_url + "/dashboard.html#history")
     expect(page).to_have_url(app_url + "/dashboard/history")
     expect(page.get_by_role("tab", name="Participation history")).to_have_attribute("aria-selected", "true")
+    page.goto(app_url + "/dashboard.html#settings")
+    expect(page).to_have_url(app_url + "/dashboard/settings")
+    expect(page.get_by_role("tab", name="Account settings")).to_have_attribute("aria-selected", "true")
 
 
 @pytest.mark.parametrize("path", list(PAGES))
@@ -101,7 +155,7 @@ def test_same_copy_as_the_static_page(page: Page, app_url, citizen, path):
     page.goto(SITE + PAGES[path])
     panel = page.locator(".dash-page .results-panel:not([hidden])")
     expect(panel).to_have_count(1)
-    old = [" ".join(t.split()) for t in panel.locator(".results-card-label, .results-card-sub, dt, p, .dash-filter-btn")
+    old = [" ".join(t.split()) for t in panel.locator(".results-card-label, .results-card-sub, dt, p, label, .dash-filter-btn")
            .filter(visible=True).all_inner_texts()]
     head = [" ".join(t.split()) for t in page.locator(".page-head").locator("h1, p, .ph-stat-label").all_inner_texts()]
     sign_in_with_cookie(page, app_url, citizen)
