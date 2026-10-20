@@ -69,6 +69,8 @@ What becomes easier, what becomes harder, what must now be done.
 | [0021](0021-public-pages-data-and-charts.md) | Public pages: figures rendered per request, charts in Chart.js (D32, D33) | Accepted (2026-10-20) |
 | [0022](0022-poll-page-sign-in-and-radios.md) | The Poll page before Login moves, and real radio buttons (D34, D35) | Accepted (2026-10-20) |
 | [0023](0023-public-pages-migration-conventions.md) | Conventions for moving the public pages (D36–D40) | Accepted (2026-10-20) |
+| [0024](0024-sign-in-and-session-in-the-browser.md) | Sign-in, register and the session in the new frontend (D41, D43–D46) | Accepted (2026-10-20) |
+| [0025](0025-account-pages-migration-conventions.md) | Conventions for moving Login and the Dashboard (D42, D47, D48) | Accepted (2026-10-20) |
 
 Pending decisions are listed in [ROADMAP.md](../ROADMAP.md#decisions-required-from-the-project-owner). Record each one here when it's made.
 

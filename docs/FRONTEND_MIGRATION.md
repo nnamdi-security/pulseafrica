@@ -182,7 +182,7 @@ Summarised from [SECURITY.md](SECURITY.md#recommended-authentication-architectur
 2. **In Next.js:**
    - The browser calls same-origin `/api/*`, proxied to FastAPI. The cookie is first-party, and no token is ever readable by JavaScript.
    - `useMe()` (`GET /api/auth/me`) is the client's source of truth for "signed in".
-   - `middleware.ts` redirects requests without the cookie away from `/dashboard*` and `/admin*`. **For user experience only.**
+   - ~~`middleware.ts` redirects requests without the cookie away from `/dashboard*` and `/admin*`.~~ The cookie has `Path=/api`, so the Next.js server never sees it: protected pages decide in the browser with `useMe()` ([decision 0024](decisions/0024-sign-in-and-session-in-the-browser.md), D41).
    - The pages also handle 401 (→ login) and 403 (→ "Admin access only").
 3. **FastAPI remains the authority.** No route, menu or button visibility is security.
 4. **No BFF layer.** It isn't justified for this architecture (see SECURITY.md).
@@ -275,7 +275,7 @@ Details, acceptance criteria and status are in [ROADMAP.md](ROADMAP.md).
 | **Prerequisites** (not part of the migration) | **M1** stabilisation · **M2** Playwright parity suite + CI · **M3** backend cookie sessions + security headers | — |
 | **M5** Frontend foundation | `frontend/` app, TypeScript strict, Tailwind theme from tokens, re-themed shadcn primitives, fonts, layout (nav, ticker, footer), API client + generated types, Query provider, redirects scaffold, Vitest, CI build | 4–6 days |
 | **M6** Public pages | Home, Polls, Poll, Results, Methodology, About; parity suite green for these journeys | 10–14 days |
-| **M7** Auth and user | Login, Register, cookie session integration, middleware, Dashboard | 5–8 days |
+| **M7** Auth and user | Login, Register, cookie session integration, a browser-side guard, Dashboard | 5–8 days |
 | **M8** Admin and cutover | Admin (overview, polls, editor, users); full parity suite; screenshot sign-off; redirects to 308; tag legacy; switch traffic | 7–10 days |
 
 **Order rationale:** the public pages come before auth because they're read-only, verify the foundation (data components, charts, API client) at low risk, and represent most of what visitors see. Auth comes before Dashboard and Admin, which depend on it. Admin is last because it's the largest page, depends on everything else, and has the fewest users.
