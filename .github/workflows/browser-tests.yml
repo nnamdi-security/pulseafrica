@@ -70,11 +70,11 @@ jobs:
         run: pytest --tracing retain-on-failure --output test-results
 
       # The current and new shell side by side, for review on the PR (Milestone 5)
-      - name: Keep the shell screenshots
+      - name: Keep the screenshots (shell, and each moved page next to its static one)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: shell-screenshots
+          name: screenshots
           path: e2e/screenshots/
           if-no-files-found: ignore
           retention-days: 14
