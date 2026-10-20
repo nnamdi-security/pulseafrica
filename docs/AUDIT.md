@@ -185,7 +185,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** a single XSS becomes full account takeover for up to 60 minutes per stolen token. Bearer tokens are, however, immune to CSRF.
 - **Recommended fix:** move to an HttpOnly, Secure, SameSite cookie session with CSRF protection. See [SECURITY.md](SECURITY.md#recommended-authentication-architecture); this is best done together with the frontend migration.
 - **Verification status:** Potential risk (no XSS found).
-- **Resolution (M3, backend half, commit `ecea133`):** decisions D15 and D16 ([0011](decisions/0011-cookie-session-and-csrf.md)). Login also sets an HttpOnly `pa_session` cookie; `get_optional_user` reads bearer first, then the cookie, and cookie-authenticated writes need `X-Requested-With: pulseafrica`. **Still open for the current pages,** which keep the bearer token in Web Storage until a frontend moves to the cookie (M7).
+- **Resolution (M3, backend half, commit `ecea133`):** decisions D15 and D16 ([0011](decisions/0011-cookie-session-and-csrf.md)). Login also sets an HttpOnly `pa_session` cookie; `get_optional_user` reads bearer first, then the cookie, and cookie-authenticated writes need `X-Requested-With: pulseafrica`. **Still open for the current pages,** which keep the bearer token in Web Storage until a frontend moves to the cookie (M7). **Fixed in `frontend/` (M7, decision 0024):** `/login` and `/register` sign in only through the HttpOnly cookie, and `e2e/test_frontend_auth.py::test_no_token_is_readable_by_javascript` checks nothing is stored; the static pages keep it open until cutover.
 
 <a id="sec-05"></a>
 ### SEC-05: Changing a password doesn't revoke existing tokens (MEDIUM)
