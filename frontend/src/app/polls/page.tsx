@@ -1,7 +1,7 @@
-import { HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
+import { PageData } from '@/components/data/PageData';
 import { PageHead } from '@/components/layout/PageHead';
 import { PollsBrowser, PollsHeaderStats } from '@/features/polls/PollsBrowser';
 import { pollsQuery, referenceQuery } from '@/lib/api/options';
@@ -16,7 +16,7 @@ export default async function PollsPage() {
   const base = apiBase();
   const state = await prefetch([pollsQuery(base), referenceQuery(base)]);
   return (
-    <HydrationBoundary state={state}>
+    <PageData state={state}>
       <PageHead label="Browse all polls" title="Public opinion polls" extra={<PollsHeaderStats />}>
         Active and recently closed polls across all sectors of national governance. Filter by category, status, or
         search by keyword.
@@ -24,6 +24,6 @@ export default async function PollsPage() {
       <Suspense>
         <PollsBrowser />
       </Suspense>
-    </HydrationBoundary>
+    </PageData>
   );
 }
