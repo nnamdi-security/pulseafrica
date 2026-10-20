@@ -139,7 +139,13 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance criteria:** the layout matches the current shell in screenshot review at 1280px and 390px; the type check, lint and unit tests pass in CI; the bundle budget is set.
 - **Estimate:** 4–6 days.
 
-## M6: Public pages migration (APPROVED, NOT STARTED)
+## M6: Public pages migration (IN PROGRESS)
+
+- **Progress:** planned 2026-10-20 in the [Milestone 6 plan](https://claude.ai/code/artifact/c0613686-31f3-4189-83d2-29524fc535a3); the owner chose decisions D32–D40 the same day ([0021–0023](decisions/README.md)). Four PRs:
+  1. Methodology and About, the shared data layer (per-request prefetch, query options, the figures module tested against the static pages' own functions), and the budget for dynamic routes;
+  2. Home and Polls;
+  3. Poll;
+  4. Results, and the close-out docs.
 
 - **Scope:** Home, Polls, Poll (including the sign-in gate), Results, Methodology, About.
 - **Dependencies:** M5.
@@ -222,5 +228,12 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D29 | ~~Footer placeholder links~~ **Decided 2026-10-19:** real links only ([0019](decisions/0019-footer-links.md)) | M5 |
 | D30 | ~~Where the new frontend runs~~ **Decided 2026-10-19:** `frontend/`, local and CI only in M5 ([0016](decisions/0016-nextjs-frontend.md)) | M5 |
 | D31 | ~~JavaScript budget, revised~~ **Decided 2026-10-19:** 250 KB gzipped per route, enforced ([0020](decisions/0020-javascript-budget.md)) | M5 |
-
-Record each decision in [`docs/decisions/`](decisions/README.md) when it's made.
+| D32 | ~~Chart library for Results~~ **Decided 2026-10-20:** Chart.js 4, loaded lazily ([0021](decisions/0021-public-pages-data-and-charts.md)) | M6 |
+| D33 | ~~Freshness of public figures~~ **Decided 2026-10-20:** rendered per request, refreshed in the browser ([0021](decisions/0021-public-pages-data-and-charts.md)) | M6 |
+| D34 | ~~Poll page before Login moves~~ **Decided 2026-10-20:** the whole flow on the cookie session ([0022](decisions/0022-poll-page-sign-in-and-radios.md)) | M6 |
+| D35 | ~~FE-04 in the new Poll page~~ **Decided 2026-10-20:** real radio buttons ([0022](decisions/0022-poll-page-sign-in-and-radios.md)) | M6 |
+| D36 | ~~Shareable URLs~~ **Decided 2026-10-20:** Polls filters and the Results tab and question in the URL ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
+| D37 | ~~About and Methodology copy~~ **Decided 2026-10-20:** word for word; About's review stays in M9 ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
+| D38 | ~~Freeze on the static public pages~~ **Decided 2026-10-20:** bug fixes only, made in both ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
+| D39 | ~~Screenshot sign-off~~ **Decided 2026-10-20:** on each PR ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
+| D40 | ~~Placeholder links~~ **Decided 2026-10-20:** real links only, as decision 0019 ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |

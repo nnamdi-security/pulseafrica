@@ -17,6 +17,9 @@ The current site is the visual reference. Every value here was read from `style.
 | `red` | `#A32D2D` | 43 | Negative and disapproval data, errors, destructive actions, "suspended" |
 | `red-soft` | `#c86b6b` | 4 | Secondary negative data shade |
 | `rust` | `#8B3A1F` | 1 | Low-level bar on the home "by category" panel |
+| `green-pale`, `red-pale` | `#8cbfa3`, `#e0a3a3` | 1 each | Third positive and negative shades on Results charts (scales of six or more options) |
+| `grey` | `#aaaaaa` | 1 | Neutral option on Results charts |
+| `indigo` | `#534AB7` | 1 | One About team avatar; not for any other use |
 | `parchment` | `#F5F0E8` | 52 | Light text on navy; light section backgrounds |
 | `cream` | `#F9F7F4` | 17 | Page background (`body`), input backgrounds |
 | `white` | `#FFFFFF` | — | Cards, tables, panels on cream |

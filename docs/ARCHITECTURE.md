@@ -129,7 +129,7 @@ Details and justification are in [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md).
 Browser ── https://<site> ──▶ Next.js (App Router, TypeScript)
                                  │  pages, layouts, components (Tailwind + shadcn/ui
                                  │  themed to PulseAfrica tokens), TanStack Query,
-                                 │  Recharts, React Hook Form + Zod
+                                 │  Chart.js, React Hook Form + Zod
                                  │  /api/* → rewrite / reverse proxy (same origin)
                                  ▼
                               FastAPI (unchanged ownership of auth, rules, aggregation)

@@ -2,61 +2,77 @@
 
      pnpm build && pnpm budget
 
-   For every page `next build` prerenders, it reads the HTML, collects the scripts the page
-   loads (script tags and script preloads under /_next/static), and adds up their gzipped
-   sizes. Routes that can't be prerendered (dynamic pages, from Milestone 6) need adding
-   here when they arrive: the script fails if it finds no page at all. */
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+   Every route `next build` produced is measured, prerendered or dynamic (decision 0021): its
+   first-load scripts are the framework's (build-manifest.json) plus every chunk the route's
+   client reference manifest lists for its layouts, error and not-found boundaries and page.
+   Chunks loaded later with import(), such as the Results charts, aren't first-load and aren't
+   counted. For prerendered routes the script checks that this set matches the scripts in the
+   page's HTML, so the two ways of counting can't drift apart unnoticed. */
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import { gzipSync } from 'node:zlib';
 
 // Decision 0018 set 150 KB, below what Next.js and React load on their own (about 172 KB);
 // decision 0020 raised it to 250 KB.
 const BUDGET_KB = 250;
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const appDir = join(root, '.next', 'server', 'app');
-const staticDir = join(root, '.next');
+const next = join(root, '.next');
+const appDir = join(next, 'server', 'app');
 
-function htmlFiles(dir) {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) return htmlFiles(path);
-    return entry.name.endsWith('.html') ? [path] : [];
-  });
-}
+const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 
-let pages;
-try {
-  pages = htmlFiles(appDir);
-} catch {
+if (!existsSync(join(next, 'app-path-routes-manifest.json'))) {
   console.error('No build found. Run `pnpm build` first.');
   process.exit(1);
 }
-if (!pages.length) {
-  console.error('The build has no prerendered pages to measure.');
+const routes = readJson(join(next, 'app-path-routes-manifest.json'));
+const build = readJson(join(next, 'build-manifest.json'));
+const framework = [...build.polyfillFiles, ...build.rootMainFiles];
+
+/** The chunks a route's client reference manifest names, e.g. for "/polls/[id]/page" */
+function routeChunks(entry) {
+  const file = join(appDir, entry + '_client-reference-manifest.js');
+  const sandbox = { globalThis: {} };
+  sandbox.self = sandbox.globalThis;
+  runInNewContext(readFileSync(file, 'utf8'), sandbox);
+  const manifest = sandbox.globalThis.__RSC_MANIFEST[entry];
+  return Object.values(manifest.entryJSFiles).flat();
+}
+
+/** The scripts in a prerendered page's HTML, or null for a dynamic route */
+function htmlChunks(route) {
+  const file = join(appDir, (route === '/' ? '/index' : route) + '.html');
+  if (!existsSync(file)) return null;
+  const SCRIPT = /<script[^>]*\ssrc="\/_next\/(static\/[^"]+\.js)"|<link[^>]*\sas="script"[^>]*\shref="\/_next\/(static\/[^"]+\.js)"/g;
+  return new Set([...readFileSync(file, 'utf8').matchAll(SCRIPT)].map((m) => m[1] ?? m[2]));
+}
+
+let failed = false;
+const rows = Object.entries(routes).sort(([, a], [, b]) => a.localeCompare(b));
+if (!rows.length) {
+  console.error('The build has no routes to measure.');
   process.exit(1);
 }
 
-const SCRIPT = /<script[^>]*\ssrc="(\/_next\/static\/[^"]+\.js)"|<link[^>]*\sas="script"[^>]*\shref="(\/_next\/static\/[^"]+\.js)"/g;
-let over = false;
-
-for (const page of pages.sort()) {
-  const html = readFileSync(page, 'utf8');
-  const scripts = new Set([...html.matchAll(SCRIPT)].map((m) => m[1] ?? m[2]));
-  const bytes = [...scripts].reduce(
-    (sum, src) => sum + gzipSync(readFileSync(join(staticDir, src.replace(/^\/_next\//, '')))).length,
-    0,
-  );
+for (const [entry, route] of rows) {
+  const chunks = new Set([...framework, ...routeChunks(entry)]);
+  const html = htmlChunks(route);
+  if (html && [...html].some((src) => !chunks.has(src))) {
+    console.error(`MISMATCH ${route}: its HTML loads scripts the manifests don't list.`);
+    failed = true;
+  }
+  const bytes = [...chunks].reduce((sum, src) => sum + gzipSync(readFileSync(join(next, src))).length, 0);
   const kb = bytes / 1024;
-  const route = '/' + relative(appDir, page).replace(/\.html$/, '').replace(/^index$/, '');
   const ok = kb <= BUDGET_KB;
-  over ||= !ok;
-  console.log(`${ok ? 'ok  ' : 'OVER'} ${route.padEnd(24)} ${kb.toFixed(1).padStart(6)} KB gzipped (${scripts.size} files)`);
+  failed ||= !ok;
+  const kind = html ? 'static ' : 'dynamic';
+  console.log(`${ok ? 'ok  ' : 'OVER'} ${route.padEnd(24)} ${kind} ${kb.toFixed(1).padStart(6)} KB gzipped (${chunks.size} files)`);
 }
 
-if (over) {
-  console.error(`\nA route loads more than ${BUDGET_KB} KB of gzipped JavaScript (decision 0018).`);
+if (failed) {
+  console.error(`\nA route loads more than ${BUDGET_KB} KB of gzipped JavaScript (decision 0020), or couldn't be measured.`);
   process.exit(1);
 }
 console.log(`\nEvery route is within the ${BUDGET_KB} KB budget.`);

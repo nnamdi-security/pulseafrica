@@ -64,7 +64,7 @@ paths:
 
 These apply to code under `frontend/` ([decision 0016](../../docs/decisions/0016-nextjs-frontend.md)). Commands are in [frontend/README.md](../../frontend/README.md); the full plan is in [FRONTEND_MIGRATION.md](../../docs/FRONTEND_MIGRATION.md). Pages move only in their milestone (M6–M8), with the `frontend-migration` skill; until then, page bugs are fixed in the static pages.
 
-- **Stack:** Next.js App Router, TypeScript `strict`, Tailwind CSS 4 (the theme in `src/styles/globals.css` is DESIGN_SYSTEM's tokens and nothing else), shadcn/ui primitives **re-themed** in `src/components/ui/`, TanStack Query for server state, `@tabler/icons-react`, `next/font` for the three fonts, pnpm with a committed lockfile. Later: React Hook Form + Zod, Recharts.
+- **Stack:** Next.js App Router, TypeScript `strict`, Tailwind CSS 4 (the theme in `src/styles/globals.css` is DESIGN_SYSTEM's tokens and nothing else), shadcn/ui primitives **re-themed** in `src/components/ui/`, TanStack Query for server state, `@tabler/icons-react`, `next/font` for the three fonts, pnpm with a committed lockfile. Chart.js for the Results charts, imported only when drawn ([decision 0021](../../docs/decisions/0021-public-pages-data-and-charts.md)). Later: React Hook Form + Zod.
 - **Versions:** pinned exactly in `package.json`, from releases at least two weeks old; upgraded on purpose, never as a side effect.
 - **No:** Prisma or any ORM, NextAuth, Redux or Zustand, axios, or business logic in route handlers.
 - **Styling:**
