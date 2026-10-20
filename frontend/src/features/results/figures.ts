@@ -118,3 +118,32 @@ export function compareColor(value: number, overall: number) {
 
 export type Results = Schemas['PollResults'];
 export type QuestionResult = Schemas['QuestionResult'];
+
+/** "2026-10-19T…" → "19 Oct" (polls.html's formatDate, in the viewer's time zone) */
+export function dayMonth(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+/** Rough time to complete a poll: about 30 seconds a question, plus a minute for the demographics step */
+export function minutesFor(questionCount: number) {
+  return Math.max(1, Math.round(questionCount * 0.5 + 1));
+}
+
+/** The Polls page's sentiment bar: the preview's percentages grouped by tone and rounded,
+    each group labelled with its option nearest the middle (polls.html's sentimentBuckets) */
+export function sentimentBuckets(options: { text: string; percent: number }[]) {
+  const n = options.length;
+  const half = Math.floor(n / 2);
+  const groups: { tone: Tone; options: typeof options }[] = [
+    { tone: 'approve', options: options.slice(0, half) },
+    { tone: 'neutral', options: n % 2 ? [options[half]!] : [] },
+    { tone: 'disapprove', options: options.slice(n - half) },
+  ];
+  return groups
+    .filter((g) => g.options.length)
+    .map((g) => ({
+      tone: g.tone,
+      label: (g.tone === 'disapprove' ? g.options[0] : g.options[g.options.length - 1])!.text,
+      percent: Math.round(g.options.reduce((sum, o) => sum + o.percent, 0)),
+    }));
+}

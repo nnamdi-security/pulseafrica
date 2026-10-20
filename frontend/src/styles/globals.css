@@ -25,6 +25,10 @@
   --color-green-pale: #8cbfa3;
   --color-red-pale: #e0a3a3;
   --color-grey: #aaaaaa;
+  /* Category badge text (style.css .cat-education, .cat-healthcare, .cat-governance) */
+  --color-indigo-ink: #3c3489;
+  --color-red-ink: #791f1f;
+  --color-slate: #374151;
   /* One of about.html's team avatars (decision 0023: the page is ported as it is) */
   --color-indigo: #534ab7;
 

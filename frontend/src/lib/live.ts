@@ -75,3 +75,14 @@ export function liveTickerItems(stats: Schemas['PlatformStats'], polls: Poll[], 
   if (stats.syntheticPolls) items.unshift({ label: 'Demonstration data', value: 'Simulated responses', warn: true });
   return items;
 }
+
+/** Live polls, most responses first */
+export function liveByResponses(polls: Poll[]) {
+  return polls.filter((p) => p.status === 'active').sort((a, b) => (b.responseCount ?? 0) - (a.responseCount ?? 0));
+}
+
+/** The home page's featured poll: the biggest live presidency poll, or else the biggest live poll */
+export function featuredPoll(polls: Poll[], categories: Category[]) {
+  const presidency = leadersByCategory(polls, categories).find((l) => l.key === 'presidency');
+  return presidency?.poll ?? liveByResponses(polls)[0] ?? null;
+}

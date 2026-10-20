@@ -4,6 +4,9 @@ import {
   buckets,
   compactNumber,
   compareColor,
+  dayMonth,
+  minutesFor,
+  sentimentBuckets,
   homeOptionColor,
   isApprovalScale,
   levelColor,
@@ -23,6 +26,7 @@ const results = legacyFunctions('results.html', [
   'isApprovalScale', 'positiveLabel', 'shareName',
 ]);
 const home = legacyFunctions('index.html', ['compactNumber', 'optionColor', 'levelColor']);
+const list = legacyFunctions('polls.html', ['formatDate', 'minutesFor', 'sentimentBuckets']);
 
 const SCALES = [
   ['Approve', 'Disapprove'],
@@ -81,5 +85,22 @@ describe('figures match the static pages', () => {
       expect(compareColor(50 + diff, 50)).toBe(token(results.compareColor((50 + diff), 50)));
     }
     expect(Object.keys(HEX_TO_TOKEN).length).toBeGreaterThan(10);
+  });
+});
+
+describe('Polls page figures match polls.html', () => {
+  it('formats dates and durations the same way', () => {
+    expect(dayMonth('2026-03-09T12:00:00Z')).toBe(list.formatDate('2026-03-09T12:00:00Z'));
+    for (const questionCount of [0, 1, 2, 3, 5, 10]) expect(minutesFor(questionCount)).toBe(list.minutesFor({ questionCount }));
+  });
+
+  it('groups the preview into the same sentiment bar', () => {
+    for (const texts of SCALES) {
+      for (const counts of COUNTS) {
+        const total = counts.slice(0, texts.length).reduce((a, b) => a + b, 0);
+        const preview = texts.map((text, i) => ({ text, percent: total ? (100 * counts[i]!) / total : 0 }));
+        expect(sentimentBuckets(preview)).toEqual(JSON.parse(JSON.stringify(list.sentimentBuckets(preview))));
+      }
+    }
   });
 });

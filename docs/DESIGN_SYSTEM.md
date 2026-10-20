@@ -19,7 +19,8 @@ The current site is the visual reference. Every value here was read from `style.
 | `rust` | `#8B3A1F` | 1 | Low-level bar on the home "by category" panel |
 | `green-pale`, `red-pale` | `#8cbfa3`, `#e0a3a3` | 1 each | Third positive and negative shades on Results charts (scales of six or more options) |
 | `grey` | `#aaaaaa` | 1 | Neutral option on Results charts |
-| `indigo` | `#534AB7` | 1 | One About team avatar; not for any other use |
+| `indigo` | `#534AB7` | 1 | One About team avatar, and (at 10%) the education badge's fill |
+| `indigo-ink`, `red-ink`, `slate` | `#3C3489`, `#791F1F`, `#374151` | 1 each | Category badge text: education, healthcare, governance |
 | `parchment` | `#F5F0E8` | 52 | Light text on navy; light section backgrounds |
 | `cream` | `#F9F7F4` | 17 | Page background (`body`), input backgrounds |
 | `white` | `#FFFFFF` | — | Cards, tables, panels on cream |
