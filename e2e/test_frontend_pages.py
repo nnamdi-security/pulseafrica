@@ -5,12 +5,13 @@ Each page moved from the static site gets its journeys here, run against the bui
 and screenshots of the current and new page side by side for the owner's sign-off (D39)."""
 
 import re
+import secrets
 
 import pytest
 from axe_playwright_python.sync_playwright import Axe
 from playwright.sync_api import Page, expect
 
-from conftest import SITE, api
+from conftest import SITE, api, register
 from test_frontend_shell import SCREENSHOTS
 
 axe = Axe()
@@ -22,10 +23,11 @@ PAGES = {
     "/methodology": "/methodology.html",
     "/about": "/about.html",
     "/polls/1": "/poll.html?id=1",  # the seeded presidential poll, signed out
+    "/results": "/results.html",
 }
 
 # Pages that decide what to show in the browser, and the heading that says they have
-READY = {"/polls/1": "Sign in to take this poll"}
+READY = {"/polls/1": "Sign in to take this poll", "/results": "Answer distribution"}
 
 
 def wait_for_page(page: Page) -> None:
@@ -329,3 +331,139 @@ def test_poll_closed_and_not_found(page: Page, app_url, console_errors):
         page.goto(app_url + path)
         expect(page.get_by_role("heading", level=1, name="Poll not found")).to_be_visible()
         expect(page.get_by_role("heading", name="We couldn’t find that poll")).to_be_visible()
+
+
+# ── Results (journey 3 on the new page; decisions 0006, 0014, 0021 and 0023) ──
+
+PRESIDENT = "Presidential performance — Q2 2026 mid-term assessment"
+OUTLOOK = "Q1 2026 economic outlook — citizen confidence index"
+HELD = "Published when this poll closes, to protect respondents’ privacy."
+
+
+def open_tab(page: Page, name: str):
+    page.get_by_role("tab", name=name).click()
+    expect(page.get_by_role("tab", name=name)).to_have_attribute("aria-selected", "true")
+
+
+def card(page: Page, heading: str | re.Pattern):
+    return page.locator("section").filter(has=page.get_by_role("heading", name=heading))
+
+
+def test_results_open_poll_holds_breakdowns(page: Page, app_url, console_errors):
+    poll = seeded(PRESIDENT)
+    page.goto(f"{app_url}/results/{poll['id']}")
+    expect(page.get_by_role("heading", level=1)).to_contain_text(PRESIDENT)
+    strip = page.get_by_role("region", name="Top-line figures")
+    expect(strip.get_by_text(re.compile(r"^\d+%$")).first).to_be_visible()
+    held = page.get_by_role("note").filter(has_text="held back until it closes")
+    expect(held).to_contain_text("updated in steps of 10")
+
+    open_tab(page, "By demographic")
+    expect(card(page, "By gender")).to_contain_text(HELD)
+    open_tab(page, "By state")
+    expect(card(page, re.compile("^State heatmap"))).to_contain_text(HELD)
+    open_tab(page, "Trend analysis")
+    expect(card(page, "Weekly trend").or_(card(page, "Daily trend")).or_(card(page, "Monthly trend"))).to_contain_text(
+        "published when this poll closes")
+    expect(page).to_have_url(re.compile(r"\?tab=trend$"))
+
+    # Another question of the same poll, kept in the URL (D36)
+    questions = page.get_by_label("Question")
+    second = questions.locator("option").nth(1)
+    questions.select_option(value=second.get_attribute("value"))
+    expect(page).to_have_url(re.compile(r"\?tab=trend&q=2$"))
+    open_tab(page, "Overview")
+    expect(card(page, "Answer distribution")).to_contain_text(second.text_content().split(" · ", 1)[-1][:20])
+
+    page.go_back()
+    expect(page.get_by_role("tab", name="Trend analysis")).to_have_attribute("aria-selected", "true")
+
+
+def test_results_closed_poll_shows_breakdowns_and_charts(page: Page, app_url, console_errors):
+    president, outlook = seeded(PRESIDENT), seeded(OUTLOOK)
+    page.goto(f"{app_url}/results/{president['id']}")
+    page.get_by_label("Poll", exact=True).select_option(str(outlook["id"]))
+    expect(page).to_have_url(f"{app_url}/results/{outlook['id']}")
+    expect(page.get_by_role("heading", level=1)).to_contain_text(OUTLOOK)
+    expect(page.get_by_role("note").filter(has_text="held back")).to_have_count(0)
+    # Chart.js is loaded when the donut is drawn, and draws on the canvas
+    donut = card(page, "Response breakdown").get_by_role("img")
+    expect(donut).to_have_attribute("aria-label", re.compile(r"^Donut chart: Confident \d+%, Not confident \d+%\.$"))
+    page.wait_for_function("() => { const c = document.querySelector('canvas'); return c && c.width > 0 && "
+                           "c.getContext('2d').getImageData(0, 0, c.width, c.height).data.some(v => v) }")
+
+    open_tab(page, "By demographic")
+    expect(card(page, "By gender").get_by_role("listitem").first).to_be_visible()
+    expect(card(page, "By gender")).not_to_contain_text(HELD)
+    open_tab(page, "By state")
+    expect(page.get_by_role("list", name="State results heatmap").get_by_role("listitem").first).to_be_visible()
+    open_tab(page, "Trend analysis")
+    expect(page.get_by_text(re.compile("share among the responses received each"))).to_be_visible()
+    expect(card(page, "Key moments").get_by_role("listitem").first).to_be_visible()
+
+
+def test_results_figures_equal_the_api(page: Page, app_url):
+    """The headline figures, computed independently from GET /api/results"""
+    outlook = seeded(OUTLOOK)
+    _, res = api("GET", f"/results/{outlook['id']}")
+    options = res["questions"][0]["options"]
+    total = sum(o["count"] for o in options)
+    half = len(options) // 2
+    positive = round(100 * sum(o["count"] for o in options[:half]) / total)
+    negative = round(100 * sum(o["count"] for o in options[len(options) - half:]) / total)
+    page.goto(f"{app_url}/results/{outlook['id']}")
+    strip = page.get_by_role("region", name="Top-line figures")
+    expect(strip).to_contain_text(f"{positive}%")
+    expect(strip).to_contain_text(f"{negative}%")
+    expect(strip).to_contain_text(f"{res['totalResponses']:,}")
+    expect(strip).to_contain_text(f"From {res['statesCovered']} of 40 states")
+
+
+def test_results_show_their_sample_size(page: Page, app_url, admin, console_errors):
+    """METH-03 (decision 0014): n beside every figure, and a note under 100 responses"""
+    status, poll = api("POST", "/polls", {
+        "title": f"Small sample {secrets.token_hex(3)}", "description": "Ten respondents.", "category": "economy",
+        "status": "active",
+        "questions": [{"text": "Is the economy improving?", "options": [{"text": "Yes"}, {"text": "No"}]}],
+    }, token=admin.token)
+    assert status == 201, poll
+    question = poll["questions"][0]
+    for i in range(10):
+        user = register("sample")
+        status, body = api("POST", "/responses", {
+            "pollId": poll["id"], "ageRange": "25–34", "gender": "Female", "state": "ENUGU STATE",
+            "answers": [{"questionId": question["id"], "optionId": question["options"][i % 2]["id"]}],
+        }, token=user.token)
+        assert status == 201, body
+    assert api("PATCH", f"/polls/{poll['id']}", {"status": "closed"}, token=admin.token)[0] == 200
+    try:
+        page.goto(f"{app_url}/results/{poll['id']}")
+        expect(card(page, "Answer distribution")).to_contain_text(
+            "Based on 10 responses (n). Small sample: with fewer than 100 responses, "
+            "these figures can change a lot as more people answer.")
+        open_tab(page, "By demographic")
+        gender = card(page, "By gender")
+        expect(gender.get_by_text("n=10")).to_be_visible()
+        expect(gender).to_contain_text("Small samples: groups with fewer than 100 responses")
+    finally:
+        api("DELETE", f"/polls/{poll['id']}", token=admin.token)
+
+
+def test_results_not_found(page: Page, app_url, console_errors):
+    page.goto(app_url + "/results/999999")
+    expect(page.get_by_role("heading", level=1)).to_contain_text("Poll not found")
+    expect(page.get_by_text("We couldn’t find that poll")).to_be_visible()
+
+
+@pytest.mark.parametrize("tab", ["demographic", "state", "trend"])
+@pytest.mark.parametrize("width", [1280, 390])
+def test_results_tabs_axe(page: Page, app_url, tab, width):
+    outlook = seeded(OUTLOOK)
+    page.set_viewport_size({"width": width, "height": 900})
+    page.goto(f"{app_url}/results/{outlook['id']}?tab={tab}")
+    expect(page.get_by_role("tabpanel")).to_be_visible()
+    wait_for_page(page)
+    assert page.evaluate("document.documentElement.scrollWidth") <= width
+    serious = [f"{v['id']}: {[n['target'] for n in v['nodes']][:3]}"
+               for v in axe.run(page).response["violations"] if v["impact"] in ("serious", "critical")]
+    assert serious == []

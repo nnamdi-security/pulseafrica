@@ -208,7 +208,7 @@ function Bars({ options }: { options: Schemas['OptionResult'][] }) {
 
 export function HeroCard() {
   const { featured, ready, failed } = useHomeData();
-  const results = useResults(featured?.id ?? 0);
+  const results = useResults(featured?.id ?? null);
   const enabled = Boolean(featured);
   const loaded = enabled && results.data;
   const unavailable = failed || (enabled && results.isError);

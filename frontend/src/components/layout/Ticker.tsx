@@ -4,32 +4,10 @@ import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from
 
 import { usePolls, useReference, useStats } from '@/lib/api/queries';
 import { liveTickerItems, PLACEHOLDER_ITEMS, type TickerItem } from '@/lib/live';
+import { isPageReady, subscribePageReady } from '@/lib/page-ready';
 import { cn } from '@/lib/utils';
 
 const SCROLL_PX_PER_SECOND = 45;
-/* The ticker shares the stats and polls queries with the page. The page's server data is
-   streamed after the shell, and HydrationBoundary defers data for queries already in the
-   cache, so a ticker that went live first would make the page hydrate without its data
-   (React #418). The ticker waits until the document has finished streaming and React is idle. */
-let settled = false;
-function subscribeSettled(notify: () => void) {
-  if (settled) return () => {};
-  let idle = 0;
-  const done = () => {
-    settled = true;
-    notify();
-  };
-  const onLoad = () => {
-    idle = window.requestIdleCallback ? window.requestIdleCallback(done, { timeout: 2000 }) : window.setTimeout(done, 0);
-  };
-  if (document.readyState === 'complete') onLoad();
-  else window.addEventListener('load', onLoad, { once: true });
-  return () => {
-    window.removeEventListener('load', onLoad);
-    if (window.cancelIdleCallback) window.cancelIdleCallback(idle);
-    else window.clearTimeout(idle);
-  };
-}
 
 function Item({ item, hidden }: { item: TickerItem; hidden?: boolean }) {
   return (
@@ -46,16 +24,14 @@ function Item({ item, hidden }: { item: TickerItem; hidden?: boolean }) {
 
 /** Live platform figures (ticker.js). Until they arrive, or if they never do, a neutral placeholder.
 
-    The figures are read only after the first render in the browser. The ticker renders before
-    the page, so reading them earlier would create the page's queries before its prefetched data
-    is hydrated (decision 0021), and TanStack Query would then hold that data back until after
-    hydration: the page would hydrate empty against server HTML that has its figures. */
+    The figures are read only once the page's own server data has hydrated (lib/page-ready.ts).
+    The ticker renders before the page, so reading them earlier would create the page's queries
+    before its prefetched data is hydrated (decision 0021), and TanStack Query would then hold
+    that data back until after hydration: the page would hydrate empty against server HTML that
+    has its figures. */
 export function Ticker() {
-  const live = useSyncExternalStore(
-    subscribeSettled,
-    () => settled,
-    () => false,
-  );
+  // After the page's own data has hydrated (lib/page-ready.ts)
+  const live = useSyncExternalStore(subscribePageReady, isPageReady, () => false);
   return live ? <LiveTicker /> : <TickerStrip items={PLACEHOLDER_ITEMS} live={false} demo={false} />;
 }
 

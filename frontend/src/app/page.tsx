@@ -1,5 +1,4 @@
 import { IconChartBar, IconEye, IconLock } from '@tabler/icons-react';
-import { HydrationBoundary } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
 import {
@@ -10,6 +9,7 @@ import {
   HomeDemoNotice,
   StatsStrip,
 } from '@/features/home/HomeLive';
+import { PageData } from '@/components/data/PageData';
 import type { Schemas } from '@/lib/api/client';
 import { pollsQuery, referenceQuery, resultsQuery, statsQuery } from '@/lib/api/options';
 import { apiBase, prefetch } from '@/lib/api/server';
@@ -101,8 +101,8 @@ export default async function HomePage() {
   const heroState = featured ? await prefetch([resultsQuery(featured.id, base)]) : null;
 
   return (
-    <HydrationBoundary state={state}>
-      <HydrationBoundary state={heroState}>
+    <PageData state={state}>
+      <PageData state={heroState}>
         <section
           aria-label="Platform introduction"
           className="relative overflow-hidden bg-navy px-10 pt-20 pb-[88px] tablet:px-6 tablet:pt-14 tablet:pb-16 before:pointer-events-none before:absolute before:inset-y-0 before:right-0 before:w-[44%] before:bg-[repeating-linear-gradient(90deg,var(--gold-stripe)_0px,var(--gold-stripe)_1px,transparent_1px,transparent_52px)] before:content-[''] tablet:before:hidden"
@@ -217,7 +217,7 @@ export default async function HomePage() {
             </p>
           </div>
         </aside>
-      </HydrationBoundary>
-    </HydrationBoundary>
+      </PageData>
+    </PageData>
   );
 }

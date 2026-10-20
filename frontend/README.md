@@ -4,7 +4,12 @@ The new frontend, built in parallel with the static pages at the repo root and c
 Milestone 8 ([decision 0016](../docs/decisions/0016-nextjs-frontend.md),
 [FRONTEND_MIGRATION.md](../docs/FRONTEND_MIGRATION.md)). Milestone 5 built its foundation:
 the shared shell (ticker, nav, footer), the design tokens, the API client and the checks.
-No page has moved yet, and it isn't deployed.
+Milestone 6 moved the six public pages: `/`, `/polls`, `/polls/[id]`, `/results` and
+`/results/[id]`, `/methodology` and `/about`. It isn't deployed yet.
+
+The data pages are rendered per request from `API_INTERNAL_URL` (default
+`http://localhost:8000/api`) and refreshed in the browser (decision 0021). Chart.js is
+imported only when a Results chart is drawn.
 
 ## Requirements
 

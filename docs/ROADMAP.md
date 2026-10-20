@@ -146,6 +146,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
   2. Home and Polls;
   3. Poll;
   4. Results, and the close-out docs.
+- **Built** 2026-10-20: all four batches, with the parity journeys for the six pages passing on the new frontend (`e2e/test_frontend_pages.py`, 54 tests), axe clean including contrast, and figures checked against the API and the static pages' own functions. Done when the four PRs are merged and their screenshots signed off (D39). FE-04 and FE-05 are fixed in `frontend/`.
 
 - **Scope:** Home, Polls, Poll (including the sign-in gate), Results, Methodology, About.
 - **Dependencies:** M5.

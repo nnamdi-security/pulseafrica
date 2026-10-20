@@ -1,7 +1,7 @@
-import { HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 import { cache } from 'react';
 
+import { PageData } from '@/components/data/PageData';
 import { PollHeader, PollMain, PollSidebar } from '@/features/poll/PollFlow';
 import { api } from '@/lib/api/client';
 import { referenceQuery } from '@/lib/api/options';
@@ -31,12 +31,12 @@ export default async function PollPage({ params }: Props) {
   const id = pollId((await params).id);
   const [state, initial] = await Promise.all([prefetch([referenceQuery(apiBase())]), id === null ? null : publicPoll(id)]);
   return (
-    <HydrationBoundary state={state}>
+    <PageData state={state}>
       <PollHeader id={id} initial={initial} />
       <div className="grid min-h-[600px] grid-cols-[280px_1fr] bg-cream tablet:grid-cols-1">
         <PollSidebar id={id} initial={initial} />
         <PollMain id={id} />
       </div>
-    </HydrationBoundary>
+    </PageData>
   );
 }
