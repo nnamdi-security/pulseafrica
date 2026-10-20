@@ -24,3 +24,5 @@ The Poll page needs a signed-in user, but Login and Register move to `frontend/`
 
 - Until Milestone 7, the new Poll page's "Sign in" link reaches the not-found page when followed by hand. The browser tests don't follow it.
 - FE-04 is fixed in `frontend/` and stays open on the static page until cutover.
+- The session cookie is scoped to `/api` (decision 0011), so the Next.js server never sees it. The server fetches the poll's public fields for the title, header and sidebar; whether this visitor can answer (`hasResponded`) is fetched in the browser, which then shows the gate or the first question. Decision 0021's per-request rendering covers the public part only.
+- Each answer is a native radio input stretched over its tile, so a click anywhere on the tile, the arrow keys and Playwright's `check()` all act on the real control.
