@@ -1,6 +1,6 @@
 # Frontend modernization assessment (Next.js)
 
-> **Status: APPROVED (Option A, [decision 0016](decisions/0016-nextjs-frontend.md)); foundation built in Milestone 5.** `frontend/` holds the shell, tokens, API client and checks ([frontend/README.md](../frontend/README.md)); no page has moved yet (Milestones 6–8, with the `frontend-migration` skill). Where this assessment and the decisions differ, the decisions win: Tabler icons (0017), the Python browser suite instead of `@playwright/test` (0018), Tailwind CSS 4 (0016), and the JavaScript budget (0018, revised by proposed 0020).
+> **Status: APPROVED (Option A, [decision 0016](decisions/0016-nextjs-frontend.md)); foundation built in Milestone 5.** `frontend/` holds the shell, tokens, API client and checks ([frontend/README.md](../frontend/README.md)); no page has moved yet (Milestones 6–8, with the `frontend-migration` skill). Where this assessment and the decisions differ, the decisions win: Tabler icons (0017), the Python browser suite instead of `@playwright/test` (0018), Tailwind CSS 4 (0016), and the JavaScript budget (0018, revised to 250 KB by 0020).
 
 ## Recommendation in one paragraph
 
