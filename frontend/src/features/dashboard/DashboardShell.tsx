@@ -5,17 +5,18 @@
    is signed in is decided here, in the browser (D41): the API answers every request, and a 401
    from any of them returns the page to its signed-out state. Hiding the page is never the
    security; the API is. */
-import { IconCircleCheck, IconLoader2, IconLock, IconWifiOff, type Icon } from '@tabler/icons-react';
+import { IconCircleCheck, IconLoader2, IconLock, IconWifiOff } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 
-import { PageHead } from '@/components/layout/PageHead';
+import { NoticeCard, Retry, type Notice } from '@/components/data/Notice';
+import { PageHead, PageHeadStats } from '@/components/layout/PageHead';
+import { PageTabs, selectedTab } from '@/components/layout/PageTabs';
 import { ApiError, type Schemas } from '@/lib/api/client';
 import { queryKeys } from '@/lib/api/options';
 import { useMe, useMyResponses, usePolls } from '@/lib/api/queries';
-import { cn } from '@/lib/utils';
 
 import { firstName, memberSince, stateShort, waitingPolls, type Answered } from './data';
 
@@ -36,9 +37,6 @@ export function useDashboard() {
   return value;
 }
 
-export const CARD = 'mb-5 min-w-0 rounded-lg border-[0.5px] border-navy/10 bg-white px-6 py-[22px]';
-export const CARD_LABEL = 'mb-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted';
-
 const noSubscription = () => () => {};
 
 const TABS = [
@@ -47,104 +45,16 @@ const TABS = [
   { href: '/dashboard/settings', label: 'Account settings', id: 'tab-settings' },
 ] as const;
 
-function Tabs() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const refs = useRef<(HTMLAnchorElement | null)[]>([]);
-  return (
-    <div role="tablist" aria-label="Dashboard sections" className="flex border-b border-navy/10 bg-white px-10 tablet:overflow-x-auto tablet:px-6">
-      {TABS.map((tab, i) => {
-        const selected = pathname === tab.href;
-        return (
-          <Link
-            key={tab.href}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            href={tab.href}
-            id={tab.id}
-            role="tab"
-            aria-selected={selected}
-            aria-controls="dash-panel"
-            tabIndex={selected ? 0 : -1}
-            onKeyDown={(e) => {
-              // Left and Right move between the tabs, as on dashboard.html
-              if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-              e.preventDefault();
-              const to = (i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length;
-              router.push(TABS[to]!.href);
-              refs.current[to]?.focus();
-            }}
-            className={cn(
-              'border-b-2 border-transparent px-5 py-[15px] font-mono text-[10px] uppercase tracking-[0.08em] text-muted transition-colors hover:text-navy focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gold tablet:px-3.5 tablet:py-3.5 tablet:whitespace-nowrap',
-              selected && 'border-gold text-navy',
-            )}
-          >
-            {tab.label}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
 function HeadStats({ data }: { data: DashboardData | null }) {
-  const items = [
-    { label: 'Polls answered', value: data?.answered.length },
-    { label: 'Live polls waiting', value: data && waitingPolls(data.answered, data.polls).length },
-    { label: 'Member since', value: data && memberSince(data.user.createdAt) },
-    { label: 'Your state', value: data && stateShort(data.user.state) },
-  ];
   return (
-    <div className="mt-7 flex items-center gap-9 tablet:flex-wrap tablet:gap-5 mobile:flex-col mobile:items-start mobile:gap-3.5">
-      {items.map((item, i) => (
-        <div key={item.label} className="contents">
-          {i ? <div aria-hidden="true" className="h-9 w-px bg-gold/20 mobile:hidden" /> : null}
-          <div>
-            <p className="font-mono text-[24px] leading-none font-bold tracking-[-0.03em] text-parchment">{item.value ?? '–'}</p>
-            <p className="mt-[3px] font-mono text-[10px] uppercase tracking-[0.09em] text-parchment/50">{item.label}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-type Notice = { Icon: Icon; title: string; text?: ReactNode; warn?: boolean };
-
-function NoticeCard({ notice, focus }: { notice: Notice; focus?: boolean }) {
-  const spin = notice.Icon === IconLoader2;
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (focus) ref.current?.focus();
-  }, [focus]);
-  return (
-    <div ref={ref} role="status" tabIndex={focus ? -1 : undefined} className={cn(CARD, 'flex items-start gap-3.5 focus:outline-none')}>
-      <notice.Icon
-        aria-hidden="true"
-        size={22}
-        className={cn('mt-px shrink-0', notice.warn ? 'text-red' : 'text-gold-ink', spin && 'animate-spin motion-reduce:animate-none')}
-      />
-      <div>
-        <p className="mb-1 font-serif text-[17px] font-semibold text-navy">{notice.title}</p>
-        {notice.text ? <div className="text-[13px] leading-[1.6] text-muted [&_a]:text-green [&_a]:underline [&_a]:underline-offset-2">{notice.text}</div> : null}
-      </div>
-    </div>
-  );
-}
-
-function Retry({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <>
-      {message}{' '}
-      <button
-        type="button"
-        onClick={onRetry}
-        className="ml-1.5 rounded-sm border border-navy/20 px-2.5 py-0.5 text-[12px] font-medium text-navy hover:border-navy/40"
-      >
-        Try again
-      </button>
-    </>
+    <PageHeadStats
+      items={[
+        { label: 'Polls answered', value: data?.answered.length },
+        { label: 'Live polls waiting', value: data && waitingPolls(data.answered, data.polls).length },
+        { label: 'Member since', value: data && memberSince(data.user.createdAt) },
+        { label: 'Your state', value: data && stateShort(data.user.state) },
+      ]}
+    />
   );
 }
 
@@ -212,13 +122,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       <PageHead label="Your dashboard" title={deleted ? 'Account deleted' : data ? `Welcome back, ${firstName(data.user.fullName)}` : 'Your dashboard'} extra={<HeadStats data={data} />}>
         Your profile, the polls you&apos;ve taken part in, and your account settings.
       </PageHead>
-      {notice ? null : <Tabs />}
+      {notice ? null : <PageTabs tabs={TABS} label="Dashboard sections" panelId="dash-panel" />}
       <div className="bg-cream px-10 pt-7 pb-10 tablet:px-6 tablet:pt-5 tablet:pb-8">
         {notice || !data ? (
           <NoticeCard notice={notice ?? { Icon: IconLoader2, title: 'Loading your dashboard…' }} focus={deleted} />
         ) : (
           <DashboardContext.Provider value={data}>
-            <div id="dash-panel" role="tabpanel" aria-labelledby={(TABS.find((t) => t.href === pathname) ?? TABS[0]).id}>
+            <div id="dash-panel" role="tabpanel" aria-labelledby={selectedTab(TABS, pathname).id}>
               {children}
             </div>
           </DashboardContext.Provider>
