@@ -31,6 +31,10 @@
   --color-slate: #374151;
   /* One of about.html's team avatars (decision 0023: the page is ported as it is) */
   --color-indigo: #534ab7;
+  /* admin.html's hover shades: a chart column, the primary and the danger button (style.css .admin-*) */
+  --color-gold-dark: #a87a28;
+  --color-navy-hover: #1a2a42;
+  --color-red-dark: #842323;
 
   /* Set on <html> by next/font in src/app/fonts.ts */
   --font-*: initial;

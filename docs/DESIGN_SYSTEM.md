@@ -21,6 +21,7 @@ The current site is the visual reference. Every value here was read from `style.
 | `grey` | `#aaaaaa` | 1 | Neutral option on Results charts |
 | `indigo` | `#534AB7` | 1 | One About team avatar, and (at 10%) the education badge's fill |
 | `indigo-ink`, `red-ink`, `slate` | `#3C3489`, `#791F1F`, `#374151` | 1 each | Category badge text: education, healthcare, governance |
+| `gold-dark`, `navy-hover`, `red-dark` | `#a87a28`, `#1a2a42`, `#842323` | 1 each | Hover shades on Admin: a chart column, the primary button, the danger button |
 | `parchment` | `#F5F0E8` | 52 | Light text on navy; light section backgrounds |
 | `cream` | `#F9F7F4` | 17 | Page background (`body`), input backgrounds |
 | `white` | `#FFFFFF` | — | Cards, tables, panels on cream |
