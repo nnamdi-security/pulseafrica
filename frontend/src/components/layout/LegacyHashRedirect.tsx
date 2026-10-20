@@ -12,7 +12,8 @@ export function LegacyHashRedirect() {
 
   useEffect(() => {
     const target = routeForHash(pathname, window.location.hash);
-    if (target) router.replace(target);
+    // The query comes along: login.html?next=…#register keeps its `next`
+    if (target) router.replace(target + window.location.search);
   }, [pathname, router]);
 
   return null;

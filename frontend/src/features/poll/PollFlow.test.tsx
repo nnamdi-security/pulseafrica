@@ -73,7 +73,7 @@ it('links the sign-in gate to /login with the poll as next', async () => {
   serve(pollOut({ hasResponded: null }), null);
   renderWithQuery(<PollMain id={3} />);
   expect(await screen.findByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login?next=/polls/3');
-  expect(screen.getByRole('link', { name: 'Create account' })).toHaveAttribute('href', '/login?next=/polls/3#register');
+  expect(screen.getByRole('link', { name: 'Create account' })).toHaveAttribute('href', '/register?next=/polls/3');
 });
 
 it('says not found for an id that isn’t a number, without asking the API', async () => {

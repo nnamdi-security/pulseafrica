@@ -154,11 +154,16 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** results-maths divergence; design drift.
 - **Estimate:** 10–14 days.
 
-## M7: Authentication and user experience (APPROVED, NOT STARTED)
+## M7: Authentication and user experience (IN PROGRESS)
 
-- **Scope:** Login, Register, cookie sessions end to end, middleware, Dashboard (profile, history, settings).
+- **Progress:** planned 2026-10-20 in the [Milestone 7 plan](https://claude.ai/code/artifact/f2493012-1aa3-49ad-82d8-9f20faedeec1); the owner chose decisions D41–D48 the same day ([0024–0025](decisions/README.md)). Three PRs:
+  1. Login, Register and the reset notice, the shared form module and the `next` round trip;
+  2. the Dashboard's overview and history, behind the browser-side guard (D41);
+  3. the Dashboard's settings, and the close-out docs.
+
+- **Scope:** Login, Register, cookie sessions end to end, a browser-side guard (D41), Dashboard (profile, history, settings).
 - **Dependencies:** M3 (cookie support), M6.
-- **Acceptance criteria:** no token readable by JavaScript; CSRF tests pass; `next` round trips; keep-me-signed-in behaves as specified; the dashboard parity journeys pass.
+- **Acceptance criteria:** no token readable by JavaScript; CSRF tests pass; `next` round trips; keep-me-signed-in behaves as specified; the dashboard parity journeys pass. Middleware isn't used: the session cookie only reaches `/api`, so the dashboard is guarded in the browser (D41).
 - **Estimate:** 5–8 days.
 
 ## M8: Administration and cutover (APPROVED, NOT STARTED)
@@ -238,3 +243,11 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D38 | ~~Freeze on the static public pages~~ **Decided 2026-10-20:** bug fixes only, made in both ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
 | D39 | ~~Screenshot sign-off~~ **Decided 2026-10-20:** on each PR ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
 | D40 | ~~Placeholder links~~ **Decided 2026-10-20:** real links only, as decision 0019 ([0023](decisions/0023-public-pages-migration-conventions.md)) | M6 |
+| D41 | ~~Protecting the dashboard~~ **Decided 2026-10-20:** in the browser with `useMe()`; no `proxy.ts`, since the cookie only reaches `/api` ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
+| D42 | ~~Forms~~ **Decided 2026-10-20:** plain React state and one shared form module; no new dependencies ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |
+| D43 | ~~Routes~~ **Decided 2026-10-20:** `/login`, `/register`, `/login/reset`, `/dashboard`, `/dashboard/history`, `/dashboard/settings` ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
+| D44 | ~~Landing after sign-in~~ **Decided 2026-10-20:** a safe `next`, else the success panel ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
+| D45 | ~~Keep me signed in~~ **Decided 2026-10-20:** as decision 0011: the token's lifetime, or the browser session ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
+| D46 | ~~After a password change~~ **Decided 2026-10-20:** say every session has ended and offer sign-in; the same fix in `dashboard.html` ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
+| D47 | ~~Freeze on `login.html` and `dashboard.html`~~ **Decided 2026-10-20:** bug fixes only, made in both ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |
+| D48 | ~~Conventions from M6~~ **Decided 2026-10-20:** copy word for word, screenshot sign-off per PR, real links only ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |

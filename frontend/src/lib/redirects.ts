@@ -36,7 +36,7 @@ export const legacyRedirects: Redirect[] = [
 const HASH_ROUTES: Record<string, Record<string, string>> = {
   '/dashboard': { '#history': '/dashboard/history', '#settings': '/dashboard/settings' },
   '/admin': { '#polls': '/admin/polls', '#users': '/admin/users' },
-  '/login': { '#register': '/register' },
+  '/login': { '#register': '/register', '#reset': '/login/reset' },
 };
 
 /** Where an old hash link should land, or null to stay put */

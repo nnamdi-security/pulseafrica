@@ -47,6 +47,19 @@
 
   --breakpoint-*: initial;
 
+  /* login.html's success tick (style.css @keyframes auth-pop) */
+  --animate-auth-pop: auth-pop 0.35s ease-out;
+  @keyframes auth-pop {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
   --animate-ticker: ticker-scroll 28s linear infinite;
   @keyframes ticker-scroll {
     from {

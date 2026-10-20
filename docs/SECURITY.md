@@ -93,7 +93,7 @@ Browser ──https://pulseafrica.example──▶ Next.js (pages)
 - **CSRF:** `SameSite=Lax` blocks cross-site POST, PATCH and DELETE in modern browsers. In addition, require a custom header (`X-Requested-With: pulseafrica`) or a double-submit CSRF token on every unsafe method that was authenticated by the *cookie*. Bearer-authenticated requests don't need it.
 - **Logout:** `POST /api/auth/logout` clears the cookie. Combine it with a server-side token version (SEC-05) so logout and password change actually revoke tokens.
 - **Expiry and rotation:** keep access tokens short (15–60 min). Add refresh tokens, stored hashed in a `sessions` table and rotated on use, only if real usage shows 60-minute sessions are a problem. Don't add them speculatively.
-- **Route protection:** Next.js middleware may redirect visitors without the cookie away from `/dashboard` and `/admin`. That's purely for **user experience**. FastAPI stays authoritative: every admin endpoint already checks the role, and the frontend must never assume a check passed.
+- **Route protection:** `frontend/` decides in the browser, with `useMe()`, whether to show `/dashboard` and `/admin` or a signed-out notice; there's no Next.js middleware, because the cookie only reaches `/api` ([decision 0024](decisions/0024-sign-in-and-session-in-the-browser.md)). That's purely for **user experience**. FastAPI stays authoritative: every admin endpoint already checks the role, and the frontend must never assume a check passed.
 - **SSR:** server components or route handlers can forward the incoming cookie to FastAPI for signed-in pages. Public pages (home, polls, results) need no authentication on the server.
 
 ### Is a full Backend-for-Frontend worthwhile?

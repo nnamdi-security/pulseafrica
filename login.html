@@ -96,15 +96,15 @@
 
         <div class="auth-aside-stats">
           <div class="auth-aside-stat">
-            <span class="auth-aside-stat-val">31,890</span>
+            <span class="auth-aside-stat-val" data-aside-stat="registeredUsers">–</span>
             <span class="auth-aside-stat-label">Registered voices</span>
           </div>
           <div class="auth-aside-stat">
-            <span class="auth-aside-stat-val">40</span>
+            <span class="auth-aside-stat-val" data-aside-stat="statesCovered">–</span>
             <span class="auth-aside-stat-label">States covered</span>
           </div>
           <div class="auth-aside-stat">
-            <span class="auth-aside-stat-val">14</span>
+            <span class="auth-aside-stat-val" data-aside-stat="activePolls">–</span>
             <span class="auth-aside-stat-label">Live polls</span>
           </div>
         </div>
@@ -384,6 +384,13 @@
         navToggle.setAttribute('aria-expanded', 'true');
       }
     });
+
+    /* ---------- Trust panel figures: the platform's own, from GET /api/stats ---------- */
+    PulseLive.stats.then(function (stats) {
+      document.querySelectorAll('[data-aside-stat]').forEach(function (el) {
+        el.textContent = Number(stats[el.dataset.asideStat]).toLocaleString();
+      });
+    }).catch(function () { /* the dashes stay */ });
 
     /* ---------- View switching (login / register / reset / success) ---------- */
     const tabs  = document.querySelectorAll('.auth-tab');

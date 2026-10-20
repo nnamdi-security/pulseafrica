@@ -5,7 +5,8 @@ Milestone 8 ([decision 0016](../docs/decisions/0016-nextjs-frontend.md),
 [FRONTEND_MIGRATION.md](../docs/FRONTEND_MIGRATION.md)). Milestone 5 built its foundation:
 the shared shell (ticker, nav, footer), the design tokens, the API client and the checks.
 Milestone 6 moved the six public pages: `/`, `/polls`, `/polls/[id]`, `/results` and
-`/results/[id]`, `/methodology` and `/about`. It isn't deployed yet.
+`/results/[id]`, `/methodology` and `/about`. Milestone 7 adds `/login`, `/register` and
+`/login/reset` (decision 0024); the Dashboard follows. It isn't deployed yet.
 
 The data pages are rendered per request from `API_INTERNAL_URL` (default
 `http://localhost:8000/api`) and refreshed in the browser (decision 0021). Chart.js is
@@ -48,9 +49,10 @@ the suite as usual; it starts the app on `127.0.0.1:3000` ([TESTING.md](../docs/
 ```
 src/app/              routes: layout (the shell), page, loading, error, not-found; fonts, providers
 src/components/ui/    shadcn/ui primitives, re-themed (only those in use)
+src/components/forms/ Fields: the form controls of login.html and dashboard.html
 src/components/layout SiteHeader, NavAuth, Ticker, SiteFooter, Logo, PageHead, LegacyHashRedirect
 src/lib/api/          client, generated schema, query hooks
-src/lib/              live.ts (ticker figures), redirects.ts (old URLs), utils.ts
+src/lib/              live.ts (ticker figures), redirects.ts (old URLs), form.ts (shared form behaviour), utils.ts
 src/styles/           globals.css: the Tailwind theme, which is DESIGN_SYSTEM.md's tokens only
 scripts/              api-types.mjs, check-bundle.mjs
 ```

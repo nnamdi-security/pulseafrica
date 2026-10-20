@@ -64,7 +64,7 @@ paths:
 
 These apply to code under `frontend/` ([decision 0016](../../docs/decisions/0016-nextjs-frontend.md)). Commands are in [frontend/README.md](../../frontend/README.md); the full plan is in [FRONTEND_MIGRATION.md](../../docs/FRONTEND_MIGRATION.md). Pages move only in their milestone (M6–M8), with the `frontend-migration` skill; until then, page bugs are fixed in the static pages.
 
-- **Stack:** Next.js App Router, TypeScript `strict`, Tailwind CSS 4 (the theme in `src/styles/globals.css` is DESIGN_SYSTEM's tokens and nothing else), shadcn/ui primitives **re-themed** in `src/components/ui/`, TanStack Query for server state, `@tabler/icons-react`, `next/font` for the three fonts, pnpm with a committed lockfile. Chart.js for the Results charts, imported only when drawn ([decision 0021](../../docs/decisions/0021-public-pages-data-and-charts.md)). Later: React Hook Form + Zod.
+- **Stack:** Next.js App Router, TypeScript `strict`, Tailwind CSS 4 (the theme in `src/styles/globals.css` is DESIGN_SYSTEM's tokens and nothing else), shadcn/ui primitives **re-themed** in `src/components/ui/`, TanStack Query for server state, `@tabler/icons-react`, `next/font` for the three fonts, pnpm with a committed lockfile. Chart.js for the Results charts, imported only when drawn ([decision 0021](../../docs/decisions/0021-public-pages-data-and-charts.md)). Forms use plain React state and the shared form module, with no form library ([decision 0025](../../docs/decisions/0025-account-pages-migration-conventions.md)).
 - **Versions:** pinned exactly in `package.json`, from releases at least two weeks old; upgraded on purpose, never as a side effect.
 - **No:** Prisma or any ORM, NextAuth, Redux or Zustand, axios, or business logic in route handlers.
 - **Styling:**
@@ -79,6 +79,6 @@ These apply to code under `frontend/` ([decision 0016](../../docs/decisions/0016
   - FastAPI's HttpOnly cookie session only; never store a token in JavaScript-readable storage;
   - writes carry the CSRF header (the client adds it);
   - signing out clears the Query cache;
-  - middleware (Next.js 16: `proxy.ts`) redirects are for user experience only; always handle 401 and 403 from the API.
+  - the session cookie only reaches `/api`, so who is signed in is decided in the browser with `useMe()`; there is no `proxy.ts` ([decision 0024](../../docs/decisions/0024-sign-in-and-session-in-the-browser.md)); always handle 401 and 403 from the API.
 - **Checks:** `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm budget`; browser checks in `e2e/` against the built app ([decision 0018](../../docs/decisions/0018-frontend-checks.md)).
 - **Parity:** every migrated page must pass the Milestone 2 Playwright journeys and a side-by-side screenshot review before cutover. No redesigns during migration.

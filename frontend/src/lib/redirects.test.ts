@@ -25,6 +25,7 @@ describe('routeForHash', () => {
     ['/admin', '#polls', '/admin/polls'],
     ['/admin', '#users', '/admin/users'],
     ['/login', '#register', '/register'],
+    ['/login', '#reset', '/login/reset'],
   ])('%s%s → %s', (path, hash, target) => {
     expect(routeForHash(path, hash)).toBe(target);
   });

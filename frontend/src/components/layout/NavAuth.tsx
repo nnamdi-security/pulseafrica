@@ -28,7 +28,7 @@ export function NavAuth({ onNavigate }: { onNavigate?: () => void }) {
   }, [user]);
 
   if (!user) {
-    const active = pathname === '/login';
+    const active = pathname.startsWith('/login') || pathname === '/register';
     return (
       <li>
         <Link
