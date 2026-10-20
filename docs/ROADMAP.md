@@ -154,21 +154,26 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Risks:** results-maths divergence; design drift.
 - **Estimate:** 10–14 days.
 
-## M7: Authentication and user experience (IN PROGRESS)
+## M7: Authentication and user experience (DONE)
 
 - **Progress:** planned 2026-10-20 in the [Milestone 7 plan](https://claude.ai/code/artifact/f2493012-1aa3-49ad-82d8-9f20faedeec1); the owner chose decisions D41–D48 the same day ([0024–0025](decisions/README.md)). Three PRs:
   1. Login, Register and the reset notice, the shared form module and the `next` round trip (merged as #17);
   2. the Dashboard's overview and history, behind the browser-side guard (D41) (merged as #18);
-  3. the Dashboard's settings, and the close-out docs (in review).
+  3. the Dashboard's settings, and the close-out docs (merged as #19). Milestone 7 is complete.
 
 - **Scope:** Login, Register, cookie sessions end to end, a browser-side guard (D41), Dashboard (profile, history, settings).
 - **Dependencies:** M3 (cookie support), M6.
 - **Acceptance criteria:** no token readable by JavaScript; CSRF tests pass; `next` round trips; keep-me-signed-in behaves as specified; the dashboard parity journeys pass. Middleware isn't used: the session cookie only reaches `/api`, so the dashboard is guarded in the browser (D41).
 - **Estimate:** 5–8 days.
 
-## M8: Administration and cutover (APPROVED, NOT STARTED)
+## M8: Administration and cutover (IN PROGRESS)
 
-- **Scope:** Admin overview, polls and editor, users; the full parity suite; screenshot sign-off; tag `legacy-frontend-final`; switch traffic; permanent redirects after two stable weeks.
+- **Progress:** planned 2026-10-20 in the [Milestone 8 plan](https://claude.ai/code/artifact/971cc186-0446-4fb7-9164-7b2225870621); the owner chose decisions D49–D58 the same day ([0026–0027](decisions/README.md)). Nothing is deployed, so the milestone ends cutover-ready in the repository, and traffic moves with Milestone 9's first deployment (D49). Three PRs:
+  1. the admin gate, the shared confirmation dialog, and the Overview (`/admin`);
+  2. the polls list and the poll editor (`/admin/polls`, `/admin/polls/new`, `/admin/polls/[id]/edit`);
+  3. users (`/admin/users`), the legacy-URL tests, the rollback runbook, and the close-out docs.
+
+- **Scope:** Admin overview, polls and editor, users; the full parity suite; screenshot sign-off; tag `legacy-frontend-final` and a rehearsed rollback (D58). The traffic switch moves to M9, and permanent redirects and removing the static pages follow two stable weeks in production (D57).
 - **Dependencies:** M7.
 - **Acceptance criteria:** the [migration acceptance criteria](FRONTEND_MIGRATION.md#18-acceptance-criteria-whole-migration); rollback rehearsed.
 - **Estimate:** 7–10 days.
@@ -251,3 +256,13 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D46 | ~~After a password change~~ **Revised 2026-10-20 (owner confirmed):** sign this browser back in with the new password for the browser session, as `dashboard.html` does; the first version rested on a wrong premise ([0024](decisions/0024-sign-in-and-session-in-the-browser.md)) | M7 |
 | D47 | ~~Freeze on `login.html` and `dashboard.html`~~ **Decided 2026-10-20:** bug fixes only, made in both ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |
 | D48 | ~~Conventions from M6~~ **Decided 2026-10-20:** copy word for word, screenshot sign-off per PR, real links only ([0025](decisions/0025-account-pages-migration-conventions.md)) | M7 |
+| D49 | ~~What M8's cutover means~~ **Decided 2026-10-20:** cutover-ready in the repository; traffic moves with M9's first deployment ([0027](decisions/0027-cutover-readiness.md)) | M8 |
+| D50 | ~~Admin routes~~ **Decided 2026-10-20:** `/admin`, `/admin/polls`, `/admin/polls/new`, `/admin/polls/[id]/edit`, `/admin/users`; filters and paging in the URL ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D51 | ~~Protecting the admin pages~~ **Decided 2026-10-20:** in the browser with `useMe()`, as D41 ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D52 | ~~The poll editor's form~~ **Decided 2026-10-20:** plain React state and the shared form module; no React Hook Form ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D53 | ~~Confirmations~~ **Decided 2026-10-20:** a native `<dialog>` `ConfirmDialog`; no dialog library ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D54 | ~~Responses-per-day chart~~ **Decided 2026-10-20:** the CSS columns, ported; no Chart.js on Admin ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D55 | ~~Unsaved editor changes~~ **Decided 2026-10-20:** no warning, as today ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D56 | ~~Freeze on `admin.html` and conventions~~ **Decided 2026-10-20:** bug fixes only, made in both; as D48 ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
+| D57 | ~~Static pages and redirects after M8~~ **Decided 2026-10-20:** kept, at 307, until two stable weeks in production; then 308 and removal in one PR ([0027](decisions/0027-cutover-readiness.md)) | M8 |
+| D58 | ~~Legacy tag and rollback rehearsal~~ **Decided 2026-10-20:** the owner tags `legacy-frontend-final` after M8's last PR; the tagged pages' journeys run against the API at `main` ([0027](decisions/0027-cutover-readiness.md)) | M8 |

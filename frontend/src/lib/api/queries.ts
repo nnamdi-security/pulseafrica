@@ -140,3 +140,13 @@ export function useResults(id: number | null) {
 export function useReference() {
   return useQuery(referenceQuery());
 }
+
+/** The admin Overview's figures; only asked for once /auth/me says the user is an admin */
+export function useAdminOverview(enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.adminOverview,
+    queryFn: ({ signal }) => api.adminOverview(signal),
+    enabled,
+    retry: false,
+  });
+}

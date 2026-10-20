@@ -28,3 +28,21 @@ export function PageHead({
     </section>
   );
 }
+
+/** The figures along the bottom of the Dashboard's and Admin's page heads (style.css
+    .page-head-stats); "–" until they arrive */
+export function PageHeadStats({ items }: { items: { label: string; value?: ReactNode }[] }) {
+  return (
+    <div className="mt-7 flex items-center gap-9 tablet:flex-wrap tablet:gap-5 mobile:flex-col mobile:items-start mobile:gap-3.5">
+      {items.map((item, i) => (
+        <div key={item.label} className="contents">
+          {i ? <div aria-hidden="true" className="h-9 w-px bg-gold/20 mobile:hidden" /> : null}
+          <div>
+            <p className="font-mono text-[24px] leading-none font-bold tracking-[-0.03em] text-parchment">{item.value ?? '–'}</p>
+            <p className="mt-[3px] font-mono text-[10px] uppercase tracking-[0.09em] text-parchment/50">{item.label}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

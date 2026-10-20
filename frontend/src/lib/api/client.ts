@@ -137,4 +137,7 @@ export const api = {
 
   /** → the fixed lists: states, age ranges, genders, education, occupations, categories (DB-03) */
   reference: (options: Fetch = {}) => request<Schemas['Reference']>('GET', '/reference', options),
+
+  /** → platform totals, responses per day and participation by poll; 401 signed out, 403 not an admin */
+  adminOverview: (signal?: AbortSignal) => request<Schemas['AdminOverview']>('GET', '/admin/overview', { signal }),
 };

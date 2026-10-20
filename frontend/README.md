@@ -7,7 +7,8 @@ the shared shell (ticker, nav, footer), the design tokens, the API client and th
 Milestone 6 moved the six public pages: `/`, `/polls`, `/polls/[id]`, `/results` and
 `/results/[id]`, `/methodology` and `/about`. Milestone 7 adds `/login`, `/register` and
 `/login/reset` (decision 0024), then `/dashboard`, `/dashboard/history` and
-`/dashboard/settings`. It isn't deployed yet.
+`/dashboard/settings`. Milestone 8 moves Admin: `/admin` (the Overview) so far (decision 0026).
+It isn't deployed yet.
 
 The data pages are rendered per request from `API_INTERNAL_URL` (default
 `http://localhost:8000/api`) and refreshed in the browser (decision 0021). Chart.js is
@@ -51,7 +52,7 @@ the suite as usual; it starts the app on `127.0.0.1:3000` ([TESTING.md](../docs/
 src/app/              routes: layout (the shell), page, loading, error, not-found; fonts, providers
 src/components/ui/    shadcn/ui primitives, re-themed (only those in use)
 src/components/forms/ Fields: the form controls of login.html and dashboard.html
-src/features/         one folder per page (auth, dashboard, home, poll, polls, results)
+src/features/         one folder per page (admin, auth, dashboard, home, poll, polls, results)
 src/components/layout SiteHeader, NavAuth, Ticker, SiteFooter, Logo, PageHead, LegacyHashRedirect
 src/lib/api/          client, generated schema, query hooks
 src/lib/              live.ts (ticker figures), redirects.ts (old URLs), form.ts (shared form behaviour), utils.ts

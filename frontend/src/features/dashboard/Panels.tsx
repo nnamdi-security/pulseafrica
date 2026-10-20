@@ -9,8 +9,9 @@ import { useState, type ReactNode } from 'react';
 import { CategoryBadge } from '@/components/data/CategoryBadge';
 import { dayMonth, longDate, plural } from '@/features/results/figures';
 import { cn } from '@/lib/utils';
+import { CARD, CARD_LABEL } from '@/components/data/Notice';
 
-import { CARD, CARD_LABEL, useDashboard } from './DashboardShell';
+import { useDashboard } from './DashboardShell';
 import { filterHistory, waitingPolls, type Answered, type HistoryFilter } from './data';
 
 const SUB = 'mb-[18px] text-[12px] leading-normal text-muted';

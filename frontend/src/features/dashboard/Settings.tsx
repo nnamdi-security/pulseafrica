@@ -14,8 +14,9 @@ import { ApiError } from '@/lib/api/client';
 import { queryKeys, useChangePassword, useDeleteAccount, useReference, useUpdateProfile } from '@/lib/api/queries';
 import { useForm } from '@/lib/form';
 import { cn } from '@/lib/utils';
+import { CARD, CARD_LABEL } from '@/components/data/Notice';
 
-import { CARD, CARD_LABEL, useDashboard } from './DashboardShell';
+import { useDashboard } from './DashboardShell';
 
 const SUB = 'mb-[18px] text-[12px] leading-normal text-muted';
 

@@ -1,6 +1,6 @@
 # Frontend modernization assessment (Next.js)
 
-> **Status: APPROVED (Option A, [decision 0016](decisions/0016-nextjs-frontend.md)); foundation built in Milestone 5, public pages moved in Milestone 6.** `frontend/` holds the shell, tokens, API client and checks ([frontend/README.md](../frontend/README.md)), and Home, Polls, Poll, Results, Methodology and About (decisions 0021–0023), and, in Milestone 7, Login, Register and the Dashboard (decisions 0024–0025); Admin moves in Milestone 8, with the `frontend-migration` skill. The session cookie is scoped to `/api`, so user-dependent data (the Poll page's gate) is fetched in the browser ([decision 0022](decisions/0022-poll-page-sign-in-and-radios.md)). Where this assessment and the decisions differ, the decisions win: Tabler icons (0017), the Python browser suite instead of `@playwright/test` (0018), Tailwind CSS 4 (0016), and the JavaScript budget (0018, revised to 250 KB by 0020).
+> **Status: APPROVED (Option A, [decision 0016](decisions/0016-nextjs-frontend.md)); foundation built in Milestone 5, public pages moved in Milestone 6.** `frontend/` holds the shell, tokens, API client and checks ([frontend/README.md](../frontend/README.md)), and Home, Polls, Poll, Results, Methodology and About (decisions 0021–0023), and, in Milestone 7, Login, Register and the Dashboard (decisions 0024–0025); Admin moves in Milestone 8 (decision 0026; the Overview is at `/admin`), which ends cutover-ready: traffic moves with Milestone 9's first deployment (decision 0027). The session cookie is scoped to `/api`, so user-dependent data (the Poll page's gate) is fetched in the browser ([decision 0022](decisions/0022-poll-page-sign-in-and-radios.md)). Where this assessment and the decisions differ, the decisions win: Tabler icons (0017), the Python browser suite instead of `@playwright/test` (0018), Tailwind CSS 4 (0016), and the JavaScript budget (0018, revised to 250 KB by 0020).
 
 ## Recommendation in one paragraph
 
@@ -276,7 +276,7 @@ Details, acceptance criteria and status are in [ROADMAP.md](ROADMAP.md).
 | **M5** Frontend foundation | `frontend/` app, TypeScript strict, Tailwind theme from tokens, re-themed shadcn primitives, fonts, layout (nav, ticker, footer), API client + generated types, Query provider, redirects scaffold, Vitest, CI build | 4–6 days |
 | **M6** Public pages | Home, Polls, Poll, Results, Methodology, About; parity suite green for these journeys | 10–14 days |
 | **M7** Auth and user | Login, Register, cookie session integration, a browser-side guard, Dashboard | 5–8 days |
-| **M8** Admin and cutover | Admin (overview, polls, editor, users); full parity suite; screenshot sign-off; redirects to 308; tag legacy; switch traffic | 7–10 days |
+| **M8** Admin and cutover | Admin (overview, polls, editor, users); full parity suite; screenshot sign-off; tag legacy and rehearse rollback. Switching traffic moves to M9's first deployment, and redirects to 308 follow two stable weeks (decision 0027) | 7–10 days |
 
 **Order rationale:** the public pages come before auth because they're read-only, verify the foundation (data components, charts, API client) at low risk, and represent most of what visitors see. Auth comes before Dashboard and Admin, which depend on it. Admin is last because it's the largest page, depends on everything else, and has the fewest users.
 

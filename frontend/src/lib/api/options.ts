@@ -14,6 +14,7 @@ export const queryKeys = {
   poll: (id: number) => ['poll', id] as const,
   results: (id: number) => ['results', id] as const,
   reference: ['reference'] as const,
+  adminOverview: ['admin', 'overview'] as const,
 };
 
 export const statsQuery = (base?: string) =>
