@@ -8,6 +8,7 @@ import { api } from './client';
 
 export const queryKeys = {
   me: ['me'] as const,
+  myResponses: ['me', 'responses'] as const,
   stats: ['stats'] as const,
   polls: ['polls', {}] as const,
   poll: (id: number) => ['poll', id] as const,

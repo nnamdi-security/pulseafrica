@@ -157,8 +157,8 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 ## M7: Authentication and user experience (IN PROGRESS)
 
 - **Progress:** planned 2026-10-20 in the [Milestone 7 plan](https://claude.ai/code/artifact/f2493012-1aa3-49ad-82d8-9f20faedeec1); the owner chose decisions D41–D48 the same day ([0024–0025](decisions/README.md)). Three PRs:
-  1. Login, Register and the reset notice, the shared form module and the `next` round trip;
-  2. the Dashboard's overview and history, behind the browser-side guard (D41);
+  1. Login, Register and the reset notice, the shared form module and the `next` round trip (merged as #17);
+  2. the Dashboard's overview and history, behind the browser-side guard (D41) (in review);
   3. the Dashboard's settings, and the close-out docs.
 
 - **Scope:** Login, Register, cookie sessions end to end, a browser-side guard (D41), Dashboard (profile, history, settings).

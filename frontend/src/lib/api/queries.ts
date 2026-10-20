@@ -22,6 +22,16 @@ export function useMe() {
   });
 }
 
+/** The signed-in user's participation history; only asked for while someone is signed in */
+export function useMyResponses(enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.myResponses,
+    queryFn: ({ signal }) => api.myResponses(signal),
+    enabled,
+    retry: false,
+  });
+}
+
 /** Signs out everywhere, then forgets every cached response so nothing of this user is left behind */
 export function useSignOut() {
   const queryClient = useQueryClient();
@@ -45,6 +55,8 @@ export function useSignIn() {
       return api.me();
     },
     onSuccess: (user) => {
+      // A history refused before (an ended session) must not outlive the new sign-in
+      queryClient.removeQueries({ queryKey: queryKeys.myResponses });
       queryClient.setQueryData(queryKeys.me, user);
       return queryClient.invalidateQueries({ predicate: (query) => query.queryHash !== JSON.stringify(queryKeys.me) });
     },
@@ -72,7 +84,7 @@ export function useSubmitResponse(id: number) {
     mutationFn: (body: Schemas['ResponseCreate']) => api.submitResponse(body),
     onSuccess: () =>
       Promise.all(
-        [queryKeys.poll(id), queryKeys.results(id), ['polls'], queryKeys.stats, ['me', 'responses']].map((queryKey) =>
+        [queryKeys.poll(id), queryKeys.results(id), ['polls'], queryKeys.stats, queryKeys.myResponses].map((queryKey) =>
           queryClient.invalidateQueries({ queryKey }),
         ),
       ),
