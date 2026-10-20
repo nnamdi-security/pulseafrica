@@ -104,6 +104,9 @@ export const api = {
   /** → the new account; 409 if the email is taken, 422 for invalid fields. Doesn't sign in. */
   register: (body: Schemas['UserRegister']) => request<Schemas['UserOut']>('POST', '/auth/register', { body }),
 
+  /** → the polls the signed-in user answered, newest first: titles and dates, never the answers */
+  myResponses: (signal?: AbortSignal) => request<Schemas['MyResponse'][]>('GET', '/auth/me/responses', { signal }),
+
   /** Revokes every session of the user and clears the cookie (decision 0010) */
   logout: () => request<null>('POST', '/auth/logout'),
 
