@@ -293,7 +293,7 @@ Ticked when checked by the suites at the end of Milestone 8; the rest wait for t
 - [x] No API changes beyond the approved additive ones; generated types current.
 - [x] TypeScript strict passes with no `any` escapes in feature code; lint clean.
 - [x] A JS bundle budget is agreed in M5 and met.
-- [ ] Legacy frontend tagged and its rollback rehearsed once.
+- [x] Legacy frontend tagged and its rollback rehearsed once ([ROLLBACK.md](ROLLBACK.md#rehearsals), 2026-10-31).
 
 ---
 
