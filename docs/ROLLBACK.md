@@ -56,3 +56,4 @@ A bug fix made on `main` while the static pages are kept goes into both frontend
 | Date | Tag | API at | Result |
 |---|---|---|---|
 | 2026-10-31 | stand-in: `main` at `ac6655e` (the tag is created after M8’s last PR) | `main` at `ac6655e` | 89 passed; the 10 `test_assets.py` CDN checks failed only because the CDNs were blocked |
+| 2026-10-31 | `legacy-frontend-final` (annotated, at `8bed85d`, the merge of #22) | `main` at `8bed85d` | 90 passed; the same 10 CDN checks failed only because the CDNs were blocked (they pass in CI) |
