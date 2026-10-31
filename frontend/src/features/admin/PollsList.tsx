@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 import { useAdmin } from './AdminShell';
 import { useConfirm } from './ConfirmDialog';
-import { closesOn, count, deleteText, pollFilterFrom, pollsSummary, POLL_FILTERS, type PollFilter } from './data';
+import { longDate, count, deleteText, pollFilterFrom, pollsSummary, POLL_FILTERS, type PollFilter } from './data';
 import { BUTTON, BUTTON_PRIMARY, DANGER_GHOST, ICON_ONLY, LINK_BUTTON, NUM, SMALL, StatusBadge, TABLE, TABLE_WRAP, TD, TH } from './ui';
 
 type Poll = Schemas['PollSummary'];
@@ -135,7 +135,7 @@ export function PollsList() {
                     <StatusBadge status={p.status} />
                   </td>
                   <td className={cn(TD, NUM)}>{count(p.responseCount)}</td>
-                  <td className={TD}>{p.closesAt ? closesOn(p.closesAt) : <span className="text-muted">No date</span>}</td>
+                  <td className={TD}>{p.closesAt ? longDate(p.closesAt) : <span className="text-muted">No date</span>}</td>
                   <td className={TD}>
                     <div className="flex justify-end gap-1.5">
                       <Link href={`/admin/polls/${p.id}/edit`} className={cn(LINK_BUTTON, SMALL)} onClick={() => setFlash(null)}>

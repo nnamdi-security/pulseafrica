@@ -69,8 +69,8 @@ export function pollsSummary(polls: { status: PollStatus }[]) {
   return `${plural(polls.length, 'poll')} · ${n.draft} draft · ${n.active} live · ${n.closed} closed`;
 }
 
-/** A closing date as the admin tables show it: "5 Nov 2026" (UTC) */
-export function closesOn(iso: string) {
+/** A date as the admin tables show it: "5 Nov 2026" (UTC) */
+export function longDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
@@ -106,4 +106,91 @@ export function closesAt(day: string) {
 /** Today in UTC, as a date input's value */
 export function todayUtc() {
   return new Date().toISOString().slice(0, 10);
+}
+
+export type AdminUser = Schemas['AdminUser'];
+export const USERS_PER_PAGE = 25;
+
+/** The users list's search, filters and page, as the URL keeps them (D50) */
+export type UserQuery = { search: string; role: '' | 'admin' | 'citizen'; status: '' | 'active' | 'suspended'; page: number };
+
+export function userQueryFrom(params: URLSearchParams): UserQuery {
+  const role = params.get('role');
+  const status = params.get('status');
+  const page = Number(params.get('page'));
+  return {
+    search: (params.get('search') ?? '').trim(),
+    role: role === 'admin' || role === 'citizen' ? role : '',
+    status: status === 'active' || status === 'suspended' ? status : '',
+    page: Number.isInteger(page) && page > 1 ? page : 1,
+  };
+}
+
+/** "?search=ada&role=admin&page=2", leaving out what is at its default */
+export function userQueryString(q: UserQuery) {
+  const params = new URLSearchParams();
+  if (q.search) params.set('search', q.search);
+  if (q.role) params.set('role', q.role);
+  if (q.status) params.set('status', q.status);
+  if (q.page > 1) params.set('page', String(q.page));
+  const s = params.toString();
+  return s ? `?${s}` : '';
+}
+
+/** "304 users · newest first", or "3 matches · newest first" when filtered */
+export function usersSummary(total: number, q: UserQuery) {
+  const filtered = Boolean(q.search || q.role || q.status);
+  const word = filtered ? (total === 1 ? 'match' : 'matches') : total === 1 ? 'user' : 'users';
+  return `${count(total)} ${word} · newest first`;
+}
+
+/** The pager: "26–50 of 304", and whether there are pages either side */
+export function pageRange(q: UserQuery, shown: number, total: number) {
+  const offset = (q.page - 1) * USERS_PER_PAGE;
+  const last = offset + shown;
+  return { text: total ? `${offset + 1}–${last} of ${count(total)}` : '', previous: offset > 0, next: last < total };
+}
+
+/** "LAGOS STATE" → "LAGOS", as admin.html shows it */
+export function stateName(state: string) {
+  return state.replace(/ STATE$/, '');
+}
+
+export type UserChange = { isActive: boolean } | { role: 'admin' | 'citizen' };
+
+/** What a suspend, reactivate, promote or demote changes, and the confirmation that says so */
+export function userAction(u: AdminUser, action: 'status' | 'role') {
+  if (action === 'status')
+    return {
+      changes: { isActive: !u.isActive } as UserChange,
+      dialog: u.isActive
+        ? {
+            title: `Suspend ${u.fullName}?`,
+            confirm: 'Suspend',
+            text: 'They’ll be signed out straight away and won’t be able to sign in or respond to polls. Their existing responses stay in the results. You can reactivate them at any time.',
+          }
+        : { title: `Reactivate ${u.fullName}?`, confirm: 'Reactivate', danger: false, text: 'They’ll be able to sign in and respond to polls again.' },
+    };
+  const toAdmin = u.role !== 'admin';
+  return {
+    changes: { role: toAdmin ? 'admin' : 'citizen' } as UserChange,
+    dialog: toAdmin
+      ? {
+          title: `Make ${u.fullName} an admin?`,
+          confirm: 'Make admin',
+          text: 'Admins can create, edit and delete polls, and suspend or promote any user, including you.',
+        }
+      : {
+          title: `Remove admin access from ${u.fullName}?`,
+          confirm: 'Remove admin',
+          danger: false,
+          text: 'They’ll keep their account as a citizen and lose access to this dashboard.',
+        },
+  };
+}
+
+/** The list's message after a change */
+export function userChangedText(u: AdminUser, changes: UserChange) {
+  if ('role' in changes) return `${u.fullName}${u.role === 'admin' ? ' is now an admin.' : ' is no longer an admin.'}`;
+  return `${u.fullName}${u.isActive ? ' has been reactivated.' : ' has been suspended.'}`;
 }

@@ -17,13 +17,13 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 
 | Layer | Technology | Location |
 |---|---|---|
-| Frontend | Static HTML5 + one CSS file + vanilla JS (no build). Chart.js 4.4.1 (results only), Tabler Icons, Google Fonts via CDN | repo root: 9 `*.html`, `style.css`, `api.js`, `nav-auth.js`, `ticker.js`, `images/` |
+| Legacy frontend (the rollback, D57) | Static HTML5 + one CSS file + vanilla JS (no build). Chart.js 4.4.1 (results only), Tabler Icons, Google Fonts via CDN | repo root: 9 `*.html`, `style.css`, `api.js`, `nav-auth.js`, `ticker.js`, `images/` |
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
-| New frontend (foundation) | Next.js 16 App Router, React 19, TypeScript strict, Tailwind CSS 4 (theme = design tokens), shadcn/ui re-themed, TanStack Query, `@tabler/icons-react`, pnpm, Node 24 | `frontend/` |
-| Tests | pytest + FastAPI `TestClient` (145 tests); Python Playwright browser suite (254 tests, 165 of them on `frontend/`); Vitest (174 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
+| Frontend (primary) | Next.js 16 App Router, React 19, TypeScript strict, Tailwind CSS 4 (theme = design tokens), shadcn/ui re-themed, TanStack Query, `@tabler/icons-react`, pnpm, Node 24 | `frontend/` |
+| Tests | pytest + FastAPI `TestClient` (145 tests); Python Playwright browser suite (262 tests, 173 of them on `frontend/`); Vitest (186 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
 
-**The Next.js migration is approved ([decision 0016](docs/decisions/0016-nextjs-frontend.md)).** Milestone 5 built `frontend/`'s foundation: the shell (ticker, nav, footer), tokens, API client and checks. Milestone 6 moved the six public pages (Home, Polls, Poll, Results, Methodology, About; decisions 0021–0023). Milestone 7 moved Login, Register and the Dashboard (decisions 0024–0025). Milestone 8 (in progress, decisions 0026–0027) moves Admin (the Overview and polls so far; users next) and ends cutover-ready: traffic moves with Milestone 9's first deployment (D49). **`frontend/` isn't deployed yet:** the static pages at the repo root are still what users get, and they take bug fixes only, made in both frontends (D38, D47, D56). Admin moves with the `frontend-migration` skill.
+**The Next.js migration is approved ([decision 0016](docs/decisions/0016-nextjs-frontend.md)).** Milestone 5 built `frontend/`'s foundation: the shell (ticker, nav, footer), tokens, API client and checks. Milestone 6 moved the six public pages (Home, Polls, Poll, Results, Methodology, About; decisions 0021–0023). Milestone 7 moved Login, Register and the Dashboard (decisions 0024–0025). Milestone 8 (decisions 0026–0027) moved Admin and left the repository cutover-ready: **`frontend/` is the primary frontend**, and traffic moves to it with Milestone 9's first deployment (D49). **Nothing is deployed yet.** The static pages at the repo root are the rollback ([docs/ROLLBACK.md](docs/ROLLBACK.md)) until two stable weeks in production (D57); until then they take bug fixes only, made in both frontends (D38, D47, D56). New features go into `frontend/` only.
 
 ## Repository map
 
@@ -41,7 +41,7 @@ backend/app/schemas/   Pydantic contracts (CamelModel → camelCase JSON)
 backend/app/models/    SQLAlchemy models   backend/app/core/  config, security, constants
 backend/app/seed.py    demo data (empty databases only)   backend/app/create_admin.py
 backend/app/export_openapi.py   prints the OpenAPI schema (for frontend/'s generated types)
-frontend/              Next.js app (shell, the 6 public pages, Login, Dashboard, Admin): src/app, src/components/{ui,layout,data,content}, src/features,
+frontend/              Next.js app, the primary frontend (every page): src/app, src/components/{ui,layout,data,content}, src/features,
                        src/lib/api (client, generated schema.d.ts, queries), src/styles/globals.css
 docs/                  product, architecture, audit, API, DB, security, testing, roadmap…
 .claude/rules/         path-scoped rules     .claude/skills/   workflows

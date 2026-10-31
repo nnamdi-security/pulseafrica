@@ -1,5 +1,5 @@
-"""Journey 6 on frontend/ (Milestone 8): the admin gate, the Overview, the poll list and the poll
-editor. Users follow in the next PR (decision 0026)."""
+"""Journey 6 on frontend/ (Milestone 8): the admin gate, the Overview, the poll list, the poll
+editor and the users list (decision 0026)."""
 
 import secrets
 
@@ -14,7 +14,12 @@ from test_frontend_shell import SCREENSHOTS
 axe = Axe()
 
 # The new routes, with the static view each replaces
-PAGES = {"/admin": "/admin.html", "/admin/polls": "/admin.html#polls", "/admin/polls/new": "/admin.html#polls"}
+PAGES = {
+    "/admin": "/admin.html",
+    "/admin/polls": "/admin.html#polls",
+    "/admin/polls/new": "/admin.html#polls",
+    "/admin/users": "/admin.html#users",
+}
 NEW_POLL = "/admin/polls/new"
 
 
@@ -24,6 +29,10 @@ def open_static(page: Page, path: str):
     if path == "/admin":
         expect(page.locator("#partTable tr").first).to_be_visible()
         return page.locator("#panel-overview")
+    if path == "/admin/users":
+        expect(page.locator("#userTable tr").first).to_be_visible()
+        expect(page.locator("#usersPage")).not_to_be_empty()
+        return page.locator("#panel-users")
     expect(page.locator("#pollTable tr").first).to_be_visible()
     if path == NEW_POLL:
         page.get_by_role("button", name="New poll").click()
@@ -39,6 +48,8 @@ def open_new(page: Page, app_url: str, path: str):
         expect(page.get_by_label("Category").locator("option")).not_to_have_count(1)
     else:
         expect(page.get_by_role("tabpanel").get_by_role("row").nth(1)).to_be_visible()
+    if path == "/admin/users":
+        expect(page.get_by_role("navigation", name="User list pages")).to_contain_text(" of ")
 
 
 def stat(page: Page, label: str):
@@ -208,6 +219,81 @@ def test_old_links_land_on_the_new_routes(page: Page, app_url, admin):
     page.goto(app_url + "/admin.html#polls")
     expect(page).to_have_url(app_url + "/admin/polls")
     expect(page.get_by_role("tab", name="Polls")).to_have_attribute("aria-selected", "true")
+    page.goto(app_url + "/admin.html#users")
+    expect(page).to_have_url(app_url + "/admin/users")
+    expect(page.get_by_role("tab", name="Users")).to_have_attribute("aria-selected", "true")
+
+
+def test_user_access(page: Page, app_url, admin, citizen, console_errors):
+    """test_admin.py's journey on the new page: suspend, reactivate, make admin, remove admin"""
+    sign_in_with_cookie(page, app_url, admin)
+    page.goto(app_url + "/admin/users")
+    page.get_by_label("Search users").fill(citizen.email)
+    expect(page).to_have_url(f"{app_url}/admin/users?search={citizen.email.replace('@', '%40')}")
+    users = page.get_by_role("region", name="Users")
+    expect(users.get_by_text("1 match · newest first")).to_be_visible()
+    row = users.get_by_role("row").filter(has_text=citizen.email)
+    expect(row).to_contain_text("Citizen")
+
+    def act(button: str, dialog_title: str, confirm: str, outcome: str):
+        row.get_by_role("button", name=button).click()
+        page.get_by_role("dialog", name=dialog_title).get_by_role("button", name=confirm).click()
+        expect(users.get_by_role("status")).to_contain_text(outcome)
+
+    # Cancelling changes nothing, and Escape returns focus to the button
+    row.get_by_role("button", name="Suspend").click()
+    expect(page.get_by_role("dialog", name=f"Suspend {citizen.full_name}?").get_by_role("button", name="Cancel")).to_be_focused()
+    page.keyboard.press("Escape")
+    expect(row.get_by_role("button", name="Suspend")).to_be_focused()
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 200
+
+    act("Suspend", f"Suspend {citizen.full_name}?", "Suspend", f"{citizen.full_name} has been suspended.")
+    expect(row).to_contain_text("Suspended")
+    assert api("GET", "/auth/me", token=citizen.token)[0] == 401
+
+    def fresh_token() -> str:
+        status, body = api("POST", "/auth/login", {"email": citizen.email, "password": citizen.password})
+        assert status == 200, body
+        return body["accessToken"]
+
+    act("Reactivate", f"Reactivate {citizen.full_name}?", "Reactivate", "has been reactivated.")
+    token = fresh_token()
+    act("Make admin", f"Make {citizen.full_name} an admin?", "Make admin", "is now an admin.")
+    expect(row).to_contain_text("Admin")
+    assert api("GET", "/admin/overview", token=token)[0] == 200
+    act("Remove admin", f"Remove admin access from {citizen.full_name}?", "Remove admin", "is no longer an admin.")
+    assert api("GET", "/admin/overview", token=fresh_token())[0] == 403
+
+
+def test_users_filters_and_pages_live_in_the_url(page: Page, app_url, admin, console_errors):
+    sign_in_with_cookie(page, app_url, admin)
+    page.goto(app_url + "/admin/users?role=admin")
+    users = page.get_by_role("region", name="Users")
+    expect(page.get_by_label("Role")).to_have_value("admin")
+    _, body = api("GET", "/admin/users?role=admin&limit=1", token=admin.token)
+    expect(users.get_by_text(f"{body['total']:,} {'match' if body['total'] == 1 else 'matches'} · newest first")).to_be_visible()
+
+    # The admin's own row can't change its own access
+    own = users.get_by_role("row").filter(has_text=admin.email)
+    expect(own).to_contain_text("you")
+    expect(own.get_by_role("button", name="Remove admin")).to_be_disabled()
+    expect(own.get_by_role("button", name="Suspend")).to_be_disabled()
+
+    page.get_by_label("Role").select_option("")
+    expect(page).to_have_url(app_url + "/admin/users")
+    _, everyone = api("GET", "/admin/users?limit=1", token=admin.token)
+    pager = users.get_by_role("navigation", name="User list pages")
+    expect(pager).to_contain_text(f"1–25 of {everyone['total']:,}")
+    pager.get_by_role("button", name="Next").click()
+    expect(page).to_have_url(app_url + "/admin/users?page=2")
+    expect(pager).to_contain_text(f"26–{min(50, everyone['total'])} of")
+    page.reload()
+    expect(pager).to_contain_text(f"26–{min(50, everyone['total'])} of")
+    expect(pager.get_by_role("button", name="Previous")).to_be_enabled()
+
+    page.get_by_label("Search users").fill("no-such-user-zzz")
+    expect(users.get_by_text("No users match these filters.")).to_be_visible()
+    expect(page).to_have_url(app_url + "/admin/users?search=no-such-user-zzz")
 
 
 @pytest.mark.parametrize("path", list(PAGES))
