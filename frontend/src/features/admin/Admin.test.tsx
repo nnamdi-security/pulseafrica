@@ -3,11 +3,11 @@ import userEvent from '@testing-library/user-event';
 
 import { queryKeys } from '@/lib/api/options';
 import { renderWithQuery } from '@/test/render';
+import { OVERVIEW, serveAdmin as serve } from '@/test/admin';
 import { api, http, HttpResponse, server, USER } from '@/test/server';
 
 import { AdminShell } from './AdminShell';
 import { useConfirm, type ConfirmOptions } from './ConfirmDialog';
-import type { Overview as OverviewData } from './data';
 import { Overview } from './Overview';
 
 const nav = vi.hoisted(() => ({ pathname: '/admin', push: vi.fn() }));
@@ -16,28 +16,6 @@ vi.mock('next/navigation', () => ({
   usePathname: () => nav.pathname,
   useRouter: () => ({ push: nav.push, replace: vi.fn() }),
 }));
-
-const ADMIN = { ...USER, role: 'admin' as const };
-
-const OVERVIEW: OverviewData = {
-  totalUsers: 1520, activeUsers: 1500, suspendedUsers: 20, admins: 2,
-  totalPolls: 3, draftPolls: 1, activePolls: 1, closedPolls: 1,
-  totalResponses: 400, responsesLast7Days: 96,
-  dailyResponses: Array.from({ length: 14 }, (_, i) => ({ date: `2026-10-${String(7 + i).padStart(2, '0')}`, count: i === 4 ? 30 : 2 })),
-  polls: [
-    { id: 4, title: 'Roads & <b>transport</b>', category: 'economy', status: 'active', closesAt: null, responseCount: 300, responsesLast7Days: 90 },
-    { id: 2, title: 'Schools', category: 'education', status: 'closed', closesAt: null, responseCount: 100, responsesLast7Days: 6 },
-    { id: 9, title: 'Water supply', category: 'economy', status: 'draft', closesAt: null, responseCount: 0, responsesLast7Days: 0 },
-  ],
-};
-
-function serve({ me = 200, user = ADMIN, overview = 200 }: { me?: number; user?: typeof USER; overview?: number } = {}) {
-  const fail = (status: number) => HttpResponse.json({ detail: status === 401 ? 'Not authenticated' : status === 403 ? 'Admin access required' : 'Boom' }, { status });
-  server.use(
-    http.get(api('/auth/me'), () => (me === 200 ? HttpResponse.json(user) : fail(me))),
-    http.get(api('/admin/overview'), () => (overview === 200 ? HttpResponse.json(OVERVIEW) : fail(overview))),
-  );
-}
 
 function renderAt(pathname = '/admin') {
   nav.pathname = pathname;

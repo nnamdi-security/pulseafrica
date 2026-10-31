@@ -8,6 +8,18 @@ export const BUTTON =
 export const BUTTON_PRIMARY = cn(BUTTON, 'border-navy bg-navy text-parchment hover:enabled:bg-navy-hover hover:enabled:text-parchment hover:enabled:border-navy');
 export const BUTTON_DANGER = cn(BUTTON, 'border-red bg-red text-white hover:enabled:border-red-dark hover:enabled:bg-red-dark hover:enabled:text-white');
 
+/** .admin-btn on a link, which has no :enabled state */
+export const LINK_BUTTON = cn(BUTTON, 'hover:border-gold hover:text-gold-ink');
+
+/** .admin-btn-sm, .admin-btn-icon and .admin-btn-danger-ghost */
+export const SMALL = 'px-2.5 py-[5px] text-[12px]';
+export const ICON_ONLY = 'px-2 py-[5px]';
+export const DANGER_GHOST = 'text-red hover:enabled:border-red hover:enabled:text-red-dark';
+
+/** .admin-input: the editor's question and option fields, and the users toolbar */
+export const INPUT =
+  'min-w-0 rounded-md border border-navy/18 bg-white px-2.5 py-2 text-[13px] leading-[normal] text-navy placeholder:text-faint focus:border-gold focus:ring-3 focus:ring-gold/15 focus:outline-none aria-invalid:border-red';
+
 export const TABLE_WRAP = 'relative mt-3.5 overflow-x-auto';
 export const TABLE = 'w-full border-collapse text-[13px]';
 export const TH = 'whitespace-nowrap border-b border-navy/10 pr-3 pb-2.5 text-left font-mono text-[10px] font-normal uppercase tracking-[0.12em] text-muted';

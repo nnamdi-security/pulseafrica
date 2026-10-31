@@ -9,21 +9,34 @@ import { IconLoader2, IconLock, IconShieldX, IconWifiOff } from '@tabler/icons-r
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import { NoticeCard, Retry, type Notice } from '@/components/data/Notice';
 import { PageHead, PageHeadStats } from '@/components/layout/PageHead';
 import { PageTabs, selectedTab } from '@/components/layout/PageTabs';
 import { ApiError, type Schemas } from '@/lib/api/client';
-import { queryKeys, useAdminOverview, useMe } from '@/lib/api/queries';
+import { queryKeys, useAdminOverview, useAdminPolls, useMe } from '@/lib/api/queries';
 
 import { count, type Overview } from './data';
 
-type AdminData = { user: Schemas['UserOut']; overview: Overview };
+/** A message for the top of the polls or users list: an error, or what an action did */
+export type Flash = { text: string; success?: boolean } | null;
+
+type AdminData = {
+  user: Schemas['UserOut'];
+  overview: Overview;
+  /** Every poll, drafts included */
+  polls: Schemas['PollSummary'][];
+  flash: Flash;
+  setFlash: (flash: Flash) => void;
+  /** For a failed admin request: true if it was a 401, which ends the session for the whole
+      page, as admin.html's handleError() does; anything else is the caller's to show */
+  sessionEnds: (err: unknown) => boolean;
+};
 
 const AdminContext = createContext<AdminData | null>(null);
 
-/** The signed-in admin and the Overview's figures; the panels render only once both have arrived */
+/** The signed-in admin, the Overview's figures and the polls; the panels render only once all have arrived */
 export function useAdmin() {
   const value = useContext(AdminContext);
   if (!value) throw new Error('useAdmin outside AdminShell');
@@ -54,16 +67,29 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const user = me.data ?? null;
   const isAdmin = user?.role === 'admin';
   const overview = useAdminOverview(isAdmin);
+  const polls = useAdminPolls(isAdmin);
+  const [flash, setFlash] = useState<Flash>(null);
+  // A change refused with 401 after the page loaded (admin.html's handleError())
+  const [ended, setEnded] = useState(false);
+  const sessionEnds = useCallback((err: unknown) => {
+    if (status(err) !== 401) return false;
+    setEnded(true);
+    return true;
+  }, []);
   // /auth/me said who it was, then an admin request was refused: the session ended (401), or
   // the account lost its admin role (403)
-  const sessionEnded = status(overview.error) === 401;
-  const noLongerAdmin = status(overview.error) === 403;
+  const sessionEnded = ended || status(overview.error) === 401 || status(polls.error) === 401;
+  const noLongerAdmin = status(overview.error) === 403 || status(polls.error) === 403;
 
   useEffect(() => {
     if (sessionEnded && user) queryClient.setQueryData(queryKeys.me, null);
   }, [sessionEnded, user, queryClient]);
 
-  const data: AdminData | null = user && isAdmin && overview.data && !sessionEnded ? { user, overview: overview.data } : null;
+  const data: AdminData | null =
+    user && isAdmin && overview.data && polls.data && !sessionEnded
+      ? { user, overview: overview.data, polls: polls.data, flash, setFlash, sessionEnds }
+      : null;
+  const failed = overview.isError ? overview : polls.isError ? polls : null;
 
   let notice: Notice | null = null;
   if (!hydrated || me.isPending) notice = LOADING;
@@ -90,12 +116,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </>
       ),
     };
-  else if (overview.isError)
+  else if (failed)
     notice = {
       Icon: IconWifiOff,
       warn: true,
       title: 'We couldn’t load the admin dashboard',
-      text: <Retry message={overview.error.message} onRetry={() => overview.refetch()} />,
+      text: <Retry message={failed.error!.message} onRetry={() => failed.refetch()} />,
     };
   else if (!data) notice = LOADING;
 

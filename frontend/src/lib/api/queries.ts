@@ -150,3 +150,42 @@ export function useAdminOverview(enabled: boolean) {
     retry: false,
   });
 }
+
+/** Every poll, drafts included, for the admin pages */
+export function useAdminPolls(enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.adminPolls,
+    queryFn: ({ signal }) => api.polls({ signal }),
+    enabled,
+    retry: false,
+  });
+}
+
+/** After a poll changes: everything that shows it, as admin.html's refreshData() and more,
+    since the public pages share this cache */
+function refreshPolls(queryClient: ReturnType<typeof useQueryClient>, id?: number) {
+  const keys: readonly (readonly unknown[])[] = [['admin'], ['polls'], queryKeys.stats, ...(id ? [queryKeys.poll(id), queryKeys.results(id)] : [])];
+  return Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+}
+
+/** Creates a poll (no id) or changes one: a full edit, or just its status */
+export function useSavePoll() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id?: number; body: Schemas['PollCreate'] | Schemas['PollUpdate'] }) =>
+      id ? api.updatePoll(id, body) : api.createPoll(body as Schemas['PollCreate']),
+    onSuccess: (poll) => refreshPolls(queryClient, poll.id),
+  });
+}
+
+export function useDeletePoll() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api.deletePoll(id),
+    onSuccess: (_, id) => {
+      queryClient.removeQueries({ queryKey: queryKeys.poll(id) });
+      queryClient.removeQueries({ queryKey: queryKeys.results(id) });
+      return refreshPolls(queryClient);
+    },
+  });
+}

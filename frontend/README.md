@@ -7,7 +7,8 @@ the shared shell (ticker, nav, footer), the design tokens, the API client and th
 Milestone 6 moved the six public pages: `/`, `/polls`, `/polls/[id]`, `/results` and
 `/results/[id]`, `/methodology` and `/about`. Milestone 7 adds `/login`, `/register` and
 `/login/reset` (decision 0024), then `/dashboard`, `/dashboard/history` and
-`/dashboard/settings`. Milestone 8 moves Admin: `/admin` (the Overview) so far (decision 0026).
+`/dashboard/settings`. Milestone 8 moves Admin: `/admin` (the Overview), `/admin/polls`,
+`/admin/polls/new` and `/admin/polls/[id]/edit` so far (decision 0026).
 It isn't deployed yet.
 
 The data pages are rendered per request from `API_INTERNAL_URL` (default
