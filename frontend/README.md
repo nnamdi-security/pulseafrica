@@ -7,9 +7,10 @@ the shared shell (ticker, nav, footer), the design tokens, the API client and th
 Milestone 6 moved the six public pages: `/`, `/polls`, `/polls/[id]`, `/results` and
 `/results/[id]`, `/methodology` and `/about`. Milestone 7 adds `/login`, `/register` and
 `/login/reset` (decision 0024), then `/dashboard`, `/dashboard/history` and
-`/dashboard/settings`. Milestone 8 moves Admin: `/admin` (the Overview), `/admin/polls`,
-`/admin/polls/new` and `/admin/polls/[id]/edit` so far (decision 0026).
-It isn't deployed yet.
+`/dashboard/settings`. Milestone 8 moved Admin: `/admin` (the Overview), `/admin/polls`,
+`/admin/polls/new`, `/admin/polls/[id]/edit` and `/admin/users` (decision 0026). It is the
+primary frontend; it isn't deployed yet, and the static pages at the repository root stay as
+the rollback ([docs/ROLLBACK.md](../docs/ROLLBACK.md)).
 
 The data pages are rendered per request from `API_INTERNAL_URL` (default
 `http://localhost:8000/api`) and refreshed in the browser (decision 0021). Chart.js is

@@ -90,6 +90,8 @@ export async function request<T>(method: Method, path: string, options: RequestO
 
 type Fetch = { signal?: AbortSignal; base?: string };
 
+export type AdminUsersQuery = { search?: string; role?: string; status?: string; limit: number; offset: number };
+
 export const api = {
   /** → the signed-in user, or rejects with status 401 */
   me: (signal?: AbortSignal) => request<Schemas['UserOut']>('GET', '/auth/me', { signal }),
@@ -149,4 +151,14 @@ export const api = {
 
   /** Deletes a poll and every response to it */
   deletePoll: (id: number) => request<null>('DELETE', `/polls/${id}`),
+
+  /** → one page of users matching the filters, newest first, with how many polls each answered */
+  adminUsers: (query: AdminUsersQuery, signal?: AbortSignal) => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) if (value !== '' && value !== undefined) params.set(key, String(value));
+    return request<Schemas['AdminUserPage']>('GET', `/admin/users?${params}`, { signal });
+  },
+
+  /** → the updated user; 409 for the admin's own access or the last active admin */
+  adminUpdateUser: (id: number, body: Schemas['AdminUserUpdate']) => request<Schemas['AdminUser']>('PATCH', `/admin/users/${id}`, { body }),
 };

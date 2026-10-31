@@ -2,9 +2,9 @@
 
 /* Query hooks shared across pages. The keys and fetchers are in options.ts, so the server's
    prefetches (server.ts) fill exactly the queries these hooks read. */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { api, ApiError, type Schemas } from './client';
+import { api, ApiError, type AdminUsersQuery, type Schemas } from './client';
 import { pollQuery, pollsQuery, queryKeys, referenceQuery, resultsQuery, statsQuery } from './options';
 
 export { queryKeys };
@@ -186,6 +186,31 @@ export function useDeletePoll() {
       queryClient.removeQueries({ queryKey: queryKeys.poll(id) });
       queryClient.removeQueries({ queryKey: queryKeys.results(id) });
       return refreshPolls(queryClient);
+    },
+  });
+}
+
+/** One page of the admin users list. The last page stays on screen while the next one loads. */
+export function useAdminUsers(query: AdminUsersQuery) {
+  return useQuery({
+    queryKey: queryKeys.adminUsers(query),
+    queryFn: ({ signal }) => api.adminUsers(query, signal),
+    placeholderData: keepPreviousData,
+    retry: false,
+  });
+}
+
+/** Suspends, reactivates, promotes or demotes a user. The row changes in place, as in
+    admin.html, so a user doesn't vanish from a filtered page; the Overview's figures refresh. */
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: Schemas['AdminUserUpdate'] }) => api.adminUpdateUser(id, body),
+    onSuccess: (user) => {
+      queryClient.setQueriesData<Schemas['AdminUserPage']>({ queryKey: ['admin', 'users'] }, (page) =>
+        page && { ...page, items: page.items.map((u) => (u.id === user.id ? user : u)) },
+      );
+      return queryClient.invalidateQueries({ queryKey: queryKeys.adminOverview });
     },
   });
 }

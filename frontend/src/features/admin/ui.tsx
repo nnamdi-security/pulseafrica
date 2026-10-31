@@ -28,12 +28,35 @@ export const NUM = 'text-right font-mono tabular-nums';
 
 const STATUS_COLOUR: Record<PollStatus, string> = { active: 'text-green', draft: 'text-gold-ink', closed: 'text-muted' };
 
+function Dot({ label, colour }: { label: string; colour: string }) {
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px]', colour)}>
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
+      {label}
+    </span>
+  );
+}
+
 /** Draft, Live or Closed: always a word, never colour alone */
 export function StatusBadge({ status }: { status: PollStatus }) {
+  return <Dot label={STATUS_LABEL[status]} colour={STATUS_COLOUR[status]} />;
+}
+
+/** A user's Active or Suspended */
+export function UserStatus({ active }: { active: boolean }) {
+  return active ? <Dot label="Active" colour="text-green" /> : <Dot label="Suspended" colour="text-red" />;
+}
+
+/** .admin-role: Admin or Citizen (9px in style.css; 10px here, FE-03) */
+export function RoleBadge({ role }: { role: 'admin' | 'citizen' }) {
   return (
-    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px]', STATUS_COLOUR[status])}>
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
-      {STATUS_LABEL[status]}
+    <span
+      className={cn(
+        'whitespace-nowrap rounded-[3px] px-2 py-[3px] font-mono text-[10px] uppercase tracking-[0.08em]',
+        role === 'admin' ? 'bg-gold/14 text-gold-ink' : 'bg-navy/6 text-slate',
+      )}
+    >
+      {role === 'admin' ? 'Admin' : 'Citizen'}
     </span>
   );
 }

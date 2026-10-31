@@ -28,6 +28,28 @@ export function serveAdmin({ me = 200, user = ADMIN, overview = 200, polls = 200
   );
 }
 
+const member = (u: Partial<Schemas['AdminUser']> & { id: number; fullName: string }): Schemas['AdminUser'] => ({
+  email: `${u.fullName.split(' ')[0]!.toLowerCase()}@example.com`,
+  state: 'LAGOS STATE',
+  ageRange: '25–34',
+  role: 'citizen',
+  isActive: true,
+  createdAt: '2026-10-01T09:00:00Z',
+  responseCount: 0,
+  ...u,
+});
+
+/** One page of users: the signed-in admin, another admin, a citizen and a suspended citizen */
+export const USERS: Schemas['AdminUserPage'] = {
+  total: 60,
+  items: [
+    member({ id: ADMIN.id, fullName: ADMIN.fullName, email: ADMIN.email, state: ADMIN.state, role: 'admin', responseCount: 4 }),
+    member({ id: 12, fullName: 'Bola <i>Ade</i>', role: 'admin', createdAt: '2026-09-14T08:00:00Z', responseCount: 1234 }),
+    member({ id: 13, fullName: 'Chidi Obi', state: 'FCT', responseCount: 2 }),
+    member({ id: 14, fullName: 'Dayo Bello', isActive: false }),
+  ],
+};
+
 
 export const ADMIN_POLLS: Schemas['PollSummary'][] = [
   poll({ id: 4, title: 'Roads & <b>transport</b>', category: 'economy', status: 'active', responseCount: 300, closesAt: '2026-11-05T23:59:59Z' }),
