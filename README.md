@@ -4,13 +4,13 @@
 
 PulseAfrica lets citizens participate in public opinion polls, rate the performance of public leaders, and view transparent, methodology-backed results — in the spirit of YouGov or Pew Research Center, scoped for a solo full-stack developer to build end to end.
 
-This repository contains the frontend (HTML, CSS, vanilla JS, no framework), the backend API (Python, FastAPI, PostgreSQL) in [`backend/`](backend/), and the foundation of the Next.js frontend that will replace the static pages, in [`frontend/`](frontend/README.md). Every page in the original brief exists and runs on the API. It is a work in progress: see [`docs/ROADMAP.md`](docs/ROADMAP.md) and the open findings in [`docs/AUDIT.md`](docs/AUDIT.md).
+This repository contains the backend API (Python, FastAPI, PostgreSQL) in [`backend/`](backend/), the frontend in [`frontend/`](frontend/README.md) (Next.js, TypeScript, Tailwind CSS), and the original static pages (HTML, CSS, vanilla JS) at the root. **`frontend/` is the primary frontend:** every page moved to it in Milestones 5–8. The static pages stay as the rollback until production has run on `frontend/` for two stable weeks ([decision 0027](docs/decisions/0027-cutover-readiness.md), [rollback runbook](docs/ROLLBACK.md)); nothing is deployed yet. Every page in the original brief exists and runs on the API. It is a work in progress: see [`docs/ROADMAP.md`](docs/ROADMAP.md) and the open findings in [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ---
 
 ## Status
 
-🚧 **In progress.** The frontend pages are built and the backend API (auth, polls, responses, results) lives in [`backend/`](backend/). These pages now run on the real API:
+🚧 **In progress.** Every page below is in [`frontend/`](frontend/README.md) at its new route (`/`, `/polls`, `/polls/[id]`, `/results/[id]`, `/methodology`, `/about`, `/login`, `/register`, `/dashboard`, `/admin`), and old links such as `poll.html?id=1` or `admin.html#users` land there. The static originals, listed here, still run on the same API:
 
 - **`login.html`**: sign in and create account
 - **`polls.html`**: the poll directory, with live counts, filters, sorting and search
@@ -36,7 +36,7 @@ No page shows hard-coded poll numbers any more.
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Colours, type, components, accessibility |
 | [`docs/SECURITY.md`](docs/SECURITY.md) · [`docs/AUDIT.md`](docs/AUDIT.md) | Security model; prioritised audit findings |
 | [`docs/TESTING.md`](docs/TESTING.md) · [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Tests and baseline; local setup; deployment plan |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/FRONTEND_MIGRATION.md`](docs/FRONTEND_MIGRATION.md) · [`docs/decisions/`](docs/decisions/README.md) | Milestones and owner decisions; the Next.js migration (foundation in [`frontend/`](frontend/README.md)); decision records |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) · [`docs/FRONTEND_MIGRATION.md`](docs/FRONTEND_MIGRATION.md) · [`docs/ROLLBACK.md`](docs/ROLLBACK.md) · [`docs/decisions/`](docs/decisions/README.md) | Milestones and owner decisions; the Next.js migration to [`frontend/`](frontend/README.md) and its rollback runbook; decision records |
 
 ---
 
@@ -119,7 +119,11 @@ This three-typeface system is deliberate: serif for institutional voice, sans fo
 
 ### Frontend
 
-No build step, no dependencies to install. It's static HTML/CSS/JS.
+The primary frontend is [`frontend/`](frontend/README.md) (Node 24, `corepack enable`): `pnpm install && pnpm dev` serves it at `http://localhost:3000`, with `/api` proxied to the API on `:8000`.
+
+### The static pages (legacy)
+
+No build step, no dependencies to install. They're static HTML/CSS/JS, kept as the rollback ([docs/ROLLBACK.md](docs/ROLLBACK.md)).
 
 1. Open the `pulseafrica/` folder in VS Code
 2. Install the **Live Server** extension (by Ritwick Dey) if you don't have it

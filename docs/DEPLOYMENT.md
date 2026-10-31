@@ -36,8 +36,8 @@ The README's original plan (Vercel + Render + managed Postgres) is reasonable fo
 
 | Component | Recommendation |
 |---|---|
-| **Frontend (current)** | Any static host (Netlify, Vercel static, Cloudflare Pages, nginx). Configure the CSP and security headers there |
-| **Frontend (Next.js, `frontend/`)** | Not deployed yet ([decision 0016](decisions/0016-nextjs-frontend.md)); the host is chosen in Milestone 9. Vercel, or a Node container. `rewrites` proxy `/api/*` to FastAPI. `API_INTERNAL_URL` is read at **build** time |
+| **Static pages (the rollback)** | Any static host (Netlify, Vercel static, Cloudflare Pages, nginx). Configure the CSP and security headers there. Kept deployable from the tag `legacy-frontend-final` until two stable weeks on `frontend/` ([ROLLBACK.md](ROLLBACK.md), decision 0027) |
+| **Frontend (primary, Next.js, `frontend/`)** | Not deployed yet ([decision 0016](decisions/0016-nextjs-frontend.md)); the host is chosen in Milestone 9. Vercel, or a Node container. `rewrites` proxy `/api/*` to FastAPI. `API_INTERNAL_URL` is read at **build** time |
 | **API** | A container (Render, Fly.io, Railway, or a VM): `uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --proxy-headers --forwarded-allow-ips=<proxy>`. Run `alembic upgrade head` as a **release step** before new instances start, never on every container boot of several replicas at once |
 | **Database** | Managed PostgreSQL 16 (Render, Neon or Supabase). Not publicly reachable; TLS (`sslmode=require`); automated daily backups with point-in-time recovery; restore tested |
 | **Secrets** | The platform's secret store: `DATABASE_URL`, `JWT_SECRET_KEY` (≥ 32 random bytes), `CORS_ORIGINS`. Rotate `JWT_SECRET_KEY` with a planned forced re-login |

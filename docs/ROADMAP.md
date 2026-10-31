@@ -170,8 +170,10 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 
 - **Progress:** planned 2026-10-20 in the [Milestone 8 plan](https://claude.ai/code/artifact/971cc186-0446-4fb7-9164-7b2225870621); the owner chose decisions D49–D58 the same day ([0026–0027](decisions/README.md)). Nothing is deployed, so the milestone ends cutover-ready in the repository, and traffic moves with Milestone 9's first deployment (D49). Three PRs:
   1. the admin gate, the shared confirmation dialog, and the Overview (`/admin`): merged as #20;
-  2. the polls list and the poll editor (`/admin/polls`, `/admin/polls/new`, `/admin/polls/[id]/edit`): built;
-  3. users (`/admin/users`), the legacy-URL tests, the rollback runbook, and the close-out docs.
+  2. the polls list and the poll editor (`/admin/polls`, `/admin/polls/new`, `/admin/polls/[id]/edit`): merged as #21;
+  3. users (`/admin/users`), the legacy-URL tests, the [rollback runbook](ROLLBACK.md), and the close-out docs naming `frontend/` the primary frontend: built.
+
+  Left for the owner: the screenshot sign-off on PR 3, then the tag `legacy-frontend-final` (D58) and a rehearsal from it ([ROLLBACK.md](ROLLBACK.md)). The commands were rehearsed on 2026-10-31 with `main` standing in for the tag.
 
 - **Scope:** Admin overview, polls and editor, users; the full parity suite; screenshot sign-off; tag `legacy-frontend-final` and a rehearsed rollback (D58). The traffic switch moves to M9, and permanent redirects and removing the static pages follow two stable weeks in production (D57).
 - **Dependencies:** M7.
