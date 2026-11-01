@@ -58,6 +58,7 @@
 | `LOG_LEVEL` | `INFO` | `INFO` |
 | `RATE_LIMITING` | `true` | `true` (only the browser suite turns it off) |
 | `TRUSTED_PROXIES` | empty | Addresses or networks (CIDR) of the proxies in front of the API: `10.0.0.0/8` on Render |
+| `DEMO_SITE` (web service) | unset | `true` while the deployment is a demonstration: a notice on every page (D63) |
 | `API_INTERNAL_URL` (web service) | `http://localhost:8000/api` | `http://<api host:port>/api`, set at build and run time |
 
 ## Security considerations
@@ -100,5 +101,5 @@ Never run `alembic downgrade`, the test suite or a second `app.seed` against pro
 - [ ] Uptime monitoring on `/api/health/ready` and the home page
 - [ ] Backups with a tested restore; a retention policy
 - [x] CI: tests on every PR; deploy from `main` only, after checks (`autoDeployTrigger: checksPass`)
-- [ ] Synthetic-data disclosure for the demonstration deployment (METH-01, D63)
-- [ ] Terms and Privacy pages before public registration (FE-05, D64)
+- [x] Synthetic-data disclosure for the demonstration deployment (METH-01, D63: `DEMO_SITE=true`, decision 0029)
+- [x] Terms and Privacy pages before public registration (FE-05, D64: `/terms`, `/privacy`); set `CONTACT_EMAIL` before launch
