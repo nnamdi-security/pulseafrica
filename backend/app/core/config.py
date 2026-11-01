@@ -1,4 +1,5 @@
 from functools import lru_cache
+from ipaddress import ip_network
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
@@ -33,7 +34,8 @@ class Settings(BaseSettings):
     # Limits on login, register and password checks (decision 0009). Off only for the browser
     # suite, which signs many users in from one address.
     rate_limiting: bool = True
-    # Addresses of reverse proxies whose X-Forwarded-For header gives the client's address.
+    # Addresses or networks (CIDR) of reverse proxies whose X-Forwarded-For header gives the
+    # client's address. A network suits a platform whose private addresses change on each deploy.
     trusted_proxies: Annotated[list[str], NoDecode] = []
 
     @model_validator(mode="before")
@@ -58,6 +60,27 @@ class Settings(BaseSettings):
     def split_list(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
+
+    @field_validator("database_url")
+    @classmethod
+    def psycopg_driver(cls, value: str) -> str:
+        """Hosting platforms hand over postgres:// or postgresql:// URLs; the API uses psycopg 3."""
+        for scheme in ("postgres://", "postgresql://"):
+            if value.startswith(scheme):
+                return "postgresql+psycopg://" + value[len(scheme):]
+        return value
+
+    @field_validator("trusted_proxies")
+    @classmethod
+    def proxy_addresses(cls, value: list[str]) -> list[str]:
+        for entry in value:
+            try:
+                ip_network(entry)
+            except ValueError:
+                raise ValueError(
+                    f"TRUSTED_PROXIES entries must be IP addresses or networks such as 10.0.0.0/8. Not valid: {entry}"
+                ) from None
         return value
 
     @model_validator(mode="after")

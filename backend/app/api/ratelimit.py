@@ -7,6 +7,7 @@ Two requests arriving at the same instant can both take the last free slot; that
 import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address, ip_network
 
 from fastapi import HTTPException, Request, status
 from sqlalchemy import delete, func, select
@@ -41,13 +42,31 @@ def client_address(request: Request) -> str:
     forged."""
     peer = request.client.host if request.client else "unknown"
     trusted = get_settings().trusted_proxies
-    if peer not in trusted:
+    if not _is_trusted(peer, trusted):
         return peer
     forwarded = [part.strip() for part in request.headers.get("x-forwarded-for", "").split(",") if part.strip()]
     for address in reversed(forwarded):
-        if address not in trusted:
+        if not _is_trusted(address, trusted):
             return address
     return forwarded[0] if forwarded else peer
+
+
+def _is_trusted(address: str, trusted: list[str]) -> bool:
+    """Whether `address` is one of the trusted proxies, named alone or by a network (CIDR)."""
+    if address in trusted:
+        return True
+    try:
+        ip = ip_address(address)
+    except ValueError:
+        return False
+    for entry in trusted:
+        try:
+            network = ip_network(entry)
+        except ValueError:
+            continue
+        if ip.version == network.version and ip in network:
+            return True
+    return False
 
 
 def _as_utc(moment: datetime) -> datetime:
