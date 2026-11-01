@@ -21,7 +21,7 @@ Details: [docs/PRODUCT.md](docs/PRODUCT.md).
 | API | Python, FastAPI, Pydantic v2, SQLAlchemy 2.0, PyJWT (HS256), bcrypt | `backend/app/` |
 | Database | PostgreSQL 16, Alembic migrations | `backend/alembic/`, `backend/docker-compose.yml` |
 | Frontend (primary) | Next.js 16 App Router, React 19, TypeScript strict, Tailwind CSS 4 (theme = design tokens), shadcn/ui re-themed, TanStack Query, `@tabler/icons-react`, pnpm, Node 24 | `frontend/` |
-| Tests | pytest + FastAPI `TestClient` (154 tests); Python Playwright browser suite (265 tests, 176 of them on `frontend/`); Vitest (191 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
+| Tests | pytest + FastAPI `TestClient` (154 tests); Python Playwright browser suite (280 tests, 191 of them on `frontend/`); Vitest (191 tests) | `backend/tests/`, `e2e/`, `frontend/src/**/*.test.ts(x)` |
 
 **The Next.js migration is approved ([decision 0016](docs/decisions/0016-nextjs-frontend.md)).** Milestone 5 built `frontend/`'s foundation: the shell (ticker, nav, footer), tokens, API client and checks. Milestone 6 moved the six public pages (Home, Polls, Poll, Results, Methodology, About; decisions 0021–0023). Milestone 7 moved Login, Register and the Dashboard (decisions 0024–0025). Milestone 8 (decisions 0026–0027, complete) moved Admin and left the repository cutover-ready: **`frontend/` is the primary frontend**, and traffic moves to it with Milestone 9's first deployment (D49). **Nothing is deployed yet;** Milestone 9 deploys on Render (`render.yaml`, `backend/Dockerfile`, [decision 0028](docs/decisions/0028-first-deployment.md), runbook in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)). The static pages at the repo root are the rollback ([docs/ROLLBACK.md](docs/ROLLBACK.md)) until two stable weeks in production (D57); until then they take bug fixes only, made in both frontends (D38, D47, D56). New features go into `frontend/` only.
 
@@ -93,7 +93,7 @@ Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them
 
 - **HIGH:** none open (SEC-03, rate limiting, fixed in M3).
 - **MEDIUM:** SEC-04 for the current pages (the token stays in Web Storage until the pages move to `frontend/`, which uses only the cookie); SEC-07 for the static pages (their CSP is set by the Netlify standby, M9; the API and `frontend/` send their headers); FE-02 and FE-03 on the static pages (fixed in `frontend/`, retired at cutover).
-- METH-02 was fixed in M4. About's team biographies, funding model and 2024–2025 timeline figures are unreviewed copy, left for M9 ([decision 0013](docs/decisions/0013-unweighted-results-and-methodology-copy.md)).
+- METH-02 was fixed in M4. About's team biographies, the funding answer and the 2024–2025 timeline figures were replaced in M9 ([decision 0029](docs/decisions/0029-launch-content.md)). `/privacy` and `/terms` must keep matching the code (PRIV-02).
 
 ## Workflow and definition of done
 

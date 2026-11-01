@@ -44,7 +44,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [DB-01](#db-01) | LOW | Database | No index on `responses.created_at`, though several queries filter on it | Potential risk |
 | [DB-02](#db-02) | LOW | Database | "Option belongs to question" is enforced only in application code | Potential risk |
 | [FE-04](#fe-04) | LOW | Accessibility | Poll answer tiles (`role="radio"`) have no arrow-key navigation | Confirmed (inspection) |
-| [FE-05](#fe-05) | LOW | Frontend | 83 placeholder `href="#"` links and several buttons that do nothing | Confirmed (inspection) |
+| [FE-05](#fe-05) | LOW | Frontend | 83 placeholder `href="#"` links and several buttons that do nothing | Fixed in `frontend/` (M6, M9); open on the static pages |
 | [FE-06](#fe-06) | LOW | Security | XSS safety depends on hand-escaping at 70 `innerHTML` sites | Potential risk |
 | [DOC-01](#doc-01) | LOW | Documentation | README statements out of date; no root `.gitignore` | Fixed (M1) |
 | [BE-04](#be-04) | IMPROVEMENT | Backend | Admins can't preview results of a draft poll | Fixed (M4) |
@@ -175,7 +175,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
   - Show a persistent "Demonstration data" notice wherever such figures appear.
   - Exclude synthetic data from any non-demo environment.
 - **Verification status:** Confirmed (inspection).
-- **Resolution (M1, commit `8f3689d`):** owner decision D3 ([0004](decisions/0004-demonstration-data-disclosure.md)). `polls.is_synthetic` (migration `0003`, which backfills polls answered by demo accounts and prints them) is set by the seed and exposed as `isSynthetic` on polls and results and `syntheticPolls` on stats. The home page, ticker, polls list, poll page and results page show a "Demonstration data" notice wherever such figures appear. Hiding demo polls by environment waits for Milestone 9.
+- **Resolution (M1, commit `8f3689d`):** owner decision D3 ([0004](decisions/0004-demonstration-data-disclosure.md)). `polls.is_synthetic` (migration `0003`, which backfills polls answered by demo accounts and prints them) is set by the seed and exposed as `isSynthetic` on polls and results and `syntheticPolls` on stats. The home page, ticker, polls list, poll page and results page show a "Demonstration data" notice wherever such figures appear. Hiding demo polls by environment waits for Milestone 9. **M9 ([decision 0029](decisions/0029-launch-content.md), D63):** the first deployment is a labelled demonstration: `frontend/` shows a demonstration notice on every page when `DEMO_SITE=true`, and About says the data is synthetic.
 
 <a id="sec-04"></a>
 ### SEC-04: Bearer tokens are kept in Web Storage (MEDIUM)
@@ -248,7 +248,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** the site contradicts itself, and makes research claims it can't support.
 - **Recommended fix:** a product decision. Either rewrite those passages as *planned* methodology with a clear "not yet applied" status, or implement weighting and margins of error (Milestone 4). Don't touch the copy without approval.
 - **Verification status:** Confirmed (inspection).
-- **Resolution (M4, commit `a0119c3`):** decisions D19, D22 and D23 ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)). Results stay unweighted. `methodology.html` now describes the opt-in panel, one response per account, unverified registration, groups under 10 withheld, steps of 10, breakdowns after close, and *n* with small-sample notes instead of a margin of error; weighting sits in a "Planned" card. `index.html` and `about.html` no longer claim weighting, margins of error or real-time updates, and About's "Today" entry no longer quotes fixed figures. `e2e/test_copy.py` checks the retired phrases. **Not reviewed (left for M9):** About's team biographies, funding model and the 2024–2025 timeline figures.
+- **Resolution (M4, commit `a0119c3`):** decisions D19, D22 and D23 ([0013](decisions/0013-unweighted-results-and-methodology-copy.md)). Results stay unweighted. `methodology.html` now describes the opt-in panel, one response per account, unverified registration, groups under 10 withheld, steps of 10, breakdowns after close, and *n* with small-sample notes instead of a margin of error; weighting sits in a "Planned" card. `index.html` and `about.html` no longer claim weighting, margins of error or real-time updates, and About's "Today" entry no longer quotes fixed figures. `e2e/test_copy.py` checks the retired phrases. **Not reviewed (left for M9):** About's team biographies, funding model and the 2024–2025 timeline figures. **Reviewed in M9 ([decision 0029](decisions/0029-launch-content.md), D65):** the biographies and the 2024–2025 figures are replaced by a note on the project, and Methodology's "grant model" funding answer is corrected, in both frontends.
 
 <a id="fe-01"></a>
 ### FE-01: Simulated password reset and promised verification email (MEDIUM)
@@ -395,6 +395,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Recommended fix:** link to existing pages or remove. Add Terms and Privacy pages before any public launch.
 - **Verification status:** Confirmed (inspection).
 - **Status:** fixed on the six public pages in `frontend/` in Milestone 6 ([decision 0023](decisions/0023-public-pages-migration-conventions.md), D40): real links stay, `#` links are plain text, and the home page's inert buttons are left out. Open on the static pages until cutover; the Terms and Privacy pages are still to be written.
+- **Terms and Privacy (M9, [decision 0029](decisions/0029-launch-content.md), D64):** `frontend/` has `/privacy` and `/terms`, linked from the footer and the register form's terms line. The static pages keep their placeholder links until they're retired (D57).
 
 <a id="fe-06"></a>
 ### FE-06: XSS safety depends on manual escaping (LOW)

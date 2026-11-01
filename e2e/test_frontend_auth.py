@@ -53,7 +53,7 @@ def test_register_with_errors_then_succeed(page: Page, app_url, citizen, console
     form.get_by_label("Age range").select_option("35–44")
     form.get_by_label("Password", exact=True).fill("secret123")
     form.get_by_label("Confirm password").fill("secret124")
-    form.get_by_text("I am 18 or older").click()
+    form.get_by_text("I am 18 or older").click(position={"x": 4, "y": 4})  # the box, not the Terms link
     expect(form.get_by_role("checkbox")).to_be_checked()
     form.get_by_role("button", name="Create account").click()
     expect(form.get_by_label("Confirm password")).to_have_attribute("aria-invalid", "true")
@@ -81,7 +81,7 @@ def test_taken_email_offers_sign_in_with_it(page: Page, app_url, citizen, consol
     form.get_by_label("Age range").select_option("35–44")
     form.get_by_label("Password", exact=True).fill("secret123")
     form.get_by_label("Confirm password").fill("secret123")
-    form.get_by_text("I am 18 or older").click()
+    form.get_by_text("I am 18 or older").click(position={"x": 4, "y": 4})  # the box, not the Terms link
     form.get_by_role("button", name="Create account").click()
 
     form.get_by_role("link", name="Sign in instead").click()
@@ -178,7 +178,7 @@ def test_poll_gate_create_account_returns_to_the_poll(page: Page, app_url, conso
     form.get_by_label("Age range").select_option("25–34")
     form.get_by_label("Password", exact=True).fill("secret123")
     form.get_by_label("Confirm password").fill("secret123")
-    form.get_by_text("I am 18 or older").click()
+    form.get_by_text("I am 18 or older").click(position={"x": 4, "y": 4})  # the box, not the Terms link
     form.get_by_role("button", name="Create account").click()
     expect(page).to_have_url(f"{app_url}/polls/{poll['id']}")
     expect(page.get_by_role("navigation", name="Main navigation")).to_contain_text("Amaka")

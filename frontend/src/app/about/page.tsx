@@ -6,8 +6,9 @@ import type { ReactNode } from 'react';
 import { Eyebrow, Paragraph } from '@/components/content/Content';
 import { cn } from '@/lib/utils';
 
-/* about.html, word for word (decision 0023, D37). The team biographies, funding model and
-   2024–2025 timeline figures are unreviewed copy, left for Milestone 9 (decision 0013). */
+/* about.html, word for word (decision 0023, D37), with Milestone 9's review (D65): the team
+   biographies and the 2024–2025 usage figures, which nothing backs, gave way to a plain note on
+   what this project is. Change both pages together until the static pages are retired (D57). */
 
 export const metadata: Metadata = { title: 'About — PulseAfrica' };
 
@@ -74,51 +75,9 @@ const TIMELINE = [
     text: 'The founding team spent a year studying international polling standards from organisations including YouGov, Pew Research Center, and Gallup, adapting their methodologies to the unique demographic complexity of a 450-tribe, 40-state nation.',
   },
   {
-    date: '2024',
-    title: 'Platform launch — beta',
-    text: 'PulseAfrica launched in private beta with 500 registered users across 12 states. The first poll — presidential approval at 6 months into office — generated 1,840 responses and was published in full, methodology included.',
-  },
-  {
-    date: '2025',
-    title: 'National expansion',
-    text: 'Coverage extended to all 40 states. Registered users passed 20,000. The platform ran its first multi-sector national poll covering presidency, economy, security, education, and healthcare simultaneously, producing 44,210 responses.',
-  },
-  {
     date: '2026',
     title: 'Today',
     text: 'Polls open to every registered citizen, with live figures on the home page. And a public record that no government press release can erase.',
-  },
-];
-
-const TEAM = [
-  {
-    initials: 'NI',
-    avatar: 'bg-navy',
-    name: 'Nnamdi Ileh',
-    role: 'Founder & Director',
-    bio: 'Former survey researcher at the African Union Statistical Institute. 14 years in public opinion measurement across West and Central Africa.',
-  },
-  {
-    initials: 'NO',
-    avatar: 'bg-green',
-    name: 'Ngozi Orabueze',
-    role: 'Head of Methodology',
-    bio: 'PhD in Political Science from the University of Chicago. Expert in post-stratification weighting and multilingual survey design for linguistically diverse populations.',
-  },
-  {
-    initials: 'EA',
-    // Navy initials: parchment on gold is 2.3:1 (decision 0017)
-    avatar: 'bg-gold text-navy',
-    name: 'Emmanuel Akpan',
-    role: 'Lead Data Engineer',
-    bio: 'Built data pipeline systems for census operations across 3 states. Leads all backend infrastructure, data integrity, and anti-duplication systems.',
-  },
-  {
-    initials: 'FA',
-    avatar: 'bg-indigo',
-    name: 'Fatima Abubakar',
-    role: 'Civic Outreach Lead',
-    bio: 'Coordinates community partnerships across all 40 states to improve demographic representation in our registered user base and extend reach into underserved areas.',
   },
 ];
 
@@ -262,32 +221,15 @@ export default function AboutPage() {
         </ol>
       </Section>
 
-      <Section id="team-heading" eyebrow="The team" title="The people behind the data">
+      <Section id="project-heading" eyebrow="The project" title="An independent portfolio project">
         <Paragraph className="max-w-[680px]">
-          PulseAfrica is built by a small team of researchers, civic technologists, and data scientists committed to
-          one thing: an honest record of what citizens of the United States of Africa believe.
+          PulseAfrica is an independent, non-commercial portfolio project. The United States of Africa, its 40 states,
+          its leaders and every poll on this site are fictional.
         </Paragraph>
-        <div className="mt-2 grid grid-cols-4 gap-4 tablet:grid-cols-2 mobile:grid-cols-1">
-          {TEAM.map((person) => (
-            <div
-              key={person.name}
-              className={cn(CARD, 'px-[18px] py-[22px] text-center hover:-translate-y-0.5 hover:border-gold/35')}
-            >
-              <div
-                aria-hidden="true"
-                className={cn(
-                  'mx-auto mb-3.5 flex size-14 items-center justify-center rounded-full font-mono text-[16px] font-bold',
-                  person.avatar.includes('text-') ? person.avatar : `${person.avatar} text-parchment`,
-                )}
-              >
-                {person.initials}
-              </div>
-              <h3 className="mb-1 font-serif text-[15px] font-semibold text-navy">{person.name}</h3>
-              <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.1em] text-muted">{person.role}</p>
-              <p className="text-[12px] leading-[1.65] text-muted">{person.bio}</p>
-            </div>
-          ))}
-        </div>
+        <Paragraph className="max-w-[680px]">
+          While the site runs as a demonstration, its polls and responses are synthetic: they show how the platform
+          works, and they are not real research. Nobody commissions or pays for the polls.
+        </Paragraph>
       </Section>
 
       <Section id="goals-heading" eyebrow="Platform goals" title="What we are building toward" alt>

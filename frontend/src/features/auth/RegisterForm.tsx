@@ -225,7 +225,15 @@ export function RegisterForm({ next }: { next: string | null }) {
           status={form.status('terms')}
           error={form.errors.terms ?? ''}
         >
-          {/* No Terms or Privacy pages yet: plain text, not placeholder links (D40) */}I am 18 or older and agree to the Terms of Use and Privacy Policy.
+          {/* New tabs, so the form keeps what has been typed (Milestone 9, D64) */}I am 18 or older and agree to the{' '}
+          <a href="/terms" target="_blank" rel="noopener" className="font-medium text-navy underline underline-offset-2">
+            Terms of Use
+          </a>{' '}
+          and{' '}
+          <a href="/privacy" target="_blank" rel="noopener" className="font-medium text-navy underline underline-offset-2">
+            Privacy Policy
+          </a>
+          .
         </CheckField>
         <SubmitButton label="Create account" busy={signIn.isPending} />
       </form>

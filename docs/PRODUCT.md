@@ -49,7 +49,7 @@ PulseAfrica **is** an opinion-research platform. It is **not**:
 | **Admin** | Overview (totals, 14-day responses chart, per-poll participation) | `admin.html`, `/admin/overview` | |
 | | Polls: create and edit with a question builder; publish, close, reopen, delete | `/polls` POST, PATCH, DELETE | Questions lock once answered |
 | | Users: search, filter, page; suspend and reactivate; grant and remove admin | `/admin/users` | Self-protection and last-admin rules |
-| **Content** | Methodology (long-form) and About (mission, values, story, team, goals) | `methodology.html`, `about.html` | Static; methodology describes what is implemented since M4 ([decision 0013](decisions/0013-unweighted-results-and-methodology-copy.md)); About's team and funding copy is unreviewed (M9) |
+| **Content** | Methodology (long-form) and About (mission, values, story, the project, goals); Privacy and Terms (M9) | `methodology.html`, `about.html` | Static; methodology describes what is implemented since M4 ([decision 0013](decisions/0013-unweighted-results-and-methodology-copy.md)); About's team biographies and Methodology's funding answer were replaced in M9 by a note on the project ([decision 0029](decisions/0029-launch-content.md)) |
 | **Demo data** | 10 polls + 300 synthetic voters | `python -m app.seed` | Not disclosed in the UI |
 
 ### From the original brief, but not implemented

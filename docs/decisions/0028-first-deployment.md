@@ -2,7 +2,7 @@
 
 - **Status:** Accepted (2026-11-01)
 - **Deciders:** Nnamdi (project owner)
-- **Related:** roadmap decisions D59–D62 and D66–D72, [Milestone 9 plan](https://claude.ai/artifact/KpRWLVesrYAtMDjoWRF1Jv), [DEPLOYMENT.md](../DEPLOYMENT.md), [ROLLBACK.md](../ROLLBACK.md), [decision 0027](0027-cutover-readiness.md) (D57). D63–D65 (demo data, Terms and Privacy, About's copy) are recorded with Milestone 9's launch content.
+- **Related:** roadmap decisions D59–D62 and D66–D72, [Milestone 9 plan](https://claude.ai/artifact/KpRWLVesrYAtMDjoWRF1Jv), [DEPLOYMENT.md](../DEPLOYMENT.md), [ROLLBACK.md](../ROLLBACK.md), [decision 0027](0027-cutover-readiness.md) (D57). D63–D65 (demo data, Terms and Privacy, About's copy) are in [decision 0029](0029-launch-content.md).
 
 ## Decision
 
