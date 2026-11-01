@@ -284,7 +284,7 @@ describe('create account', () => {
     expect(sent.login).toEqual({ email: 'chidi@example.com', password: 'secret123', remember: false });
   });
 
-  it('shows no placeholder links in the terms line (D40)', () => {
+  it('links the terms line to the real Terms and Privacy pages, in new tabs (D40, D64)', () => {
     serve();
     renderWithQuery(
       <AuthShell>
@@ -292,7 +292,11 @@ describe('create account', () => {
       </AuthShell>,
     );
     const terms = screen.getByRole('checkbox', { name: 'I am 18 or older and agree to the Terms of Use and Privacy Policy.' });
-    expect(terms.closest('label')!.querySelector('a')).toBeNull();
+    const links = [...terms.closest('label')!.querySelectorAll('a')];
+    expect(links.map((a) => [a.textContent, a.getAttribute('href'), a.target])).toEqual([
+      ['Terms of Use', '/terms', '_blank'],
+      ['Privacy Policy', '/privacy', '_blank'],
+    ]);
   });
 });
 

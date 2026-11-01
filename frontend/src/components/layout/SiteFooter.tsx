@@ -15,15 +15,20 @@ const COLUMNS: { title: string; entries: { label: string; href?: string }[] }[] 
   },
   {
     title: 'About',
-    entries: [{ label: 'Our Mission', href: '/about' }, { label: 'The Team' }, { label: 'FAQ' }, { label: 'Press' }],
+    entries: [
+      { label: 'Our Mission', href: '/about' },
+      { label: 'The Project', href: '/about#project-heading' },
+      { label: 'FAQ' },
+      { label: 'Press' },
+    ],
   },
   {
     title: 'Legal',
     entries: [
-      { label: 'Privacy Policy' },
-      { label: 'Terms of Use' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms of Use', href: '/terms' },
       { label: 'Data Ethics' },
-      { label: 'Cookie Policy' },
+      { label: 'Cookie Policy', href: '/privacy#cookies' },
     ],
   },
 ];

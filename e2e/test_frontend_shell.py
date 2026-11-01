@@ -59,7 +59,9 @@ def test_nav_links_and_keyboard(page: Page, app_url):
                        ("About", "/about"), ("Sign in", "/login")]:
         expect(nav.get_by_role("link", name=name, exact=True)).to_have_attribute("href", href)
 
-    # Keyboard order: home link, then the menu links, then the button
+    # Keyboard order: the demonstration notice's link (D63), the home link, the menu links, the button
+    page.keyboard.press("Tab")
+    expect(page.get_by_role("complementary", name="Demonstration site").get_by_role("link")).to_be_focused()
     page.keyboard.press("Tab")
     expect(nav.get_by_role("link", name="PulseAfrica home")).to_be_focused()
     for name in ["Home", "Polls", "Results", "Methodology", "About", "Sign in"]:
@@ -73,10 +75,11 @@ def test_footer_links_only_to_real_pages(page: Page, app_url):
     page.goto(app_url + "/")
     footer = page.get_by_role("contentinfo")
     for name, href in [("Active Polls", "/polls"), ("Results Dashboard", "/results"), ("Methodology", "/methodology"),
-                       ("Our Mission", "/about")]:
+                       ("Our Mission", "/about"), ("The Project", "/about#project-heading"),
+                       ("Privacy Policy", "/privacy"), ("Terms of Use", "/terms"), ("Cookie Policy", "/privacy#cookies")]:
         expect(footer.get_by_role("link", name=name, exact=True)).to_have_attribute("href", href)
-    expect(footer.get_by_text("Privacy Policy")).to_be_visible()
-    expect(footer.get_by_role("link", name="Privacy Policy")).to_have_count(0)
+    expect(footer.get_by_text("Data Ethics")).to_be_visible()
+    expect(footer.get_by_role("link", name="Data Ethics")).to_have_count(0)
     expect(footer.locator('a[href="#"]')).to_have_count(0)
     expect(footer).to_contain_text("Totals Only")
 

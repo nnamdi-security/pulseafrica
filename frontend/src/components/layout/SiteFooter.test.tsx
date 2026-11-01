@@ -13,8 +13,12 @@ it('links the entries that have a page, and shows the rest as plain text (decisi
     'Results Dashboard': '/results',
     Methodology: '/methodology',
     'Our Mission': '/about',
+    'The Project': '/about#project-heading',
+    'Privacy Policy': '/privacy',
+    'Terms of Use': '/terms',
+    'Cookie Policy': '/privacy#cookies',
   });
-  for (const text of ['State Tracker', 'The Team', 'FAQ', 'Press', 'Privacy Policy', 'Terms of Use', 'Data Ethics', 'Cookie Policy']) {
+  for (const text of ['State Tracker', 'FAQ', 'Press', 'Data Ethics']) {
     expect(screen.getByText(text).tagName).toBe('SPAN');
   }
   expect(document.querySelector('a[href="#"]')).toBeNull();
