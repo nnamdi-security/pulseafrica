@@ -6,7 +6,8 @@ import { ConceptCard, Eyebrow, GoldLink, Paragraph } from '@/components/content/
 import { SectionNav } from '@/components/content/SectionNav';
 import { cn } from '@/lib/utils';
 
-/* methodology.html, word for word (decision 0023, D37). The copy is decision 0013's. */
+/* methodology.html, word for word (decision 0023, D37). The copy is decision 0013's, with the
+   funding answer corrected in Milestone 9 (D65); change both pages together. */
 
 export const metadata: Metadata = { title: 'Methodology — PulseAfrica' };
 
@@ -97,7 +98,7 @@ const FAQ = [
   },
   {
     q: 'Who funds PulseAfrica?',
-    a: 'PulseAfrica is an independent civic platform. It does not accept advertising, government funding, or political donations. Operational costs are covered through a transparent public interest grant model.',
+    a: 'PulseAfrica is an independent, non-commercial portfolio project. It does not accept advertising, government funding, or political donations, and nobody commissions or pays for its polls.',
   },
   {
     q: 'Why do I need to register to answer a poll?',

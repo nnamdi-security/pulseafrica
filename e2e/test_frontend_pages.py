@@ -65,10 +65,11 @@ def test_methodology_deep_link(page: Page, app_url):
 def test_about_page(page: Page, app_url, console_errors):
     page.goto(app_url + "/about")
     expect(page.get_by_role("heading", level=1)).to_have_text(re.compile(r"^Data is how citizens\s*hold power accountable\.$"))
-    for heading in ["What we stand for", "How PulseAfrica came to be", "The people behind the data",
+    for heading in ["What we stand for", "How PulseAfrica came to be", "An independent portfolio project",
                     "What we are building toward", "Be part of the record."]:
         expect(page.get_by_role("heading", level=2, name=heading)).to_be_visible()
-    expect(page.get_by_role("list", name="PulseAfrica history timeline").get_by_role("listitem")).to_have_count(5)
+    # 2022, 2023 and 2026: the 2024–2025 entries and their figures went in Milestone 9 (D65)
+    expect(page.get_by_role("list", name="PulseAfrica history timeline").get_by_role("listitem")).to_have_count(3)
     expect(page.get_by_role("link", name="Read our methodology")).to_have_attribute("href", "/methodology")
     expect(page.get_by_role("link", name="Participate in a poll")).to_have_attribute("href", "/polls")
 
