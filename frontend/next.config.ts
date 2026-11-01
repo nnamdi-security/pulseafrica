@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 import { legacyRedirects } from './src/lib/redirects';
+import { staticSecurityHeaders } from './src/lib/security-headers';
 
 /* Where FastAPI's /api lives, as seen from the Next.js server. The browser only ever calls
    same-origin /api/*, which is proxied there, so the session cookie is first-party and no
@@ -15,6 +16,10 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return legacyRedirects;
+  },
+  async headers() {
+    // Pages and assets; /api/* keeps the headers FastAPI sets. The CSP is per request (src/proxy.ts).
+    return [{ source: '/((?!api/).*)', headers: staticSecurityHeaders }];
   },
 };
 
