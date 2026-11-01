@@ -285,7 +285,7 @@ Details, acceptance criteria and status are in [ROADMAP.md](ROADMAP.md).
 
 Ticked when checked by the suites at the end of Milestone 8; the rest wait for the owner (screenshot sign-off, the tag) or for CI on `main`.
 
-- [ ] All Milestone 2 parity journeys pass against `frontend/` in CI.
+- [x] All Milestone 2 parity journeys pass against `frontend/` in CI (Browser tests on `main` at `7ebb5e6`, 2026-10-31).
 - [x] Every old URL pattern (including `?id=`, `#hash` and `next=`) lands on the equivalent page.
 - [ ] Screenshot sign-off for every route at 1280px and 390px; no unapproved visual differences.
 - [x] Axe: no serious or critical violations on any route; FE-03 and FE-04 fixed.

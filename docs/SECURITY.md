@@ -17,7 +17,7 @@ This describes the security model **as implemented** after Milestone 3, its know
 | **Logout** | `POST /api/auth/logout` raises `token_version`, revoking every token of that user, and clears the cookie; `api.js` also deletes the stored token ([decision 0010](decisions/0010-token-version-revocation.md)) | `routes/auth.py`, `api.js` |
 | **Session end** | Expiry after 60 minutes. Sign-out, a password change, suspension, demotion and account deletion take effect at once, because each request reloads the user and checks its token version | `api/deps.py` |
 | **Rate limits** | Login per address and per account, register per address, password checks per user; 429 with `Retry-After` ([decision 0009](decisions/0009-rate-limiting.md)) | `api/ratelimit.py` |
-| **Response headers** | nosniff, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a deny-all CSP on API responses, HSTS in production ([SEC-07](AUDIT.md#sec-07)) | `main.py` |
+| **Response headers** | nosniff, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, a deny-all CSP on API responses, HSTS in production ([SEC-07](AUDIT.md#sec-07)). Pages of `frontend/`: a per-request nonce CSP, nosniff, `X-Frame-Options: DENY`, `strict-origin-when-cross-origin`, Permissions-Policy, HSTS ([decision 0028](decisions/0028-first-deployment.md)) | `main.py`, `frontend/src/proxy.ts`, `frontend/next.config.ts` |
 
 ### Authorization boundaries
 
@@ -50,7 +50,7 @@ This describes the security model **as implemented** after Milestone 3, its know
 | ID | Priority | Summary |
 |---|---|---|
 | SEC-04 | MEDIUM | The current pages keep the token where any script on the origin can read it. The API side (cookie plus CSRF) is done; the pages move in M7 |
-| SEC-07 | MEDIUM | The static pages have no CSP; their host sets it (M9). The API sends its headers |
+| SEC-07 | MEDIUM | The static pages have no CSP; the Netlify standby sets it (M9 PR 3). The API and `frontend/` send their headers ([decision 0028](decisions/0028-first-deployment.md)) |
 | SEC-08 | LOW (residual) | Google Fonts loads without SRI; the icons and Chart.js carry hashes |
 | SEC-09 | LOW | Registration reveals existing emails; accepted with rate limiting ([decision 0009](decisions/0009-rate-limiting.md)) |
 
@@ -64,7 +64,7 @@ Fixed in Milestone 3: SEC-03 (rate limits), SEC-05 (revocation), SEC-10 (docs of
 4. **Small-cell suppression** in public results (PRIV-01) and **honest privacy copy** (PRIV-02): done in M1 ([decisions 0001 and 0003](decisions/README.md)). Live results no longer leak through timing: figures move in steps of 10, and breakdowns wait for the poll to close (M2, [decision 0006](decisions/0006-results-released-in-steps.md)).
 5. **`iat` claim plus a token version**, so sign-out and a password change revoke older tokens (SEC-05): implemented in M3 ([decision 0010](decisions/0010-token-version-revocation.md)).
 6. **Last-admin guard on account deletion** (SEC-06).
-7. **Security-header middleware** on the API, and **SRI** on the CDN files (SEC-07, SEC-08): implemented in M3. A CSP for the static pages waits for their host (M9).
+7. **Security-header middleware** on the API, and **SRI** on the CDN files (SEC-07, SEC-08): implemented in M3. `frontend/` sends a per-request nonce CSP and the standard headers from M9 (decision 0028); a CSP for the static pages waits for the Netlify standby (M9).
 8. **Production settings:** `ENVIRONMENT=production` hides the docs and requires https CORS origins (SEC-10): implemented in M3.
 
 ## Recommended authentication architecture

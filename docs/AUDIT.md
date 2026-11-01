@@ -28,14 +28,14 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Partly fixed (M3: API side; M5: `frontend/` uses only the cookie) |
 | [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Fixed (M3) |
 | [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
-| [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed for the API (M3) |
+| [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed for the API (M3) and `frontend/` (M9) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Fixed (M3; fonts excepted) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Fixed (M4) |
 | [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
 | [FE-02](#fe-02) | MEDIUM | Maintainability | Page shell, helpers and reference lists are copy-pasted; no CSS custom properties | Fixed in `frontend/` (M5); open on the static pages until cutover |
 | [FE-03](#fe-03) | MEDIUM | Accessibility | Gold and light-grey text fail WCAG AA contrast; 9px text is widespread | Fixed in `frontend/` (M5, D7); open on the static pages until cutover |
 | [TEST-01](#test-01) | MEDIUM | Testing | No frontend or end-to-end tests and no CI | Fixed (M2) |
-| [DEP-01](#dep-01) | MEDIUM | Deployment | No production configuration (server, proxy headers, logging, deploy files) | Confirmed (inspection) |
+| [DEP-01](#dep-01) | MEDIUM | Deployment | No production configuration (server, proxy headers, logging, deploy files) | Config added (M9); open until deployed |
 | [SEC-09](#sec-09) | LOW | Security | Registration reveals whether an email is already registered | Accepted (M3) |
 | [SEC-10](#sec-10) | LOW | Security | `/docs` and `/openapi.json` are public in every environment | Fixed (M3) |
 | [BE-01](#be-01) | LOW | Backend | `%` and `_` in search terms act as SQL wildcards | Fixed (M3) |
@@ -219,6 +219,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Recommended fix:** add header middleware to FastAPI, and set a CSP at the frontend host. The CSP needs to allow the CDN origins in use, or self-host them.
 - **Verification status:** Reproduced (API); static hosting unverifiable here.
 - **Resolution (M3, commit `eb99122`):** the API sends `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` and `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` on every response (not the CSP on `/docs`), plus HSTS in production. Tests in `tests/test_hardening.py`. **Still open:** a CSP for the static pages, which their host sets (M9, [DEPLOYMENT.md](DEPLOYMENT.md)).
+- **Resolution for `frontend/` (M9, commit `3b2f73c`):** every page gets a Content-Security-Policy with a fresh script nonce per request (`src/proxy.ts`) plus nosniff, `X-Frame-Options: DENY`, `strict-origin-when-cross-origin`, a Permissions-Policy and HSTS (`next.config.ts`); [decision 0028](decisions/0028-first-deployment.md), D66. Tests in `src/lib/security-headers.test.ts` and `e2e/test_frontend_headers.py`. **Still open:** the static pages' CSP on the Netlify standby (M9 PR 3, D60).
 
 <a id="sec-08"></a>
 ### SEC-08: CDN assets without Subresource Integrity (MEDIUM)
@@ -317,6 +318,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** a deployment would be hand-assembled and error-prone, and SEC-01 would be easy to trigger.
 - **Recommended fix:** see [DEPLOYMENT.md](DEPLOYMENT.md). Add the deployment artefacts in Milestone 9.
 - **Verification status:** Confirmed (inspection).
+- **Progress (M9, commits `0a381d9`, `c158e0e`):** `backend/Dockerfile`, `render.yaml` (web service, private API with a pre-deploy migration step, private Postgres 16), proxy networks in `TRUSTED_PROXIES`, platform database URLs, and the first-deploy runbook in [DEPLOYMENT.md](DEPLOYMENT.md) ([decision 0028](decisions/0028-first-deployment.md)). Closed once the first deployment, its smoke test and the restore rehearsal are recorded.
 
 <a id="sec-09"></a>
 ### SEC-09: Registration reveals registered emails (LOW)

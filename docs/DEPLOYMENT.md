@@ -1,79 +1,104 @@
 # Deployment
 
-> **Nothing is deployed.** The repository contains only local-development setup. This document records the current assumptions and recommends a production setup. Implementing it is Milestone 9 ([ROADMAP.md](ROADMAP.md)), and it must not start before the CRITICAL and HIGH findings in Milestone 1 are fixed.
+> **Nothing is deployed yet.** Milestone 9 deploys PulseAfrica on Render ([decision 0028](decisions/0028-first-deployment.md)). The configuration is in the repository (`render.yaml`, `backend/Dockerfile`); the owner creates the services and runs the first deploy with the runbook below.
 
 ## Existing assumptions in the code
 
 | Assumption | Where | Production implication |
 |---|---|---|
-| The API runs from `backend/` and reads `backend/.env` | `core/config.py` | Set **real environment variables**; don't rely on `.env` files. The API refuses to start without a strong `JWT_SECRET_KEY` ([SEC-01](AUDIT.md#sec-01)) |
-| The frontend calls `http://localhost:8000/api` | `api.js` | Set `window.PULSE_API_BASE` in every page, or serve the API at `/api` on the same origin and change the default to `/api` |
-| CORS allows `localhost:5500` only | `CORS_ORIGINS` | Set it to the real frontend origin. With a same-origin setup, CORS isn't needed |
-| `uvicorn --reload`, one process | `backend/README.md` | Run without reload, with several workers behind a proxy, and trust the forwarded headers |
+| The API reads environment variables (and `backend/.env` in development) | `core/config.py` | Set **real environment variables**; the image never contains a `.env` (`backend/.dockerignore`). The API refuses to start without a strong `JWT_SECRET_KEY` ([SEC-01](AUDIT.md#sec-01)) |
+| `frontend/` proxies `/api/*` to `API_INTERNAL_URL` | `frontend/next.config.ts`, `src/lib/api/server.ts` | Same origin: no CORS, first-party cookie. The rewrite reads it at **build** time and the server-rendered pages at **run** time, so set it for both |
+| The static pages call `http://localhost:8000/api` | `api.js` | Only the rollback standby serves them; it sets `window.PULSE_API_BASE` or a same-origin proxy when it's used ([ROLLBACK.md](ROLLBACK.md)) |
 | `/docs` and `/openapi.json` are served unless `ENVIRONMENT=production` | `main.py` | Set `ENVIRONMENT=production` ([SEC-10](AUDIT.md#sec-10)) |
-| Logs are JSON lines on stderr with a request id | `core/logging.py` | Ship stderr to the log store; pass the edge's request id as `X-Request-ID` ([BE-02](AUDIT.md#be-02)) |
-| `/api/health` is liveness; `/api/health/ready` checks the database | `main.py` | Point load-balancer readiness at `/api/health/ready` ([BE-05](AUDIT.md#be-05)) |
-| Rate limits key on the client address | `api/ratelimit.py` | Behind a proxy, list it in `TRUSTED_PROXIES`, or every user shares the proxy's address and its limits ([decision 0009](decisions/0009-rate-limiting.md)) |
-| Demo data via `python -m app.seed` | `app/seed.py` | **Only** in an explicitly labelled demo deployment, with disclosure ([METH-01](AUDIT.md#meth-01)) |
+| Logs are JSON lines on stderr with a request id | `core/logging.py` | Render keeps stderr; pass the edge's request id as `X-Request-ID` ([BE-02](AUDIT.md#be-02)) |
+| `/api/health` is liveness; `/api/health/ready` checks the database | `main.py` | The web service's health check and the uptime monitor use `/api/health/ready` ([BE-05](AUDIT.md#be-05)) |
+| Rate limits key on the client address | `api/ratelimit.py` | The API's peer is the web service, so `TRUSTED_PROXIES=10.0.0.0/8` (Render's private network) and the address comes from `X-Forwarded-For`, which the Next.js rewrite passes through unchanged ([decision 0009](decisions/0009-rate-limiting.md)) |
+| Platforms hand over `postgres://` URLs | `core/config.py` | Rewritten to `postgresql+psycopg://` at startup |
+| Demo data via `python -m app.seed` | `app/seed.py` | Only on an empty database, and only with disclosure ([METH-01](AUDIT.md#meth-01)); the first deployment is a labelled demonstration (D63) |
 
-## Recommended infrastructure
-
-The README's original plan (Vercel + Render + managed Postgres) is reasonable for a portfolio project. Recommended shape:
+## Architecture (decision 0028)
 
 ```
-           https://pulseafrica.example
-                     │
-        ┌────────────┴────────────┐
-        │ Edge / reverse proxy    │  TLS, security headers, rate limits (SEC-03/07)
-        │  /        → frontend    │
-        │  /api/*   → FastAPI     │  same origin: no CORS, first-party cookies
-        └──────┬──────────┬───────┘
-               │          │
-   static files (today)   FastAPI (container: uvicorn/gunicorn workers)
-   or Next.js (approved, M9)   │
-                          PostgreSQL 16 (managed, private network, backups)
+              https://<name>.onrender.com  (D62: platform subdomain first)
+                          │  Render edge: TLS, X-Forwarded-For
+                ┌─────────┴──────────┐
+                │ pulseafrica-web    │  Next.js (frontend/), the only public service
+                │  pages: CSP nonce  │  security headers (src/proxy.ts, next.config.ts)
+                │  /api/* rewrite ───┼──────┐
+                └────────────────────┘      │ private network
+                                   ┌────────┴─────────┐
+                                   │ pulseafrica-api  │  FastAPI, Docker, 2 workers
+                                   │ pre-deploy:      │  alembic upgrade head
+                                   └────────┬─────────┘
+                                   ┌────────┴─────────┐
+                                   │ pulseafrica-db   │  PostgreSQL 16, no public access,
+                                   └──────────────────┘  daily backups
+
+   Rollback standby: the Netlify site serves the static pages from legacy-frontend-final (D60)
 ```
 
-| Component | Recommendation |
+| Component | Setup |
 |---|---|
-| **Static pages (the rollback)** | Any static host (Netlify, Vercel static, Cloudflare Pages, nginx). Configure the CSP and security headers there. Kept deployable from the tag `legacy-frontend-final` until two stable weeks on `frontend/` ([ROLLBACK.md](ROLLBACK.md), decision 0027) |
-| **Frontend (primary, Next.js, `frontend/`)** | Not deployed yet ([decision 0016](decisions/0016-nextjs-frontend.md)); the host is chosen in Milestone 9. Vercel, or a Node container. `rewrites` proxy `/api/*` to FastAPI. `API_INTERNAL_URL` is read at **build** time |
-| **API** | A container (Render, Fly.io, Railway, or a VM): `uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --proxy-headers --forwarded-allow-ips=<proxy>`. Run `alembic upgrade head` as a **release step** before new instances start, never on every container boot of several replicas at once |
-| **Database** | Managed PostgreSQL 16 (Render, Neon or Supabase). Not publicly reachable; TLS (`sslmode=require`); automated daily backups with point-in-time recovery; restore tested |
-| **Secrets** | The platform's secret store: `DATABASE_URL`, `JWT_SECRET_KEY` (≥ 32 random bytes), `CORS_ORIGINS`. Rotate `JWT_SECRET_KEY` with a planned forced re-login |
+| **Frontend (`frontend/`)** | Render web service `pulseafrica-web`, Node 24: `pnpm install --frozen-lockfile && pnpm build`, then `pnpm start`. `API_INTERNAL_URL` is built from the API's private `host:port`. Health check `/api/health/ready` |
+| **API** | Render private service `pulseafrica-api` from `backend/Dockerfile`: uvicorn, 2 workers, as a non-root user. `alembic upgrade head` is the pre-deploy command: once per deploy, before the new instance starts, never on boot |
+| **Database** | Render PostgreSQL 16 `pulseafrica-db`, no IP allow-list entries (private only), daily backups; restore rehearsed before the switch (D69) |
+| **Static pages (the rollback)** | The existing Netlify site, locked to `legacy-frontend-final`, with its own CSP (D60, SEC-07). Kept until two stable weeks on `frontend/` (D57, D71) |
+| **Secrets** | `JWT_SECRET_KEY` is generated by Render (`generateValue`), `DATABASE_URL` comes from the database. Nothing secret is in `render.yaml`. Rotating `JWT_SECRET_KEY` signs everyone out |
+| **Deploys** | From `main` only, after its checks pass (`autoDeployTrigger: checksPass`); each service redeploys only when its own directory changes |
 
 ## Environment configuration
 
 | Variable | Dev default | Production |
 |---|---|---|
-| `DATABASE_URL` | `postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica` | Managed Postgres URL with `sslmode=require` |
+| `DATABASE_URL` | `postgresql+psycopg://pulseafrica:pulseafrica@localhost:5432/pulseafrica` | From the Render database (internal URL); `postgres://` is accepted |
 | `JWT_SECRET_KEY` | `.env` value; required, 32+ bytes, never `change-me` (enforced at startup) | Required, strong, unique per environment |
 | `JWT_EXPIRE_MINUTES` | 60 | 15–60 |
-| `CORS_ORIGINS` | Live Server origins | The frontend origin(s) only, or none if same-origin |
+| `CORS_ORIGINS` | Live Server origins | Empty: the browser only calls the same origin. Set to the standby's https origin during a rollback |
 | `ENVIRONMENT` | `development` | `production` (docs off, HSTS, https-only CORS origins, `Secure` session cookie) |
 | `LOG_LEVEL` | `INFO` | `INFO` |
 | `RATE_LIMITING` | `true` | `true` (only the browser suite turns it off) |
-| `TRUSTED_PROXIES` | empty | The reverse proxy's address(es) |
-| *(proposed)* `DEMO_MODE` | — | `false` |
+| `TRUSTED_PROXIES` | empty | Addresses or networks (CIDR) of the proxies in front of the API: `10.0.0.0/8` on Render |
+| `API_INTERNAL_URL` (web service) | `http://localhost:8000/api` | `http://<api host:port>/api`, set at build and run time |
 
 ## Security considerations
 
 - **TLS everywhere.** The API sends HSTS in production; set it at the edge too once stable.
-- **Security headers:** the API sets its own (M3). The static pages' host must add a CSP (self plus the required CDNs, which carry SRI hashes), `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'` and `Referrer-Policy: strict-origin-when-cross-origin` ([SEC-07](AUDIT.md#sec-07)).
+- **Security headers:** the API sets its own (M3); `frontend/` sets a per-request CSP and the rest of the headers (decision 0028, D66). The static pages' host must add a CSP (self plus the required CDNs, which carry SRI hashes), `X-Content-Type-Options: nosniff`, `frame-ancestors 'none'` and `Referrer-Policy: strict-origin-when-cross-origin` ([SEC-07](AUDIT.md#sec-07)).
 - **Rate limits:** the app limits `/api/auth/*` itself (M3, [SEC-03](AUDIT.md#sec-03)); edge limits are an optional extra layer.
 - **Least privilege:** the database role used by the app needs DML plus the migration DDL. Ideally use a separate migration role.
 - **Never run `app.seed`, `alembic downgrade` or the test suite against production.**
 
+## First deploy runbook (the owner)
+
+1. **Sign up and create the Blueprint.** In Render, New → Blueprint, pick this repository and `main`. Render reads `render.yaml` and lists the three resources; check the plans (D61) and the region before applying.
+2. **Check the generated settings.** On `pulseafrica-api`: `ENVIRONMENT=production`, `TRUSTED_PROXIES=10.0.0.0/8`, `CORS_ORIGINS` empty, `JWT_SECRET_KEY` generated. Never copy the key anywhere.
+3. **First deploy.** The API's pre-deploy step runs `alembic upgrade head` on the empty database; then the web service builds. Wait for both to be live.
+4. **Accounts and data,** from the API's Render shell (once, on the empty database):
+   - `python -m app.seed` (the labelled demonstration data, D63; it refuses a database that has polls);
+   - register your own account on the site, then `python -m app.create_admin you@example.com` promotes it to admin;
+   - register a separate account for the smoke test (D72); it stays a citizen.
+5. **Smoke test** (D72): run the smoke workflow against the web service's URL, or by hand: home, a poll, its results, sign in and out, Admin.
+6. **Check the client address once.** Sign in with a wrong password from your own machine, then in the database's shell run `SELECT key FROM rate_limit_hits ORDER BY created_at DESC LIMIT 2;`. The `login-address:` entry must be your own public address. If it's a `10.` or edge address, every visitor shares one rate-limit bucket: stop and tell Claude.
+7. **Restore rehearsal** (D69): restore the latest backup into a new database, connect with `psql`, count `polls` and `responses`, then delete that database. Record the date and the counts below.
+8. **Uptime check** (D68): add `https://<web URL>/api/health/ready` and `https://<web URL>/` to a free uptime monitor, alerting your email.
+9. **Start the clock** (D71): note the date of the switch in [ROADMAP.md](ROADMAP.md). The D57 clean-up PR comes after two stable weeks.
+
+Never run `alembic downgrade`, the test suite or a second `app.seed` against production.
+
+## Deployments
+
+| Date | `main` at | Smoke test | Client address check | Restore rehearsal |
+|---|---|---|---|---|
+| | | | | |
+
 ## Operational readiness checklist
 
-All of these are currently missing:
-
-- [ ] Fail-closed configuration (SEC-01) and a production settings profile
-- [ ] Container image for the API, plus a release step for migrations
-- [ ] Liveness (`/api/health`) and readiness (database) endpoints
-- [ ] Structured logs with request IDs; error tracking (e.g. Sentry)
-- [ ] Uptime monitoring on `/api/health` and the home page
+- [x] Fail-closed configuration (SEC-01) and a production settings profile (M1, M3)
+- [x] Container image for the API, plus a release step for migrations (`backend/Dockerfile`, `preDeployCommand`)
+- [x] Liveness (`/api/health`) and readiness (database) endpoints (M3)
+- [x] Structured logs with request IDs (M3); error tracking deferred (D68)
+- [ ] Uptime monitoring on `/api/health/ready` and the home page
 - [ ] Backups with a tested restore; a retention policy
-- [ ] CI: tests on every PR; deploy from `main` only
-- [ ] Synthetic-data disclosure if demo data is used (METH-01)
-- [ ] Terms and Privacy pages before public registration (FE-05)
+- [x] CI: tests on every PR; deploy from `main` only, after checks (`autoDeployTrigger: checksPass`)
+- [ ] Synthetic-data disclosure for the demonstration deployment (METH-01, D63)
+- [ ] Terms and Privacy pages before public registration (FE-05, D64)

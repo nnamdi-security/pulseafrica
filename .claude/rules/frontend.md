@@ -79,6 +79,6 @@ These apply to code under `frontend/` ([decision 0016](../../docs/decisions/0016
   - FastAPI's HttpOnly cookie session only; never store a token in JavaScript-readable storage;
   - writes carry the CSRF header (the client adds it);
   - signing out clears the Query cache;
-  - the session cookie only reaches `/api`, so who is signed in is decided in the browser with `useMe()`; there is no `proxy.ts` ([decision 0024](../../docs/decisions/0024-sign-in-and-session-in-the-browser.md)); always handle 401 and 403 from the API.
+  - the session cookie only reaches `/api`, so who is signed in is decided in the browser with `useMe()`; `src/proxy.ts` only sets the per-request CSP nonce and never decides access ([decision 0024](../../docs/decisions/0024-sign-in-and-session-in-the-browser.md), [0028](../../docs/decisions/0028-first-deployment.md)); always handle 401 and 403 from the API.
 - **Checks:** `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm budget`; browser checks in `e2e/` against the built app ([decision 0018](../../docs/decisions/0018-frontend-checks.md)).
 - **Parity:** every migrated page must pass the Milestone 2 Playwright journeys and a side-by-side screenshot review before cutover. No redesigns during migration.

@@ -180,7 +180,13 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 - **Acceptance criteria:** the [migration acceptance criteria](FRONTEND_MIGRATION.md#18-acceptance-criteria-whole-migration); rollback rehearsed.
 - **Estimate:** 7–10 days.
 
-## M9: Production readiness and deployment (NOT STARTED)
+## M9: Production readiness and deployment (IN PROGRESS)
+
+- **Progress:** planned 2026-11-01 in the [Milestone 9 plan](https://claude.ai/artifact/KpRWLVesrYAtMDjoWRF1Jv); the owner chose decisions D59–D72 the same day ([0028](decisions/0028-first-deployment.md)). Render runs `frontend/`, the API (private) and Postgres 16; the Netlify site becomes the rollback standby; the first production deploy is the traffic switch, and the D57 clean-up follows two stable weeks. Four PRs, with the owner's setup and first deploy between PR 3 and PR 4:
+  1. deploy config: `render.yaml`, `backend/Dockerfile`, proxy networks in `TRUSTED_PROXIES`, platform database URLs, the per-request CSP and headers on `frontend/`, the deploy runbook;
+  2. launch content: Terms and Privacy pages, the demonstration-site notice, About's copy (D63–D65);
+  3. the Netlify standby's configuration and CSP (SEC-07), and the production smoke test (D72);
+  4. close-out: the deployment, restore and smoke records.
 
 - **Objective:** a real, monitored deployment.
 - **Dependencies:** M1 and M3 (mandatory). M4 decisions for public copy. It can happen **before** M5–M8 with the current frontend, or after cutover.
@@ -212,7 +218,7 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 |---|---|---|
 | D1 | ~~Privacy model~~ **Decided 2026-10-19:** correct the copy ([0003](decisions/0003-privacy-and-methodology-copy.md)) | M1 |
 | D2 | ~~Methodology~~ **Decided 2026-10-19:** the M1 copy ([0003](decisions/0003-privacy-and-methodology-copy.md)); no weighting or margins of error for now (D19, D20) | M4 |
-| D3 | Synthetic data: ~~disclosure wording~~ **decided 2026-10-19** ([0004](decisions/0004-demonstration-data-disclosure.md)); whether any deployment shows demo data still open ([METH-01](AUDIT.md#meth-01)) | M9 |
+| D3 | ~~Synthetic data~~ **Decided:** disclosure wording 2026-10-19 ([0004](decisions/0004-demonstration-data-disclosure.md)); the first deployment is a labelled demonstration, 2026-11-01 (D63) | M9 |
 | D4 | ~~Minimum public group size~~ **Decided 2026-10-19:** *k* = 10, and overall percentages hidden below it (D4a) ([0001](decisions/0001-minimum-public-group-size.md)) | M1 |
 | D5 | ~~Frontend direction~~ **Decided 2026-10-19:** Option A, Next.js ([0016](decisions/0016-nextjs-frontend.md)) | M5–M8 |
 | D6 | ~~Icons~~ **Decided 2026-10-19:** `@tabler/icons-react` ([0017](decisions/0017-icons-and-text-contrast.md)) | M5 |
@@ -268,3 +274,17 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
 | D56 | ~~Freeze on `admin.html` and conventions~~ **Decided 2026-10-20:** bug fixes only, made in both; as D48 ([0026](decisions/0026-admin-pages-in-the-new-frontend.md)) | M8 |
 | D57 | ~~Static pages and redirects after M8~~ **Decided 2026-10-20:** kept, at 307, until two stable weeks in production; then 308 and removal in one PR ([0027](decisions/0027-cutover-readiness.md)) | M8 |
 | D58 | ~~Legacy tag and rollback rehearsal~~ **Decided 2026-10-20:** the owner tags `legacy-frontend-final` after M8's last PR; the tagged pages' journeys run against the API at `main` ([0027](decisions/0027-cutover-readiness.md)) | M8 |
+| D59 | ~~Where it runs~~ **Decided 2026-11-01:** Render: `frontend/` public, the API private, Postgres 16 ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D60 | ~~The Netlify site~~ **Decided 2026-11-01:** the rollback standby, locked to `legacy-frontend-final`, with its CSP ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D61 | ~~Plan tier~~ **Decided 2026-11-01:** paid, always-on tiers ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D62 | ~~Address~~ **Decided 2026-11-01:** the platform subdomain first ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D63 | ~~Demo data~~ **Decided 2026-11-01:** a labelled demonstration deployment, seeded once, with a site-wide notice (recorded with PR 2) | M9 |
+| D64 | ~~Registration, Terms and Privacy~~ **Decided 2026-11-01:** open registration, with Terms and Privacy pages first (recorded with PR 2) | M9 |
+| D65 | ~~About's unreviewed copy~~ **Decided 2026-11-01:** remove what nothing backs, in both frontends (recorded with PR 2) | M9 |
+| D66 | ~~Headers on `frontend/`~~ **Decided 2026-11-01:** a per-request nonce CSP and the standard headers ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D67 | ~~Deploy pipeline~~ **Decided 2026-11-01:** `render.yaml` and `backend/Dockerfile`; from `main` after checks; migrations before deploy ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D68 | ~~Monitoring~~ **Decided 2026-11-01:** platform logs and an external uptime check; no Sentry yet ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D69 | ~~Backups~~ **Decided 2026-11-01:** daily backups and one restore rehearsal before the switch ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D70 | ~~Staging~~ **Decided 2026-11-01:** none in M9; decided in M10 ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D71 | ~~The switch~~ **Decided 2026-11-01:** the first production deploy; two stable weeks, then D57's PR ([0028](decisions/0028-first-deployment.md)) | M9 |
+| D72 | ~~Smoke test~~ **Decided 2026-11-01:** a Playwright smoke script, run by hand against production; it never answers polls ([0028](decisions/0028-first-deployment.md)) | M9 |
