@@ -14,7 +14,7 @@
 |---|---|---|---|---|---|---|
 | `pytest` (in-memory SQLite, the default) | 154 | **153** | 0 | 1 | 0 | ~120 s |
 | `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 154 | **154** | 0 | 0 | 0 | ~130 s |
-| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 280 | **270** locally (the 10 `test_assets.py` checks can't reach the CDNs); all 280 in CI | 0 | 0 | 0 | ~700 s |
+| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 293 | **283** locally (the 10 `test_assets.py` checks can't reach the CDNs); all 293 in CI | 0 | 0 | 0 | ~720 s |
 | `pnpm test` (from `frontend/`, Vitest) | 191 | **191** | 0 | 0 | 0 | ~26 s |
 
 The browser and Vitest counts above were updated in Milestone 8 (decisions 0026–0027); the backend ones in Milestone 5. The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
@@ -100,6 +100,10 @@ The browser and Vitest counts above were updated in Milestone 8 (decisions 0026�
 - **Waiting:** only Playwright's auto-waiting assertions and `networkidle`; no fixed sleeps. Every journey fails on a JavaScript page error.
 - **Viewports:** the journeys run at Playwright's default 1280×720; `test_mobile.py` uses 390×844.
 - **Accessibility baseline:** axe's `color-contrast` rule fails on every page (FE-03, waiting on decision D7) and is excluded until then. Any other serious or critical violation fails the run.
+
+## The production smoke test
+
+`smoke/` holds a few read-only checks for a deployed site (Milestone 9, D72): readiness and security headers, the public pages, signing a citizen account in and out, and that the API refuses it Admin. It never answers a poll. It runs by hand after each deploy, from GitHub Actions (**Smoke test**, with the site's address; the account comes from the `SMOKE_EMAIL` and `SMOKE_PASSWORD` secrets) or locally ([smoke/README.md](../smoke/README.md)). It isn't part of `e2e/` and doesn't run on PRs. Checked locally on 2026-11-01 against a seeded stack on `http://127.0.0.1:3000`: 3 passed.
 
 ## How the backend tests work
 

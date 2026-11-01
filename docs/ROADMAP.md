@@ -188,6 +188,8 @@ Finding IDs refer to [AUDIT.md](AUDIT.md). The milestones are ordered by depende
   3. the Netlify standby's configuration and CSP (SEC-07), and the production smoke test (D72);
   4. close-out: the deployment, restore and smoke records.
 
+  PR 1 merged as #24 and PR 2 as #25 (2026-11-01).
+
 - **Objective:** a real, monitored deployment.
 - **Dependencies:** M1 and M3 (mandatory). M4 decisions for public copy. It can happen **before** M5–M8 with the current frontend, or after cutover.
 - **Tasks:** see [DEPLOYMENT.md](DEPLOYMENT.md):

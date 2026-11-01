@@ -50,7 +50,7 @@ This describes the security model **as implemented** after Milestone 3, its know
 | ID | Priority | Summary |
 |---|---|---|
 | SEC-04 | MEDIUM | The current pages keep the token where any script on the origin can read it. The API side (cookie plus CSRF) is done; the pages move in M7 |
-| SEC-07 | MEDIUM | The static pages have no CSP; the Netlify standby sets it (M9 PR 3). The API and `frontend/` send their headers ([decision 0028](decisions/0028-first-deployment.md)) |
+| SEC-07 | MEDIUM | Fixed in M9: the API, `frontend/` and the static pages' Netlify standby (per-page hash CSP, `scripts/build_standby.py`) all send security headers ([decision 0028](decisions/0028-first-deployment.md)) |
 | SEC-08 | LOW (residual) | Google Fonts loads without SRI; the icons and Chart.js carry hashes |
 | SEC-09 | LOW | Registration reveals existing emails; accepted with rate limiting ([decision 0009](decisions/0009-rate-limiting.md)) |
 
@@ -64,7 +64,7 @@ Fixed in Milestone 3: SEC-03 (rate limits), SEC-05 (revocation), SEC-10 (docs of
 4. **Small-cell suppression** in public results (PRIV-01) and **honest privacy copy** (PRIV-02): done in M1 ([decisions 0001 and 0003](decisions/README.md)). Live results no longer leak through timing: figures move in steps of 10, and breakdowns wait for the poll to close (M2, [decision 0006](decisions/0006-results-released-in-steps.md)).
 5. **`iat` claim plus a token version**, so sign-out and a password change revoke older tokens (SEC-05): implemented in M3 ([decision 0010](decisions/0010-token-version-revocation.md)).
 6. **Last-admin guard on account deletion** (SEC-06).
-7. **Security-header middleware** on the API, and **SRI** on the CDN files (SEC-07, SEC-08): implemented in M3. `frontend/` sends a per-request nonce CSP and the standard headers from M9 (decision 0028); a CSP for the static pages waits for the Netlify standby (M9).
+7. **Security-header middleware** on the API, and **SRI** on the CDN files (SEC-07, SEC-08): implemented in M3. `frontend/` sends a per-request nonce CSP and the standard headers from M9 (decision 0028); the static pages get theirs from the Netlify standby's `_headers` (M9).
 8. **Production settings:** `ENVIRONMENT=production` hides the docs and requires https CORS origins (SEC-10): implemented in M3.
 
 ## Recommended authentication architecture
