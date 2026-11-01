@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 
 import { LegacyHashRedirect } from '@/components/layout/LegacyHashRedirect';
@@ -17,7 +18,9 @@ export const metadata: Metadata = {
 };
 
 /** The shell every page shares: ticker, nav, content, footer (FE-02: once, not 9 copies) */
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Every page renders per request, so each gets its own CSP nonce (src/proxy.ts, decision 0028)
+  await connection();
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable} ${spaceMono.variable}`}>
       <body>

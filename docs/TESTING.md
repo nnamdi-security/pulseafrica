@@ -12,10 +12,10 @@
 
 | Command (run from `backend/`) | Collected | Passed | Failed | Skipped | Errors | Time |
 |---|---|---|---|---|---|---|
-| `pytest` (in-memory SQLite, the default) | 145 | **144** | 0 | 1 | 0 | ~110 s |
-| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 145 | **145** | 0 | 0 | 0 | ~140 s |
-| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 262 | **252** locally (the 10 `test_assets.py` checks can't reach the CDNs); all 262 in CI | 0 | 0 | 0 | ~580 s |
-| `pnpm test` (from `frontend/`, Vitest) | 186 | **186** | 0 | 0 | 0 | ~17 s |
+| `pytest` (in-memory SQLite, the default) | 154 | **153** | 0 | 1 | 0 | ~120 s |
+| `TEST_DATABASE_URL=postgresql+psycopg://…/pulseafrica_test pytest` | 154 | **154** | 0 | 0 | 0 | ~130 s |
+| `E2E_POSTGRES_URL=postgresql://…/postgres pytest` (from `e2e/`, Chromium, with `frontend/` built) | 265 | **255** locally (the 10 `test_assets.py` checks can't reach the CDNs); all 265 in CI | 0 | 0 | 0 | ~630 s |
+| `pnpm test` (from `frontend/`, Vitest) | 191 | **191** | 0 | 0 | 0 | ~26 s |
 
 The browser and Vitest counts above were updated in Milestone 8 (decisions 0026–0027); the backend ones in Milestone 5. The 10 `test_assets.py` checks need the CDNs, so they pass only where jsDelivr and cdnjs are reachable, as on GitHub's runners. The skipped SQLite test is the Postgres-only concurrency test. The audit baseline was 43/43 on both.
 

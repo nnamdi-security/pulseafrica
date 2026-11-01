@@ -58,3 +58,36 @@ def test_token_signed_with_the_old_default_is_rejected(client, citizen_headers):
     forged = jwt.encode({"sub": str(user_id)}, "change-me", algorithm="HS256")
     res = client.get("/api/auth/me", headers={"Authorization": f"Bearer {forged}"})
     assert res.status_code == 401
+
+
+# Milestone 9: settings a hosting platform hands over as they are (decision 0028)
+
+@pytest.mark.parametrize("given", [
+    "postgres://u:p@db.internal:5432/pulseafrica",
+    "postgresql://u:p@db.internal:5432/pulseafrica",
+    "postgresql+psycopg://u:p@db.internal:5432/pulseafrica",
+])
+def test_platform_database_urls_use_psycopg(monkeypatch, given):
+    monkeypatch.setenv("JWT_SECRET_KEY", STRONG_KEY)
+    monkeypatch.setenv("DATABASE_URL", given)
+    assert Settings(_env_file=None).database_url == "postgresql+psycopg://u:p@db.internal:5432/pulseafrica"
+
+
+def test_other_database_urls_are_left_alone(monkeypatch):
+    monkeypatch.setenv("JWT_SECRET_KEY", STRONG_KEY)
+    monkeypatch.setenv("DATABASE_URL", "sqlite://")
+    assert Settings(_env_file=None).database_url == "sqlite://"
+
+
+def test_trusted_proxies_accept_networks(monkeypatch):
+    monkeypatch.setenv("JWT_SECRET_KEY", STRONG_KEY)
+    monkeypatch.setenv("TRUSTED_PROXIES", "10.0.0.0/8, 192.0.2.7, 2001:db8::/32")
+    assert Settings(_env_file=None).trusted_proxies == ["10.0.0.0/8", "192.0.2.7", "2001:db8::/32"]
+
+
+@pytest.mark.parametrize("value", ["proxy.internal", "10.0.0.0/33", "10.0.0.1/8"])
+def test_trusted_proxies_must_be_addresses_or_networks(monkeypatch, value):
+    monkeypatch.setenv("JWT_SECRET_KEY", STRONG_KEY)
+    monkeypatch.setenv("TRUSTED_PROXIES", value)
+    with pytest.raises(ValidationError, match="TRUSTED_PROXIES"):
+        Settings(_env_file=None)

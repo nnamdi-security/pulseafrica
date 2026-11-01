@@ -126,6 +126,16 @@ def test_forwarded_for_is_used_from_a_trusted_proxy(client, monkeypatch):
     assert login(client, headers={"X-Forwarded-For": "198.51.100.2"}).status_code == 401
 
 
+def test_a_trusted_proxy_network_covers_every_address_in_it(client, monkeypatch):
+    # A platform's private network hands the proxy a different address on each deploy, so
+    # TRUSTED_PROXIES can name the network (decision 0028).
+    monkeypatch.setattr(get_settings(), "trusted_proxies", ["testclient", "10.0.0.0/8"])
+    for i in range(10):
+        login(client, email=f"nobody{i}@example.com", headers={"X-Forwarded-For": "198.51.100.1, 10.20.30.40"})
+    assert login(client, headers={"X-Forwarded-For": "198.51.100.1, 10.99.0.1"}).status_code == 429
+    assert login(client, headers={"X-Forwarded-For": "198.51.100.2, 10.20.30.40"}).status_code == 401
+
+
 def test_old_hits_are_pruned(client, db):
     login(client, email="a@example.com")
     age_hits(db, timedelta(hours=2))
