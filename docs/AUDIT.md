@@ -28,7 +28,7 @@ Priorities: **CRITICAL** (fix before any deployment) · **HIGH** · **MEDIUM** �
 | [SEC-04](#sec-04) | MEDIUM | Security | Bearer tokens are kept in `localStorage` / `sessionStorage` | Partly fixed (M3: API side; M5: `frontend/` uses only the cookie) |
 | [SEC-05](#sec-05) | MEDIUM | Security | Changing a password doesn't revoke existing tokens; tokens carry no `iat` | Fixed (M3) |
 | [SEC-06](#sec-06) | MEDIUM | Security / admin | The sole admin can delete their own account, leaving no admins | Fixed (M1) |
-| [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed for the API (M3) and `frontend/` (M9) |
+| [SEC-07](#sec-07) | MEDIUM | Security | No security headers (CSP, nosniff, frame-ancestors, HSTS) | Fixed (API M3; `frontend/` and the static pages' standby M9) |
 | [SEC-08](#sec-08) | MEDIUM | Security | CDN assets are loaded without Subresource Integrity | Fixed (M3; fonts excepted) |
 | [METH-02](#meth-02) | MEDIUM | Research integrity | Methodology and marketing copy claim weighting, margins of error, sampling and verification that don't exist | Fixed (M4) |
 | [FE-01](#fe-01) | MEDIUM | Frontend | The password-reset form pretends to send an email; the register form promises a verification link | Fixed (M1) |
@@ -219,7 +219,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Recommended fix:** add header middleware to FastAPI, and set a CSP at the frontend host. The CSP needs to allow the CDN origins in use, or self-host them.
 - **Verification status:** Reproduced (API); static hosting unverifiable here.
 - **Resolution (M3, commit `eb99122`):** the API sends `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` and `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` on every response (not the CSP on `/docs`), plus HSTS in production. Tests in `tests/test_hardening.py`. **Still open:** a CSP for the static pages, which their host sets (M9, [DEPLOYMENT.md](DEPLOYMENT.md)).
-- **Resolution for `frontend/` (M9, commit `3b2f73c`):** every page gets a Content-Security-Policy with a fresh script nonce per request (`src/proxy.ts`) plus nosniff, `X-Frame-Options: DENY`, `strict-origin-when-cross-origin`, a Permissions-Policy and HSTS (`next.config.ts`); [decision 0028](decisions/0028-first-deployment.md), D66. Tests in `src/lib/security-headers.test.ts` and `e2e/test_frontend_headers.py`. **Still open:** the static pages' CSP on the Netlify standby (M9 PR 3, D60).
+- **Resolution for `frontend/` (M9, commit `3b2f73c`):** every page gets a Content-Security-Policy with a fresh script nonce per request (`src/proxy.ts`) plus nosniff, `X-Frame-Options: DENY`, `strict-origin-when-cross-origin`, a Permissions-Policy and HSTS (`next.config.ts`); [decision 0028](decisions/0028-first-deployment.md), D66. Tests in `src/lib/security-headers.test.ts` and `e2e/test_frontend_headers.py`. The static pages (M9 PR 3): `scripts/build_standby.py` writes a `_headers` file for the Netlify standby, giving each page a CSP with its inline script's hash and only the CDNs it uses, plus the same headers; `e2e/test_standby.py` runs every page under it.
 
 <a id="sec-08"></a>
 ### SEC-08: CDN assets without Subresource Integrity (MEDIUM)

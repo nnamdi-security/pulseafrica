@@ -1,0 +1,13 @@
+# The rollback standby (Milestone 9, decision 0028, D60): the static pages only, with their own
+# Content-Security-Policy and headers (SEC-07). Production runs on Render (render.yaml).
+# Auto-publishing stays locked in Netlify; docs/ROLLBACK.md says how to use it.
+[build]
+  command = "python3 scripts/build_standby.py _site"
+  publish = "_site"
+
+# During a rollback, add a proxy from /api/* to the production site's /api/* here (ROLLBACK.md):
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://<production web URL>/api/:splat"
+#   status = 200
+#   force = true

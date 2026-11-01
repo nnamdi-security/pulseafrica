@@ -9,7 +9,7 @@
 - **D59, hosting:** Render runs all three parts. `frontend/` is a Node web service and the only public one. The API is a Docker private service, reachable only on Render's private network through the Next.js `/api` rewrite. PostgreSQL 16 is a Render database with no public access. The configuration is `render.yaml` and `backend/Dockerfile`.
   - Client addresses reach the API in `X-Forwarded-For`, passed through unchanged by the rewrite. `TRUSTED_PROXIES` accepts networks, so `10.0.0.0/8` covers the web service's changing private address.
   - `DATABASE_URL` accepts the `postgres://` and `postgresql://` URLs platforms hand over and uses psycopg 3.
-- **D60, the existing Netlify site:** it becomes the rollback standby. It serves the static pages from `legacy-frontend-final` with their own CSP and headers (SEC-07), auto-publishing is locked, and nothing links to it.
+- **D60, the existing Netlify site:** it becomes the rollback standby, with auto-publishing locked and nothing linking to it. It serves the static pages with their own CSP and headers (SEC-07). The pages are built from `main` by `scripts/build_standby.py`, because the tag `legacy-frontend-final` predates `netlify.toml`; the static pages on `main` are the tag's plus the fixes made in both frontends.
 - **D61, plan tier:** paid, always-on tiers for both services and the database. Free tiers sleep, and a free database expires and has no backups. Prices are checked before signing up.
 - **D62, address:** the platform subdomain for the first deployment. A custom domain later is only a DNS change.
 - **D66, headers on `frontend/`:** a nonce-based Content-Security-Policy, with a fresh nonce on each request, set in `src/proxy.ts`. The root layout renders every page per request so that each page gets its nonce. Styles allow `'unsafe-inline'` because React writes `style` attributes, which nonces can't cover. `nosniff`, `X-Frame-Options: DENY`, `strict-origin-when-cross-origin`, a Permissions-Policy and HSTS (no `includeSubDomains`, because of D62) are set in `next.config.ts`. `/api/*` keeps FastAPI's headers.
@@ -18,7 +18,7 @@
 - **D69, backups:** daily managed backups, and one restore rehearsal into a throwaway database before the switch, recorded in DEPLOYMENT.md.
 - **D70, staging:** none in Milestone 9. Production is smoke-tested before it's announced, and production-like staging is decided in Milestone 10.
 - **D71, the switch:** the first production deployment is the traffic switch, and D57's two-week clock starts then. Stable means no rollback and no incident that blocks sign-in, answering, results or Admin, or exposes data. After two such weeks, one PR makes the redirects 308, removes the static pages and retires the Netlify standby.
-- **D72, smoke test:** a small Playwright smoke script, run against production by a manually triggered workflow. It covers the public pages, sign-in and sign-out with a dedicated account, and Admin read-only. It never answers a poll.
+- **D72, smoke test:** a small Playwright smoke script, run against production by a manually triggered workflow. It covers readiness and headers, the public pages, and sign-in and sign-out with a dedicated citizen account. For Admin it checks that the citizen is refused (by the API, 403), so no admin password is stored in GitHub. It never answers a poll.
 
 ## Alternatives considered
 

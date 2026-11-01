@@ -29,3 +29,6 @@ test-results/
 
 # Shell screenshots for review (e2e/test_frontend_shell.py)
 e2e/screenshots/
+
+# The Netlify standby's build output (scripts/build_standby.py)
+_site/
