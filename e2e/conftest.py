@@ -111,8 +111,9 @@ def stack(tmp_path_factory):
 
     logs = tmp_path_factory.mktemp("logs")
     # Rate limits off: every test signs users in from this one address (decision 0009).
+    # DEMO_SITE: the seed is demonstration data, so frontend/ shows its demonstration notice (D63).
     env = {**os.environ, "DATABASE_URL": database_url, "JWT_SECRET_KEY": secrets.token_urlsafe(48),
-           "RATE_LIMITING": "false"}
+           "RATE_LIMITING": "false", "DEMO_SITE": "true"}
     processes: list[subprocess.Popen] = []
     try:
         for step in (["alembic", "upgrade", "head"], ["app.seed"]):

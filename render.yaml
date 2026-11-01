@@ -72,6 +72,9 @@ services:
           property: hostport
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
+      # The first deployment is a labelled demonstration (D63): a notice on every page
+      - key: DEMO_SITE
+        value: "true"
 
 databases:
   - name: pulseafrica-db

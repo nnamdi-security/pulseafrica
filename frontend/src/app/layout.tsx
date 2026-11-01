@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 
+import { DemoSiteBanner, isDemoSite } from '@/components/layout/DemoSiteBanner';
 import { LegacyHashRedirect } from '@/components/layout/LegacyHashRedirect';
 import { SiteFooter } from '@/components/layout/SiteFooter';
 import { SiteHeader } from '@/components/layout/SiteHeader';
@@ -26,6 +27,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body>
         <Providers>
           <LegacyHashRedirect />
+          {isDemoSite() && <DemoSiteBanner />}
           <Ticker />
           <SiteHeader />
           <main id="main">{children}</main>
