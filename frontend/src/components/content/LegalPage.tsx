@@ -7,8 +7,8 @@ import { SectionNav } from './SectionNav';
    layout, with plain sections. The copy must match what the code does (PRIV-02): check the
    models and routes before changing a sentence. */
 
-/** Where people write about their data or these terms. Set by the owner before launch. */
-export const CONTACT_EMAIL = 'privacy@pulseafrica.example';
+/** Where people write about their data or these terms (the owner's choice, 2026-11-01) */
+export const CONTACT_EMAIL = 'olivetgrail@gmail.com';
 
 export const UPDATED = '1 November 2026';
 

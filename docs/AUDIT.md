@@ -395,7 +395,7 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Recommended fix:** link to existing pages or remove. Add Terms and Privacy pages before any public launch.
 - **Verification status:** Confirmed (inspection).
 - **Status:** fixed on the six public pages in `frontend/` in Milestone 6 ([decision 0023](decisions/0023-public-pages-migration-conventions.md), D40): real links stay, `#` links are plain text, and the home page's inert buttons are left out. Open on the static pages until cutover; the Terms and Privacy pages are still to be written.
-- **Terms and Privacy (M9, [decision 0029](decisions/0029-launch-content.md), D64):** `frontend/` has `/privacy` and `/terms`, linked from the footer and the register form's terms line. The contact address is a placeholder until the owner sets it. The static pages keep their placeholder links until they're retired (D57).
+- **Terms and Privacy (M9, [decision 0029](decisions/0029-launch-content.md), D64):** `frontend/` has `/privacy` and `/terms`, linked from the footer and the register form's terms line. The static pages keep their placeholder links until they're retired (D57).
 
 <a id="fe-06"></a>
 ### FE-06: XSS safety depends on manual escaping (LOW)

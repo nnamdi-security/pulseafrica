@@ -93,7 +93,7 @@ Read [docs/AUDIT.md](docs/AUDIT.md) before working in an affected area. Fix them
 
 - **HIGH:** none open (SEC-03, rate limiting, fixed in M3).
 - **MEDIUM:** SEC-04 for the current pages (the token stays in Web Storage until the pages move to `frontend/`, which uses only the cookie); SEC-07 for the static pages (their CSP is set by the Netlify standby, M9; the API and `frontend/` send their headers); FE-02 and FE-03 on the static pages (fixed in `frontend/`, retired at cutover).
-- METH-02 was fixed in M4. About's team biographies, the funding answer and the 2024–2025 timeline figures were replaced in M9 ([decision 0029](docs/decisions/0029-launch-content.md)). `/privacy` and `/terms` must keep matching the code (PRIV-02), and their contact address is a placeholder until the owner sets it.
+- METH-02 was fixed in M4. About's team biographies, the funding answer and the 2024–2025 timeline figures were replaced in M9 ([decision 0029](docs/decisions/0029-launch-content.md)). `/privacy` and `/terms` must keep matching the code (PRIV-02).
 
 ## Workflow and definition of done
 

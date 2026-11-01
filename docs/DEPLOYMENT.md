@@ -102,4 +102,4 @@ Never run `alembic downgrade`, the test suite or a second `app.seed` against pro
 - [ ] Backups with a tested restore; a retention policy
 - [x] CI: tests on every PR; deploy from `main` only, after checks (`autoDeployTrigger: checksPass`)
 - [x] Synthetic-data disclosure for the demonstration deployment (METH-01, D63: `DEMO_SITE=true`, decision 0029)
-- [x] Terms and Privacy pages before public registration (FE-05, D64: `/terms`, `/privacy`); set `CONTACT_EMAIL` before launch
+- [x] Terms and Privacy pages before public registration (FE-05, D64: `/terms`, `/privacy`)

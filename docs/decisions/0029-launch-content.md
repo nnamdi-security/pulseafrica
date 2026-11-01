@@ -18,7 +18,7 @@
 
 ## Consequences
 
-- `CONTACT_EMAIL` in `frontend/src/components/content/LegalPage.tsx` is a placeholder (`privacy@pulseafrica.example`) until the owner chooses an address. It must be set before launch.
+- `CONTACT_EMAIL` in `frontend/src/components/content/LegalPage.tsx` is the owner's address, chosen on 2026-11-01.
 - The Terms and Privacy pages aren't legal advice. Any change to what the code stores, publishes or keeps has to update `/privacy` in the same PR (PRIV-02).
 - When the deployment stops being a demonstration, `DEMO_SITE` is turned off and About's project section is reworded.
 - The static pages' footers still show Privacy Policy and Terms of Use as placeholder links (FE-05 on the static pages), since they have no such pages. They are retired with the static pages (D57).
