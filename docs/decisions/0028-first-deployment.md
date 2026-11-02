@@ -7,7 +7,7 @@
 ## Decision
 
 - **D59, hosting:** Render runs all three parts. `frontend/` is a Node web service and the only public one. The API is a Docker private service, reachable only on Render's private network through the Next.js `/api` rewrite. PostgreSQL 16 is a Render database with no public access. The configuration is `render.yaml` and `backend/Dockerfile`.
-  - Client addresses reach the API in `X-Forwarded-For`, passed through unchanged by the rewrite. `TRUSTED_PROXIES` accepts networks, so `10.0.0.0/8` covers the web service's changing private address.
+  - Client addresses reach the API in `X-Forwarded-For`, passed through unchanged by the rewrite. `TRUSTED_PROXIES` accepts networks, so `10.0.0.0/8` covers the web service's changing private address. Render's edge is Cloudflare, which appends its own address, so Cloudflare's published ranges are trusted too (found by the first deploy's client-address check on 2026-11-02, which recorded a Cloudflare address).
   - `DATABASE_URL` accepts the `postgres://` and `postgresql://` URLs platforms hand over and uses psycopg 3.
 - **D60, the existing Netlify site:** it becomes the rollback standby, with auto-publishing locked and nothing linking to it. It serves the static pages with their own CSP and headers (SEC-07). The pages are built from `main` by `scripts/build_standby.py`, because the tag `legacy-frontend-final` predates `netlify.toml`; the static pages on `main` are the tag's plus the fixes made in both frontends.
 - **D61, plan tier:** paid, always-on tiers for both services and the database. Free tiers sleep, and a free database expires and has no backups. Prices are checked before signing up.
@@ -37,5 +37,5 @@
 ## Consequences
 
 - Every page of `frontend/` is rendered per request. The JavaScript budget is unchanged.
-- The client address arriving through Render's edge has to be checked once after the first deploy (DEPLOYMENT.md, "After the first deploy"). If it shows the proxy's address instead, every visitor would share one rate-limit bucket.
+- The client address arriving through Render's edge has to be checked once after the first deploy (DEPLOYMENT.md, "After the first deploy"). If it shows the proxy's address instead, every visitor would share one rate-limit bucket. The first check did show a Cloudflare address, hence Cloudflare's ranges in `TRUSTED_PROXIES`; their list has to follow Cloudflare's if it ever changes.
 - `render.yaml`'s field names and plan names are validated by Render when the Blueprint is created. Claude couldn't reach Render's documentation from its sandbox, so the first Blueprint sync is where a renamed field would show.

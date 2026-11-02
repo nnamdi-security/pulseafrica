@@ -12,7 +12,7 @@
 | `/docs` and `/openapi.json` are served unless `ENVIRONMENT=production` | `main.py` | Set `ENVIRONMENT=production` ([SEC-10](AUDIT.md#sec-10)) |
 | Logs are JSON lines on stderr with a request id | `core/logging.py` | Render keeps stderr; pass the edge's request id as `X-Request-ID` ([BE-02](AUDIT.md#be-02)) |
 | `/api/health` is liveness; `/api/health/ready` checks the database | `main.py` | The web service's health check and the uptime monitor use `/api/health/ready` ([BE-05](AUDIT.md#be-05)) |
-| Rate limits key on the client address | `api/ratelimit.py` | The API's peer is the web service, so `TRUSTED_PROXIES=10.0.0.0/8` (Render's private network) and the address comes from `X-Forwarded-For`, which the Next.js rewrite passes through unchanged ([decision 0009](decisions/0009-rate-limiting.md)) |
+| Rate limits key on the client address | `api/ratelimit.py` | The API's peer is the web service, so `TRUSTED_PROXIES` names Render's private network (`10.0.0.0/8`) and Cloudflare's published ranges (Cloudflare sits in front of Render and appends its edge address). The address comes from `X-Forwarded-For`, which the Next.js rewrite passes through unchanged ([decision 0009](decisions/0009-rate-limiting.md)) |
 | Platforms hand over `postgres://` URLs | `core/config.py` | Rewritten to `postgresql+psycopg://` at startup |
 | Demo data via `python -m app.seed` | `app/seed.py` | Only on an empty database, and only with disclosure ([METH-01](AUDIT.md#meth-01)); the first deployment is a labelled demonstration (D63) |
 
@@ -57,7 +57,7 @@
 | `ENVIRONMENT` | `development` | `production` (docs off, HSTS, https-only CORS origins, `Secure` session cookie) |
 | `LOG_LEVEL` | `INFO` | `INFO` |
 | `RATE_LIMITING` | `true` | `true` (only the browser suite turns it off) |
-| `TRUSTED_PROXIES` | empty | Addresses or networks (CIDR) of the proxies in front of the API: `10.0.0.0/8` on Render |
+| `TRUSTED_PROXIES` | empty | Addresses or networks (CIDR) of the proxies in front of the API: `10.0.0.0/8` plus [Cloudflare's ranges](https://www.cloudflare.com/ips/) on Render, as in `render.yaml` |
 | `DEMO_SITE` (web service) | unset | `true` while the deployment is a demonstration: a notice on every page (D63) |
 | `API_INTERNAL_URL` (web service) | `http://localhost:8000/api` | `http://<api host:port>/api`, set at build and run time |
 
@@ -72,14 +72,14 @@
 ## First deploy runbook (the owner)
 
 1. **Sign up and create the Blueprint.** In Render, New → Blueprint, pick this repository and `main`. Render reads `render.yaml` and lists the three resources; check the plans (D61) and the region before applying.
-2. **Check the generated settings.** On `pulseafrica-api`: `ENVIRONMENT=production`, `TRUSTED_PROXIES=10.0.0.0/8`, `CORS_ORIGINS` empty, `JWT_SECRET_KEY` generated. Never copy the key anywhere.
+2. **Check the generated settings.** On `pulseafrica-api`: `ENVIRONMENT=production`, `TRUSTED_PROXIES` as in `render.yaml` (`10.0.0.0/8` then Cloudflare's ranges), `CORS_ORIGINS` empty, `JWT_SECRET_KEY` generated. Never copy the key anywhere.
 3. **First deploy.** The API's pre-deploy step runs `alembic upgrade head` on the empty database; then the web service builds. Wait for both to be live.
 4. **Accounts and data,** from the API's Render shell (once, on the empty database):
    - `python -m app.seed` (the labelled demonstration data, D63; it refuses a database that has polls);
    - register your own account on the site, then `python -m app.create_admin you@example.com` promotes it to admin;
    - register a separate account for the smoke test (D72); it stays a citizen. Add its email and password as the repository secrets `SMOKE_EMAIL` and `SMOKE_PASSWORD` (GitHub → Settings → Secrets and variables → Actions).
 5. **Smoke test** (D72): GitHub → Actions → **Smoke test** → Run workflow, with the web service's https address ([smoke/README.md](../smoke/README.md)). It checks readiness and headers, the public pages, and signing in and out, and that a citizen is refused Admin; it never answers a poll. Run it after every deploy.
-6. **Check the client address once.** Sign in with a wrong password from your own machine, then in the database's shell run `SELECT key FROM rate_limit_hits ORDER BY created_at DESC LIMIT 2;`. The `login-address:` entry must be your own public address. If it's a `10.` or edge address, every visitor shares one rate-limit bucket: stop and tell Claude.
+6. **Check the client address once.** Sign in with a wrong password from your own machine, then in the database's shell run `SELECT key FROM rate_limit_hits ORDER BY created_at DESC LIMIT 2;`. The `login-address:` entry must be your own public address. If it's a `10.` or edge address (Cloudflare's are listed at cloudflare.com/ips), every visitor shares one rate-limit bucket: stop and tell Claude. Cloudflare publishes changes to its ranges rarely; if one is added, add it to `TRUSTED_PROXIES` in `render.yaml`.
 7. **Restore rehearsal** (D69): restore the latest backup into a new database, connect with `psql`, count `polls` and `responses`, then delete that database. Record the date and the counts below.
 8. **Uptime check** (D68): add `https://<web URL>/api/health/ready` and `https://<web URL>/` to a free uptime monitor, alerting your email.
 9. **Rollback standby** (D60): once Milestone 9's PR 3 is on `main`, let Netlify publish it, then lock auto-publishing ([ROLLBACK.md](ROLLBACK.md#3-the-standby-and-a-production-rollback-from-milestone-9)).
