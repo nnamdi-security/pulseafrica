@@ -136,6 +136,18 @@ def test_a_trusted_proxy_network_covers_every_address_in_it(client, monkeypatch)
     assert login(client, headers={"X-Forwarded-For": "198.51.100.2, 10.20.30.40"}).status_code == 401
 
 
+def test_the_client_is_found_behind_an_edge_network_and_the_private_network(client, monkeypatch):
+    # On Render the chain is: client, Cloudflare's edge (172.64.0.0/13), then the web service on
+    # the private network. Trusting both networks finds the client; entries the client wrote
+    # further left still can't pick the address (decision 0028).
+    monkeypatch.setattr(get_settings(), "trusted_proxies", ["testclient", "10.0.0.0/8", "172.64.0.0/13"])
+    for i in range(10):
+        chain = f"203.0.113.{i}, 198.51.100.1, 172.68.247.35"
+        login(client, email=f"nobody{i}@example.com", headers={"X-Forwarded-For": chain})
+    assert login(client, headers={"X-Forwarded-For": "198.51.100.1, 172.70.1.1"}).status_code == 429
+    assert login(client, headers={"X-Forwarded-For": "198.51.100.2, 172.68.247.35"}).status_code == 401
+
+
 def test_old_hits_are_pruned(client, db):
     login(client, email="a@example.com")
     age_hits(db, timedelta(hours=2))
