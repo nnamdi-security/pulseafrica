@@ -76,6 +76,52 @@ it('keeps showing Sign in when the server is unreachable', async () => {
   expect(screen.getByRole('link', { name: 'Sign in' })).toBeInTheDocument();
 });
 
+it.each(['network', 'server', 'csrf'])('keeps the session after a %s logout failure and allows retry', async (failure) => {
+  signedIn();
+  server.use(http.post(api('/auth/logout'), () => failure === 'network'
+    ? HttpResponse.error()
+    : HttpResponse.json({ detail: 'Logout refused' }, { status: failure === 'csrf' ? 403 : 500 })));
+  const { queryClient } = renderWithQuery(<SiteHeader />);
+  const history = [{ pollId: 1 }];
+  queryClient.setQueryData(['me', 'responses'], history);
+  await userEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Sign out failed. Please try again.');
+  expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
+  expect(queryClient.getQueryData(['me'])).toEqual(USER);
+  expect(queryClient.getQueryData(['me', 'responses'])).toEqual(history);
+  const retry = screen.getByRole('button', { name: 'Sign out' });
+  expect(retry).toBeEnabled();
+  expect(retry).toHaveFocus();
+  server.use(http.post(api('/auth/logout'), () => new HttpResponse(null, { status: 204 })));
+  await userEvent.click(retry);
+  const signIn = await screen.findByRole('link', { name: 'Sign in' });
+  await waitFor(() => expect(signIn).toHaveFocus());
+  expect(queryClient.getQueryData(['me', 'responses'])).toBeUndefined();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
+it('disables Sign out while awaiting the server confirmation', async () => {
+  signedIn();
+  let finish!: () => void;
+  let requests = 0;
+  server.use(http.post(api('/auth/logout'), async () => {
+    requests++;
+    await new Promise<void>((resolve) => { finish = resolve; });
+    return new HttpResponse(null, { status: 204 });
+  }));
+  renderWithQuery(<SiteHeader />);
+  const user = userEvent.setup();
+  const button = await screen.findByRole('button', { name: 'Sign out' });
+  await user.click(button);
+  await waitFor(() => expect(requests).toBe(1));
+  expect(button).toBeDisabled();
+  expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
+  await user.click(button);
+  expect(requests).toBe(1);
+  finish();
+  expect(await screen.findByRole('link', { name: 'Sign in' })).toBeInTheDocument();
+});
+
 it('opens and closes the mobile menu', async () => {
   server.use(http.get(api('/auth/me'), () => HttpResponse.json({ detail: 'Not authenticated' }, { status: 401 })));
   renderWithQuery(<SiteHeader />);

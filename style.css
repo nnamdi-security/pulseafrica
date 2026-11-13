@@ -187,6 +187,7 @@ img {
 
 /* Signed-in state (nav-auth.js): first name + Sign out */
 .nav-links li.nav-auth-in {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -249,6 +250,23 @@ a.nav-user.active {
 .nav-signout:hover,
 .nav-signout:focus-visible {
   color: #F5F0E8;
+}
+
+.nav-signout-error {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  margin-top: 8px;
+  width: 256px;
+  max-width: calc(100vw - 48px);
+  padding: 12px;
+  border: 1px solid rgba(245, 240, 232, 0.3);
+  border-radius: 2px;
+  background: #0A1628;
+  color: #F5F0E8;
+  font-size: 13px;
+  white-space: normal;
 }
 
 /* Nav CTA */

@@ -148,13 +148,17 @@
       });
     },
 
-    // Signs out here at once, and asks the API to revoke every token of this user
-    // (decision 0010). A failed request leaves the old token to expire on its own.
+    // Revoke the session before clearing local credentials (decision 0010).
+    // Keep them on failure so the user can retry rather than appear signed out.
     logout: function () {
       const token = getToken();
-      clearToken();
-      if (!token) return Promise.resolve();
-      return request('POST', '/auth/logout', undefined, { token: token }).catch(function () {});
+      if (!token) {
+        clearToken();
+        return Promise.resolve();
+      }
+      return request('POST', '/auth/logout', undefined, { token: token }).then(function () {
+        clearToken();
+      });
     },
 
     // changes: any of { fullName, state, ageRange } → the updated user (also cached)

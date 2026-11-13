@@ -17,6 +17,7 @@ export function NavAuth({ onNavigate }: { onNavigate?: () => void }) {
   const { data: user } = useMe();
   const signOut = useSignOut();
   const signInLink = useRef<HTMLAnchorElement>(null);
+  const signOutButton = useRef<HTMLButtonElement>(null);
   const focusAfterSignOut = useRef(false);
 
   // After signing out, focus lands on the "Sign in" link that replaces the button
@@ -26,6 +27,14 @@ export function NavAuth({ onNavigate }: { onNavigate?: () => void }) {
       signInLink.current?.focus();
     }
   }, [user]);
+
+  // Wait until the failed mutation has re-enabled the button before restoring focus.
+  useEffect(() => {
+    if (signOut.isError) {
+      focusAfterSignOut.current = false;
+      signOutButton.current?.focus();
+    }
+  }, [signOut.isError]);
 
   if (!user) {
     const active = pathname.startsWith('/login') || pathname === '/register';
@@ -49,7 +58,7 @@ export function NavAuth({ onNavigate }: { onNavigate?: () => void }) {
   const onAdmin = pathname.startsWith('/admin');
 
   return (
-    <li className="flex items-center gap-3.5">
+    <li className="relative flex items-center gap-3.5">
       {user.role === 'admin' ? (
         <Link
           href="/admin"
@@ -75,6 +84,7 @@ export function NavAuth({ onNavigate }: { onNavigate?: () => void }) {
         {firstName}
       </Link>
       <button
+        ref={signOutButton}
         type="button"
         className={LINK}
         disabled={signOut.isPending}
@@ -85,6 +95,11 @@ export function NavAuth({ onNavigate }: { onNavigate?: () => void }) {
       >
         Sign out
       </button>
+      {signOut.isError ? (
+        <p role="alert" className="absolute top-full right-0 z-10 mt-2 w-64 max-w-[calc(100vw-48px)] rounded-sm border border-parchment/30 bg-navy p-3 text-[13px] text-parchment">
+          Sign out failed. Please try again.
+        </p>
+      ) : null}
     </li>
   );
 }
