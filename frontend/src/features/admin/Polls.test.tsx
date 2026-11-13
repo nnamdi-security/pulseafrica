@@ -157,6 +157,17 @@ describe('poll list', () => {
 });
 
 describe('poll editor', () => {
+  beforeEach(() => {
+    // The live poll fixture closes on November 5; keep its edit journeys before that date.
+    // Mock only Date so user-event, request handling and query timers still run normally.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-01T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('checks the fields admin.html checks, then focuses the first', async () => {
     renderEditor();
     const user = userEvent.setup();

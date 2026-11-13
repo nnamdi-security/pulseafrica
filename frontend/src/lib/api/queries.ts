@@ -36,8 +36,8 @@ export function useMyResponses(enabled: boolean) {
 export function useSignOut() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => api.logout().catch(() => null),
-    onSettled: () => {
+    mutationFn: () => api.logout(),
+    onSuccess: () => {
       queryClient.clear();
       queryClient.setQueryData<Schemas['UserOut'] | null>(queryKeys.me, null);
     },

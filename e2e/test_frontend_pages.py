@@ -87,8 +87,10 @@ def test_same_copy_as_the_static_page(page: Page, app_url, path):
     expect(page.locator("main h1").first).to_be_visible()
     if path in READY:
         expect(page.get_by_role("heading", name=READY[path])).to_be_visible()
-    new = {" ".join(t.split()) for t in page.locator("main h1, main h2, main h3").all_inner_texts()}
-    assert [h for h in old if h not in new] == []
+    # Streamed sections can arrive after the page title (notably PollsBrowser's Suspense
+    # boundary). Wait for each expected heading instead of taking an immediate snapshot.
+    for heading in old:
+        expect(page.locator("main").get_by_role("heading", name=heading, exact=True).first).to_be_visible()
 
 
 @pytest.mark.parametrize("path", list(PAGES))

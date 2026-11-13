@@ -42,10 +42,24 @@
     }
 
     slot.querySelector('.nav-signout').addEventListener('click', function () {
-      PulseAPI.logout();
-      renderSignedOut();
-      slot.querySelector('a').focus();
-      document.dispatchEvent(new CustomEvent('pulse:signedout'));
+      const button = this;
+      if (button.disabled) return;
+      button.disabled = true;
+      const previousError = slot.querySelector('[role="alert"]');
+      if (previousError) previousError.remove();
+      PulseAPI.logout().then(function () {
+        renderSignedOut();
+        slot.querySelector('a').focus();
+        document.dispatchEvent(new CustomEvent('pulse:signedout'));
+      }, function () {
+        button.disabled = false;
+        const error = document.createElement('span');
+        error.className = 'nav-signout-error';
+        error.setAttribute('role', 'alert');
+        error.textContent = 'Sign out failed. Please try again.';
+        slot.appendChild(error);
+        button.focus();
+      });
     });
   }
 
