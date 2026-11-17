@@ -207,7 +207,8 @@ These were checked and behave correctly. They're listed so nobody "fixes" them b
 - **Impact:** nobody can manage polls or users until someone runs `python -m app.create_admin` on the server.
 - **Recommended fix:** apply the same last-active-admin guard (409) in `delete_account`, and add a test.
 - **Verification status:** Reproduced.
-- **Resolution (M1, commit `89b28a3`):** fixed. `DELETE /api/auth/me` now answers 409 "There must always be at least one active admin." for the last active admin, after the password check. The guard lives in `app/api/rules.py` and is shared with `PATCH /api/admin/users/{id}`. **Known remaining race:** two admins deleting or demoting each other at the same instant could both pass the count; the PATCH path had the same race before this fix, and it's accepted for now.
+- **Resolution (M1, commit `89b28a3`):** fixed. `DELETE /api/auth/me` now answers 409 "There must always be at least one active admin." for the last active admin, after the password check. The guard lives in `app/api/rules.py` and is shared with `PATCH /api/admin/users/{id}`. At that point, concurrent removals could still both pass the count.
+- **Concurrency follow-up:** the shared guard now locks all active-admin rows in ascending ID order until the removal commits. A waiting removal checks the remaining active admins and returns the existing 409 if it would remove the last one. Independent-session PostgreSQL API regressions in `backend/tests/test_admin_concurrency.py` cover all nine pairs of deletion, suspension and demotion, and verify the surviving admin can still access the admin API. No schema or API contract change is required.
 
 <a id="sec-07"></a>
 ### SEC-07: No security headers (MEDIUM)

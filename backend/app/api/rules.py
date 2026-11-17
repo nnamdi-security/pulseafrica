@@ -14,10 +14,16 @@ def ensure_another_active_admin(db: Session, user: User) -> None:
     """Refuse (409) a change that would leave no active admin, if `user` is the last one."""
     if user.role != UserRole.admin or not user.is_active:
         return
-    other_admins = db.scalar(
-        select(func.count()).where(User.role == UserRole.admin, User.is_active.is_(True), User.id != user.id)
-    )
-    if not other_admins:
+    # Include the target and lock in the same order for every removal. Counting alone
+    # lets concurrent requests each see the other admin and then remove both. Locks
+    # last until the route commits; a waiting request sees the remaining active rows.
+    active_admin_ids = db.scalars(
+        select(User.id)
+        .where(User.role == UserRole.admin, User.is_active.is_(True))
+        .order_by(User.id)
+        .with_for_update()
+    ).all()
+    if not any(admin_id != user.id for admin_id in active_admin_ids):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="There must always be at least one active admin."
         )
